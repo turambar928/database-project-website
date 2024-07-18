@@ -1,6 +1,8 @@
 <template>
   <div class="app-bar">
-    <div class="title">公告管理</div>
+    <div class="menu-button">
+      &#9776; 公告管理
+    </div>
     <div class="spacer"></div>
     <div class="user-icon">
       <img src="/avatar.jpg" alt="头像" />
@@ -20,12 +22,18 @@ export default {
   align-items: center;
   padding: 0 16px;
   height: 56px;
-  background-color: #f5f5f5;
+  background-color: #f5f5f5; /* 顶部栏背景颜色 */
   border-bottom: 1px solid #ddd;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1000; /* 确保顶部栏在所有内容之上 */
 }
-.title {
+.menu-button {
   font-size: 18px;
   font-weight: bold;
+  cursor: pointer;
 }
 .spacer {
   flex: 1;

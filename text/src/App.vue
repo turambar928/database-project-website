@@ -1,8 +1,8 @@
 <template>
   <div class="app">
     <AppBar />
-    <div class="main">
-      <MySidebar />
+    <MySidebar />
+    <div class="content-wrapper">
       <MyContent />
     </div>
   </div>
@@ -26,12 +26,18 @@ export default {
 <style>
 .app {
   display: flex;
-  flex-direction: column;
   height: 100vh;
+  flex-direction: column;
 }
-
 .main {
   display: flex;
   flex: 1;
+}
+.content-wrapper {
+  flex: 1;
+  margin-top: 56px; /* 确保内容区域在AppBar下方 */
+  margin-left: 200px; /* 确保内容区域在侧边栏右侧 */
+  padding: 20px;
+  overflow-y: auto; /* 当内容过多时滚动 */
 }
 </style>
