@@ -1,9 +1,11 @@
 <template>
   <div class="app">
-    <AppBar />
-    <MySidebar />
-    <div class="content-wrapper">
-      <MyContent />
+    <AppBar :selectedMenu="selectedMenu" />
+    <div class="main">
+      <MySidebar @menu-selected="handleMenuSelected" />
+      <div class="content-wrapper">
+        <MyContent />
+      </div>
     </div>
   </div>
 </template>
@@ -20,6 +22,16 @@ export default {
     MySidebar,
     MyContent,
   },
+  data() {
+    return {
+      selectedMenu: '公告管理'
+    };
+  },
+  methods: {
+    handleMenuSelected(menuName) {
+      this.selectedMenu = menuName;
+    }
+  }
 };
 </script>
 

@@ -1,30 +1,18 @@
 <template>
-  <div>
-    <div class="header">
-      <div class="announcement">
-        <i class="icon-menu"></i>
-      </div>
-      <div class="profile">
-        <img src="avatar.jpg" alt="头像" />
-      </div>
-    </div>
-    <div class="sidebar">
-      <ul>
-        <li v-for="menu in menus" :key="menu.name">
-          <div class="menu-item" @click="toggleMenu(menu)" @mouseover="hoverMenu(menu)" @mouseleave="leaveMenu(menu)">
-            <span :class="{'hover': menu.hover, 'active': menu.active}" class="menu-text">{{ menu.name }}</span>
-            <span v-if="menu.submenus" :class="{'open': isOpen(menu)}" class="arrow">&#x276F;</span> <!-- 使用“<”符号 -->
-          </div>
-          <ul v-if="menu.submenus && isOpen(menu)" class="submenu">
-            <li v-for="submenu in menu.submenus" :key="submenu.name" @click="selectMenu(submenu)" @mouseover="hoverMenu(submenu)" @mouseleave="leaveMenu(submenu)">
-              <span :class="{'hover': submenu.hover, 'active': submenu.active}" class="submenu-text">{{ submenu.name }}</span>
-            </li>
-          </ul>
-        </li>
-      </ul>
-    </div>
-    <div class="content">
-    </div>
+  <div class="sidebar">
+    <ul>
+      <li v-for="menu in menus" :key="menu.name">
+        <div class="menu-item" @click="handleClick(menu, $event)" @mouseover="hoverMenu(menu)" @mouseleave="leaveMenu(menu)">
+          <span :class="{'hover': menu.hover, 'active': menu.active}" class="menu-text">{{ menu.name }}</span>
+          <span v-if="menu.submenus" :class="{'open': isOpen(menu)}" class="arrow">&#x276F;</span>
+        </div>
+        <ul v-if="menu.submenus && isOpen(menu)" class="submenu">
+          <li v-for="submenu in menu.submenus" :key="submenu.name" @click="handleClick(submenu, $event)" @mouseover="hoverMenu(submenu)" @mouseleave="leaveMenu(submenu)">
+            <span :class="{'hover': submenu.hover, 'active': submenu.active}" class="submenu-text">{{ submenu.name }}</span>
+          </li>
+        </ul>
+      </li>
+    </ul>
   </div>
 </template>
 
@@ -67,57 +55,33 @@ export default {
     },
     leaveMenu(menu) {
       menu.hover = false;
+    },
+    handleClick(menu, event) {
+      if (!menu.submenus) {
+        this.$emit('menu-selected', menu.name);
+      } else {
+        this.toggleMenu(menu);
+        event.stopPropagation();
+      }
     }
   }
 };
 </script>
 
 <style scoped>
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #f8f8f8;
-  height: 56px;
-  padding: 0 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  position: fixed;
-  width: calc(100% - 200px);
-  left: 200px;
-  top: 0;
-  z-index: 1000;
-}
-.announcement {
-  display: flex;
-  align-items: center;
-  font-size: 16px;
-}
-.icon-menu {
-  margin-right: 8px;
-}
-.profile {
-  display: flex;
-  align-items: center;
-}
-.profile img {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  margin-right: 8px;
-}
 .sidebar {
   width: 200px;
   background-color: #ffcc80;
   padding: 0;
-  height: calc(100vh - 56px);
+  height: 100vh;
   box-sizing: border-box;
   position: fixed;
-  top: 56px;
+  top: 0;
   left: 0;
   overflow-y: auto; /* 保持滚动功能 */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  z-index: 999;
+  z-index: 1002; /* 增加z-index以确保在其他元素上方 */
 }
 .sidebar::-webkit-scrollbar {
   width: 0;
@@ -157,9 +121,5 @@ export default {
 }
 .submenu li {
   background-color: #cc8400; /* 二级目录背景色 */
-}
-.content {
-  margin-left: 200px;
-  padding: 10px;
 }
 </style>

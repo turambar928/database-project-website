@@ -1,7 +1,7 @@
 <template>
   <div class="app-bar">
     <div class="menu-button">
-      &#9776; 公告管理
+      &#9776; {{ selectedMenu }}
     </div>
     <div class="spacer"></div>
     <div class="user-icon">
@@ -13,6 +13,12 @@
 <script>
 export default {
   name: "AppBar",
+  props: {
+    selectedMenu: {
+      type: String,
+      default: '公告管理'
+    }
+  }
 };
 </script>
 
@@ -21,6 +27,7 @@ export default {
   display: flex;
   align-items: center;
   padding: 0 16px;
+  padding-left: 230px;
   height: 56px;
   background-color: #f5f5f5; /* 顶部栏背景颜色 */
   border-bottom: 1px solid #ddd;
@@ -28,7 +35,7 @@ export default {
   top: 0;
   right: 0;
   left: 0;
-  z-index: 1000; /* 确保顶部栏在所有内容之上 */
+  z-index: 1001; /* 确保顶部栏在所有内容之上 */
 }
 .menu-button {
   font-size: 18px;
