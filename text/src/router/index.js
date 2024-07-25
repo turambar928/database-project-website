@@ -5,7 +5,7 @@ import MySidebarComponent from '../components/MySidebar.vue'
 
 const routes = [
   {
-    path: '/content',
+    path: '/',
     name: 'AppBar',
     component: AppBarComponent
   },
@@ -15,7 +15,7 @@ const routes = [
     component: MyContentComponent
   },
   {
-    path: '/content',
+    path: '/sidebar',
     name: 'MySidebar',
     component: MySidebarComponent
   }
@@ -27,4 +27,3 @@ const router = createRouter({
 })
 
 export default router
-

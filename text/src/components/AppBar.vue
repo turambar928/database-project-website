@@ -4,7 +4,7 @@
       &#9776; {{ selectedMenu }}
     </div>
     <div class="spacer"></div>
-    <div class="user-icon">
+    <div class="user-icon" @click="$emit('menu-selected', '我')">
       <img src="/avatar.jpg" alt="头像" />
     </div>
   </div>

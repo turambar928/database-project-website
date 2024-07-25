@@ -1,6 +1,6 @@
 <template>
   <div class="content">
-    <h1>详细界面看具体介绍</h1>
+
   </div>
 </template>
 
