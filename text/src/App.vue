@@ -6,6 +6,9 @@
       <div class="content-wrapper">
         <MyContent v-if="selectedMenu === '公告管理'" />
         <UserList v-if="selectedMenu === '普通用户列表'" />
+        <DishList v-if="selectedMenu ==='菜品列表'"/>
+        <WeeklyMenu v-if="selectedMenu ==='每周菜单'"/>
+        <WeeklyPromotion v-if="selectedMenu ==='每周促销'"/>
         <div class="overlay" v-if="isUserProfileVisible">
           <UserProfile />
           <SecondComponent />
@@ -22,6 +25,9 @@ import MyContent from "./components/MyContent.vue";
 import UserProfile from "./components/UserProfile.vue";
 import SecondComponent from "./components/SecondComponent.vue";
 import UserList from "./components/UserList.vue";
+import DishList from "./components/DishList.vue";
+import WeeklyMenu from "./components/WeeklyMenu.vue";
+import WeeklyPromotion from './components/WeeklyPromotion.vue';
 
 export default {
   name: "App",
@@ -31,7 +37,10 @@ export default {
     MyContent,
     UserProfile,
     SecondComponent,
-    UserList
+    UserList,
+    DishList,
+    WeeklyMenu,
+    WeeklyPromotion
   },
   data() {
     return {
