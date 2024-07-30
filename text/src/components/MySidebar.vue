@@ -25,7 +25,7 @@ export default {
         { name: '公告管理', hover: false, active: false },
         { name: '菜品管理', submenus: [{ name: '菜品列表', hover: false, active: false }, { name: '每周菜单', hover: false, active: false }, { name: '每周促销', hover: false, active: false }], hover: false, active: false },
         { name: '职工管理', hover: false, active: false },
-        { name: '志愿者管理', hover: false, active: false },
+        { name: '志愿者管理', submenus: [{ name: '审核志愿者申请', hover: false, active: false }, { name: '上任志愿者管理', hover: false, active: false }], hover: false, active: false },
         { name: '仓库管理', hover: false, active: false },
         { name: '财务', submenus: [{ name: '财务审核', hover: false, active: false }, { name: '财务总表', hover: false, active: false }], hover: false, active: false },
         { name: '数据统计', submenus: [{ name: '用户统计', hover: false, active: false }, { name: '志愿者统计', hover: false, active: false }, { name: '订单统计', hover: false, active: false }, { name: '财务统计', hover: false, active: false }, { name: '系统日志', hover: false, active: false }], hover: false, active: false },

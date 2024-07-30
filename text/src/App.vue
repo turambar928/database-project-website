@@ -9,6 +9,9 @@
         <DishList v-if="selectedMenu ==='菜品列表'"/>
         <WeeklyMenu v-if="selectedMenu ==='每周菜单'"/>
         <WeeklyPromotion v-if="selectedMenu ==='每周促销'"/>
+        <EmployeeManagement v-if="selectedMenu ==='职工管理'"/>
+        <VerifyVolunteer v-if="selectedMenu ==='审核志愿者申请'"/>
+        <VolunteerManagement v-if="selectedMenu ==='上任志愿者管理'"/>
         <div class="overlay" v-if="isUserProfileVisible">
           <UserProfile />
           <SecondComponent />
@@ -28,6 +31,9 @@ import UserList from "./components/UserList.vue";
 import DishList from "./components/DishList.vue";
 import WeeklyMenu from "./components/WeeklyMenu.vue";
 import WeeklyPromotion from './components/WeeklyPromotion.vue';
+import EmployeeManagement from './components/EmployeeManagement.vue';
+import VerifyVolunteer from "./components/VerifyVolunteer.vue";
+import VolunteerManagement from "./components/VolunteerManagement.vue";
 
 export default {
   name: "App",
@@ -40,8 +46,11 @@ export default {
     UserList,
     DishList,
     WeeklyMenu,
-    WeeklyPromotion
-  },
+    WeeklyPromotion,
+    EmployeeManagement,
+    VerifyVolunteer,
+    VolunteerManagement
+},
   data() {
     return {
       selectedMenu: '公告管理',
