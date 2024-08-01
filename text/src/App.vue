@@ -12,6 +12,9 @@
         <EmployeeManagement v-if="selectedMenu ==='职工管理'"/>
         <VerifyVolunteer v-if="selectedMenu ==='审核志愿者申请'"/>
         <VolunteerManagement v-if="selectedMenu ==='上任志愿者管理'"/>
+        <UserStatistic v-if="selectedMenu ==='用户统计'"/>
+        <VolunteerStatistic v-if="selectedMenu ==='志愿者统计'"/>
+        <OrdersStatistic v-if="selectedMenu ==='订单统计'"/>
         <div class="overlay" v-if="isUserProfileVisible">
           <UserProfile />
           <SecondComponent />
@@ -34,6 +37,9 @@ import WeeklyPromotion from './components/WeeklyPromotion.vue';
 import EmployeeManagement from './components/EmployeeManagement.vue';
 import VerifyVolunteer from "./components/VerifyVolunteer.vue";
 import VolunteerManagement from "./components/VolunteerManagement.vue";
+import UserStatistic from './components/UserStatistic.vue';
+import VolunteerStatistic from './components/VolunteerStatistic.vue';
+import OrdersStatistic from './components/OrdersStatistic.vue';
 
 export default {
   name: "App",
@@ -49,7 +55,10 @@ export default {
     WeeklyPromotion,
     EmployeeManagement,
     VerifyVolunteer,
-    VolunteerManagement
+    VolunteerManagement,
+    UserStatistic,
+    VolunteerStatistic,
+    OrdersStatistic,
 },
   data() {
     return {
@@ -116,4 +125,10 @@ export default {
 .second-component::-webkit-scrollbar {
   display: none; /* 隐藏滚动条 Chrome */
 }
+/**/
 </style>
+
+
+
+
+
