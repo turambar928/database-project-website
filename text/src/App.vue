@@ -6,6 +6,7 @@
       <div class="content-wrapper">
         <MyContent v-if="selectedMenu === '公告管理'" />
         <UserList v-if="selectedMenu === '普通用户列表'" />
+        <AdminList v-if="selectedMenu === '管理员列表'" />
         <DishList v-if="selectedMenu ==='菜品列表'"/>
         <WeeklyMenu v-if="selectedMenu ==='每周菜单'"/>
         <WeeklyPromotion v-if="selectedMenu ==='每周促销'"/>
@@ -15,6 +16,10 @@
         <UserStatistic v-if="selectedMenu ==='用户统计'"/>
         <VolunteerStatistic v-if="selectedMenu ==='志愿者统计'"/>
         <OrdersStatistic v-if="selectedMenu ==='订单统计'"/>
+        <WarehouseManagement v-if="selectedMenu === '仓库管理'" />
+        <FinancialAudit v-if="selectedMenu === '财务审核'" />
+        <FinancialSummary v-if="selectedMenu === '财务总表'" />
+        <AnnouncementManagement v-if="selectedMenu === '公告管理'" />
         <div class="overlay" v-if="isUserProfileVisible">
           <UserProfile />
           <SecondComponent />
@@ -31,6 +36,7 @@ import MyContent from "./components/MyContent.vue";
 import UserProfile from "./components/UserProfile.vue";
 import SecondComponent from "./components/SecondComponent.vue";
 import UserList from "./components/UserList.vue";
+import AdminList from "./components/AdminList.vue"; // 导入AdminList组件
 import DishList from "./components/DishList.vue";
 import WeeklyMenu from "./components/WeeklyMenu.vue";
 import WeeklyPromotion from './components/WeeklyPromotion.vue';
@@ -40,6 +46,10 @@ import VolunteerManagement from "./components/VolunteerManagement.vue";
 import UserStatistic from './components/UserStatistic.vue';
 import VolunteerStatistic from './components/VolunteerStatistic.vue';
 import OrdersStatistic from './components/OrdersStatistic.vue';
+import WarehouseManagement from './components/WarehouseManagement.vue';
+import FinancialAudit from './components/FinancialAudit.vue';
+import FinancialSummary from './components/FinancialSummary.vue'; // 导入FinancialSummary组件
+import AnnouncementManagement from './components/AnnouncementManagement.vue'; // 导入AnnouncementManagement组件
 
 export default {
   name: "App",
@@ -50,6 +60,7 @@ export default {
     UserProfile,
     SecondComponent,
     UserList,
+    AdminList, // 注册AdminList组件
     DishList,
     WeeklyMenu,
     WeeklyPromotion,
@@ -59,7 +70,11 @@ export default {
     UserStatistic,
     VolunteerStatistic,
     OrdersStatistic,
-},
+    WarehouseManagement,
+    FinancialAudit,
+    FinancialSummary, // 注册FinancialSummary组件
+    AnnouncementManagement // 注册AnnouncementManagement组件
+  },
   data() {
     return {
       selectedMenu: '公告管理',
@@ -125,10 +140,4 @@ export default {
 .second-component::-webkit-scrollbar {
   display: none; /* 隐藏滚动条 Chrome */
 }
-/**/
 </style>
-
-
-
-
-
