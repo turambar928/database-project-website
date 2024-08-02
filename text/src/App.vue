@@ -19,6 +19,9 @@
         <WarehouseManagement v-if="selectedMenu === '仓库管理'" />
         <FinancialAudit v-if="selectedMenu === '财务审核'" />
         <FinancialSummary v-if="selectedMenu === '财务总表'" />
+        <FinancialAnalysis v-if="selectedMenu === '财务统计'" />
+        <SystemLog v-if="selectedMenu === '系统日志'" />
+        <CanteenInfo v-if="selectedMenu === '食堂信息'" />
         <AnnouncementManagement v-if="selectedMenu === '公告管理'" />
         <div class="overlay" v-if="isUserProfileVisible">
           <UserProfile />
@@ -49,11 +52,17 @@ import OrdersStatistic from './components/OrdersStatistic.vue';
 import WarehouseManagement from './components/WarehouseManagement.vue';
 import FinancialAudit from './components/FinancialAudit.vue';
 import FinancialSummary from './components/FinancialSummary.vue'; // 导入FinancialSummary组件
-import AnnouncementManagement from './components/AnnouncementManagement.vue'; // 导入AnnouncementManagement组件
+import AnnouncementManagement from './components/AnnouncementManagement.vue';
+import FinancialAnalysis from './components/FinancialAnalysis.vue';
+import SystemLog from './components/SystemLog.vue';
+import CanteenInfo from './components/CanteenInfo.vue'; // 导入AnnouncementManagement组件
 
 export default {
   name: "App",
   components: {
+    CanteenInfo,
+    SystemLog,
+    FinancialAnalysis,
     AppBar,
     MySidebar,
     MyContent,
