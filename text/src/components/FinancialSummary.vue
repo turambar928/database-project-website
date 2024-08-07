@@ -5,13 +5,13 @@
       <select v-model="searchSource">
         <option value="">来源</option>
         <!-- Add other sources as needed -->
-        <option value="sourceA">来源A</option>
-        <option value="sourceB">来源B</option>
+        <option value="来源A">来源A</option>
+        <option value="来源B">来源B</option>
       </select>
       <select v-model="searchType">
         <option value="">收支</option>
-        <option value="income">收入</option>
-        <option value="expense">支出</option>
+        <option value="收入">收入</option>
+        <option value="支出">支出</option>
       </select>
       <select v-model="searchDate">
         <option value="">时间</option>
@@ -38,22 +38,22 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="item in items" :key="item.id">
-        <td>{{ item.id }}</td>
-        <td>{{ item.source }}</td>
-        <td>{{ item.applicant }}</td>
-        <td>{{ item.auditor }}</td>
-        <td>{{ item.amount }}</td>
-        <td>{{ item.date }}</td>
-        <td>{{ item.type }}</td>
-        <td>{{ item.status }}</td>
+      <tr v-for="i in itemsPerPage" :key="i" class="table-row">
+        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].id : '' }}</td>
+        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].source : '' }}</td>
+        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].applicant : '' }}</td>
+        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].auditor : '' }}</td>
+        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].amount : '' }}</td>
+        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].date : '' }}</td>
+        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].type : '' }}</td>
+        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].status : '' }}</td>
       </tr>
       </tbody>
     </table>
     <div class="pagination">
-      <button @click="prevPage">«</button>
-      <span v-for="page in totalPages" :key="page" @click="goToPage(page)">{{ page }}</span>
-      <button @click="nextPage">»</button>
+      <button @click="prevPage" :disabled="currentPage === 1">«</button>
+      <span v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="{'active': currentPage === page}">{{ page }}</span>
+      <button @click="nextPage" :disabled="currentPage === totalPages">»</button>
     </div>
   </div>
 </template>
@@ -73,13 +73,42 @@ export default {
         { id: 2, source: '来源B', applicant: '申请人B', auditor: '审核人B', amount: 200, date: '2024-01-02', type: '支出', status: '不通过' },
         // 添加更多数据
       ],
+      filteredItems: [],
       currentPage: 1,
-      totalPages: 5,
+      itemsPerPage: 8,
     };
+  },
+  computed: {
+    totalPages() {
+      return Math.ceil(this.filteredItems.length / this.itemsPerPage);
+    },
+    paginatedItems() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredItems.slice(start, end);
+    }
+  },
+  mounted() {
+    this.filteredItems = this.items; // 初始化时显示所有数据
+    this.calculateTotalAmount();
   },
   methods: {
     search() {
-      // 搜索逻辑
+      // 过滤列表
+      this.filteredItems = this.items.filter(item => {
+        return (
+            (!this.searchSource || item.source === this.searchSource) &&
+            (!this.searchType || item.type === this.searchType) &&
+            (!this.searchDate || item.date === this.searchDate)
+        );
+      });
+      this.currentPage = 1; // 搜索后重置到第一页
+      this.calculateTotalAmount(); // 重新计算合计收支
+    },
+    calculateTotalAmount() {
+      this.totalAmount = this.filteredItems.reduce((total, item) => {
+        return total + (item.type === '收入' ? item.amount : -item.amount);
+      }, 0);
     },
     prevPage() {
       if (this.currentPage > 1) {
@@ -141,6 +170,10 @@ th {
   background-color: #f2f2f2;
 }
 
+.table-row {
+  height: 50px; /* 固定行高 */
+}
+
 .btn {
   padding: 5px 10px;
   margin: 2px;
@@ -164,5 +197,10 @@ th {
 .pagination span {
   margin: 0 5px;
   cursor: pointer;
+}
+
+.pagination .active {
+  font-weight: bold;
+  text-decoration: underline;
 }
 </style>

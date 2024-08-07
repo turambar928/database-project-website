@@ -10,7 +10,7 @@
         <option value="2">2</option>
       </select>
       <select v-model="searchGrade">
-        <option value="">高耗品</option>
+        <option value="">高耗品等级</option>
         <!-- Add other grades as needed -->
         <option value="A">A</option>
         <option value="B">B</option>
@@ -33,23 +33,95 @@
         <th>数量</th>
         <th>高耗品等级</th>
         <th>保质期</th>
+        <th>操作</th>
       </tr>
       </thead>
       <tbody>
-      <tr v-for="item in items" :key="item.id">
-        <td>{{ item.id }}</td>
-        <td>{{ item.name }}</td>
-        <td>{{ item.quantity }}</td>
-        <td>{{ item.grade }}</td>
-        <td>{{ item.expiry }}</td>
+      <tr v-for="i in itemsPerPage" :key="i" class="table-row">
+        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].id : '' }}</td>
+        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].name : '' }}</td>
+        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].quantity : '' }}</td>
+        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].grade : '' }}</td>
+        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].expiry : '' }}</td>
+        <td>
+          <button v-if="paginatedItems[i - 1]" class="btn yellow" @click="editItem(paginatedItems[i - 1])">修改</button>
+          <button v-if="paginatedItems[i - 1]" class="btn red" @click="deleteItem(paginatedItems[i - 1].id)">删除</button>
+        </td>
       </tr>
       </tbody>
     </table>
     <div class="pagination">
-      <button @click="prevPage">«</button>
-      <span v-for="page in totalPages" :key="page" @click="goToPage(page)">{{ page }}</span>
-      <button @click="nextPage">»</button>
+      <button @click="prevPage" :disabled="currentPage === 1">«</button>
+      <span v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="{'active': currentPage === page}">{{ page }}</span>
+      <button @click="nextPage" :disabled="currentPage === totalPages">»</button>
     </div>
+
+    <!-- 添加食材弹出框 -->
+    <div v-if="showAddItem" class="modal">
+      <div class="modal-content">
+        <span class="close" @click="closeAddItem">&times;</span>
+        <h3>添加食材</h3>
+        <form @submit.prevent="confirmAddItem">
+          <div class="form-group">
+            <label for="newName">食材名</label>
+            <input type="text" id="newName" v-model="newItem.name" />
+          </div>
+          <div class="form-group">
+            <label for="newQuantity">数量</label>
+            <input type="number" id="newQuantity" v-model="newItem.quantity" />
+          </div>
+          <div class="form-group">
+            <label for="newGrade">高耗品等级</label>
+            <select id="newGrade" v-model="newItem.grade">
+              <option value="A">A</option>
+              <option value="B">B</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="newExpiry">保质期</label>
+            <select id="newExpiry" v-model="newItem.expiry">
+              <option value="1 month">1 month</option>
+              <option value="6 months">6 months</option>
+            </select>
+          </div>
+          <button type="submit" class="btn green">确认</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- 修改食材信息弹出框 -->
+    <div v-if="showEditItem" class="modal">
+      <div class="modal-content">
+        <span class="close" @click="closeEditItem">&times;</span>
+        <h3>修改食材信息</h3>
+        <form @submit.prevent="confirmEditItem">
+          <div class="form-group">
+            <label for="editName">食材名</label>
+            <input type="text" id="editName" v-model="selectedItem.name" />
+          </div>
+          <div class="form-group">
+            <label for="editQuantity">数量</label>
+            <input type="number" id="editQuantity" v-model="selectedItem.quantity" />
+          </div>
+          <div class="form-group">
+            <label for="editGrade">高耗品等级</label>
+            <select id="editGrade" v-model="selectedItem.grade">
+              <option value="A">A</option>
+              <option value="B">B</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="editExpiry">保质期</label>
+            <select id="editExpiry" v-model="selectedItem.expiry">
+              <option value="1 month">1 month</option>
+              <option value="6 months">6 months</option>
+            </select>
+          </div>
+          <button type="submit" class="btn green">确认</button>
+        </form>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -68,19 +140,40 @@ export default {
         { id: 2, name: '食材B', quantity: 50, grade: 'B', expiry: '1 month' },
         // 添加更多食材
       ],
+      filteredItems: [], // 用于存储过滤后的食材列表
       currentPage: 1,
-      totalPages: 5,
+      itemsPerPage: 8,
+      showAddItem: false, // 控制添加食材弹出框的显示
+      showEditItem: false, // 控制编辑食材信息弹出框的显示
+      selectedItem: {},
+      newItem: { name: '', quantity: '', grade: 'A', expiry: '1 month' },
     };
+  },
+  computed: {
+    totalPages() {
+      return Math.ceil(this.filteredItems.length / this.itemsPerPage);
+    },
+    paginatedItems() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.filteredItems.slice(start, end);
+    }
+  },
+  mounted() {
+    this.filteredItems = this.items; // 初始化时显示所有食材
   },
   methods: {
     search() {
-      // 搜索逻辑
-    },
-    addItem() {
-      // 添加食材逻辑
-    },
-    restock() {
-      // 进货逻辑
+      // 过滤食材列表
+      this.filteredItems = this.items.filter(item => {
+        return (
+            (!this.searchName || item.name.includes(this.searchName)) &&
+            (!this.searchID || item.id == this.searchID) &&
+            (!this.searchGrade || item.grade === this.searchGrade) &&
+            (!this.searchExpiry || item.expiry === this.searchExpiry)
+        );
+      });
+      this.currentPage = 1; // 搜索后重置到第一页
     },
     prevPage() {
       if (this.currentPage > 1) {
@@ -94,6 +187,49 @@ export default {
     },
     goToPage(page) {
       this.currentPage = page;
+    },
+    addItem() {
+      this.showAddItem = true;
+    },
+    closeAddItem() {
+      this.showAddItem = false;
+    },
+    confirmAddItem() {
+      // 添加食材逻辑
+      const newId = this.items.length ? this.items[this.items.length - 1].id + 1 : 1;
+      const newItem = { ...this.newItem, id: newId };
+      this.items.push(newItem);
+      this.filteredItems = [...this.items]; // 同步更新过滤后的食材列表
+      this.closeAddItem();
+      this.resetNewItem();
+    },
+    resetNewItem() {
+      this.newItem = { name: '', quantity: '', grade: 'A', expiry: '1 month' };
+    },
+    editItem(item) {
+      this.selectedItem = { ...item };
+      this.showEditItem = true;
+    },
+    closeEditItem() {
+      this.showEditItem = false;
+    },
+    confirmEditItem() {
+      // 更新食材信息逻辑
+      const index = this.items.findIndex(i => i.id === this.selectedItem.id);
+      if (index !== -1) {
+        this.items.splice(index, 1, this.selectedItem); // 使用 splice 更新食材信息
+        this.filteredItems = [...this.items]; // 同步更新过滤后的食材列表
+      }
+      this.showEditItem = false;
+    },
+    deleteItem(itemId) {
+      // 删除食材逻辑
+      this.items = this.items.filter(i => i.id !== itemId);
+      this.filteredItems = this.items; // 同步更新过滤后的食材列表
+    },
+    restock() {
+      // 进货逻辑
+      console.log('进货');
     }
   }
 };
@@ -132,6 +268,10 @@ th {
   background-color: #f2f2f2;
 }
 
+.table-row {
+  height: 50px; /* 固定行高 */
+}
+
 .btn {
   padding: 5px 10px;
   margin: 2px;
@@ -155,6 +295,21 @@ th {
   color: white;
 }
 
+.btn.red {
+  background-color: #dc3545;
+  color: white;
+}
+
+.btn.yellow {
+  background-color: #ffc107;
+  color: white;
+}
+
+.btn.green {
+  background-color: #28a745;
+  color: white;
+}
+
 .pagination {
   display: flex;
   justify-content: center;
@@ -165,5 +320,67 @@ th {
 .pagination span {
   margin: 0 5px;
   cursor: pointer;
+}
+
+.pagination .active {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  position: relative;
+  width: 400px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  color: #aaa;
+  font-size: 24px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.reset-password-container {
+  display: flex;
+  align-items: center;
+}
+
+.reset-password-container input {
+  flex: 1;
+  margin-right: 10px;
 }
 </style>
