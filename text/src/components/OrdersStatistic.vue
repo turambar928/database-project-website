@@ -153,6 +153,8 @@
         const ctx = document.getElementById('pieChart').getContext('2d');
         if (pieChartInstance) {
           pieChartInstance.destroy();
+
+
         }
         pieChartInstance = new Chart(ctx, {
           type: 'pie',

@@ -3,16 +3,16 @@
     <div class="search-bar">
       <label for="dish-name">名称 </label>
       <input v-model="searchName" id="dish-name" placeholder="输入菜品名称">
-      
+
       <label for="dish-category">类别 </label>
       <select v-model="searchCategory" id="dish-category">
         <option value="">请选择</option>
-        <option searchCategory="category1">烧烤</option>
-        <option searchCategory="category2">蜜酿</option>
-        <option searchCategory="category3">蛋糕</option>
+        <option value="烧烤">烧烤</option>
+        <option value="蜜酿">蜜酿</option>
+        <option value="蛋糕">蛋糕</option>
         <!-- 更多类别选项 -->
       </select>
-      
+
       <button @click="searchDishes">搜索</button>
       <button @click="openAddDishForm">+</button>
     </div>
@@ -37,7 +37,7 @@
       <button @click="isEditing ? updateDish() : saveDish()">{{ isEditing ? '保存' : '添加' }}</button>
       <button @click="cancelForm">取消</button>
     </div>
-    
+
     <div class="dish-container">
       <div v-for="dish in paginatedDishes" :key="dish.id" class="dish-item">
         <img :src="dish.image" alt="Dish Image">
@@ -53,7 +53,7 @@
         </div>
       </div>
     </div>
-    
+
     <div class="pagination">
       <button v-for="page in totalPages" :key="page" @click="goToPage(page)">
         {{ page }}
@@ -63,6 +63,11 @@
 </template>
 
 <script>
+import axios from 'axios';
+
+// 使用本地 Mock URL
+axios.defaults.baseURL = 'https://apifoxmock.com/m1/4808550-4462943-default'; // 替换为实际的 Mock URL
+
 export default {
   data() {
     return {
@@ -88,6 +93,7 @@ export default {
     paginatedDishes() {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
+      console.log('filteredDishes type:', typeof this.filteredDishes, Array.isArray(this.filteredDishes)); // 调试信息
       return this.filteredDishes.slice(start, end);
     },
     totalPages() {
@@ -95,23 +101,34 @@ export default {
     }
   },
   methods: {
-    fetchDishes() {
-      // 初始化菜品数据，可以在这里添加一些默认的菜品
-      this.dishes = [
-      { id:1, name: '甜甜花酿鸡', category: '蜜酿', recipe: '甜甜花，鸡肉，提子', price: '200摩拉', image: 'chicken.jpg' },
-      { id:2, name: '蒙德烤鱼', category: '烧烤', recipe: '鱼肉，胡椒', price: '150摩拉', image: 'fish.jpg' },
-      { id:3, name: '厚云朵松饼', category: '蛋糕', recipe: '奶油，面粉，水果', price: '500摩拉', image: 'cake.jpg' },
-
-        // 添加更多默认菜品
-      ];
-      this.searchDishes(); // 初始化过滤后的菜品数据
+    async fetchDishes() {
+      try {
+        const response = await axios.get('/api/dishes');
+        console.log('获取的菜品数据:', response.data); // 调试信息
+        if (response.data.success) {
+          this.dishes = Array.isArray(response.data.response) ? response.data.response : [];
+          this.filteredDishes = this.dishes; // 确保 filteredDishes 被正确赋值为数组
+        }
+      } catch (error) {
+        console.error('获取菜品数据失败:', error);
+      }
     },
-    searchDishes() {
-      this.currentPage = 1; // 搜索后重置到第一页
-      this.filteredDishes = this.dishes.filter(dish => {
-        return (this.searchName === '' || dish.name.includes(this.searchName)) &&
-               (this.searchCategory === '' || dish.category === this.searchCategory);
-      });
+    async searchDishes() {
+      try {
+        const response = await axios.get('/api/dishes', {
+          params: {
+            name: this.searchName,
+            category: this.searchCategory
+          }
+        });
+        console.log('搜索的菜品数据:', response.data); // 调试信息
+        if (response.data.success) {
+          this.filteredDishes = Array.isArray(response.data.response) ? response.data.response : []; // 确保 filteredDishes 被正确赋值为数组
+          this.currentPage = 1; // 搜索后重置到第一页
+        }
+      } catch (error) {
+        console.error('搜索菜品失败:', error);
+      }
     },
     goToPage(page) {
       this.currentPage = page;
@@ -126,20 +143,31 @@ export default {
       this.showForm = true;
       this.form = { ...dish };
     },
-    saveDish() {
-      const newDish = { ...this.form, id: Date.now() }; // 使用时间戳作为 ID
-      this.dishes.push(newDish);
-      this.searchDishes();
-      this.cancelForm();
-    },
-    updateDish() {
-      const index = this.dishes.findIndex(d => d.id === this.form.id);
-      if (index !== -1) {
-         this.dishes.splice(index, 1, { ...this.form });
+    async saveDish() {
+      try {
+        const response = await axios.post('/api/dishes', this.form);
+        this.dishes.push(response.data);
+        this.filteredDishes = this.dishes; // 确保 filteredDishes 被正确赋值为数组
+        this.searchDishes();
+        this.cancelForm();
+      } catch (error) {
+        console.error('添加菜品失败:', error);
       }
-      this.searchDishes();
-      this.cancelForm();
-},
+    },
+    async updateDish() {
+      try {
+        await axios.put(`/api/dishes/${this.form.id}`, this.form);
+        const index = this.dishes.findIndex(d => d.id === this.form.id);
+        if (index !== -1) {
+          this.dishes.splice(index, 1, { ...this.form });
+          this.filteredDishes = this.dishes; // 确保 filteredDishes 被正确赋值为数组
+        }
+        this.searchDishes();
+        this.cancelForm();
+      } catch (error) {
+        console.error('更新菜品失败:', error);
+      }
+    },
     cancelForm() {
       this.showForm = false;
       this.resetForm();
@@ -154,9 +182,15 @@ export default {
         image: ''
       };
     },
-    deleteDish(id) {
-      this.dishes = this.dishes.filter(dish => dish.id !== id);
-      this.searchDishes(); // 更新过滤后的菜品数据
+    async deleteDish(id) {
+      try {
+        await axios.delete(`/api/dishes/${id}`);
+        this.dishes = this.dishes.filter(dish => dish.id !== id);
+        this.filteredDishes = this.dishes; // 确保 filteredDishes 被正确赋值为数组
+        this.searchDishes();
+      } catch (error) {
+        console.error('删除菜品失败:', error);
+      }
     }
   },
   mounted() {
@@ -165,7 +199,10 @@ export default {
 };
 </script>
 
-<style scoped>
+
+
+
+<style>
 .dish-list {
   /* 样式 */
 }

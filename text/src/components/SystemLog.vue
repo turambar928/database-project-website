@@ -34,18 +34,10 @@ export default {
       // Example log data
       this.logs = [
         {
-          id: 1,
-          timestamp: '2024-08-01 12:00:00',
-          type: 'Error',
-          message: 'Database connection failed',
-          details: 'Detailed error information here...'
+
         },
         {
-          id: 2,
-          timestamp: '2024-08-01 12:30:00',
-          type: 'Info',
-          message: 'User logged in',
-          details: 'User ID: 12345, Username: testuser'
+
         }
         // Add more logs as needed
       ];
