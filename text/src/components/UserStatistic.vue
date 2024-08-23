@@ -31,6 +31,7 @@
 <script>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { Chart, registerables } from 'chart.js';
+import axios from 'axios';
 import * as d3 from 'd3';
 import cloud from 'd3-cloud';
 
@@ -38,35 +39,39 @@ Chart.register(...registerables);
 
 export default {
   setup() {
-    const visitCount = ref(12);
-    const totalUsers = ref(12);
-    const monthlyNewUsers = ref(3);
+    const visitCount = ref(0);
+    const totalUsers = ref(0);
+    const monthlyNewUsers = ref(0);
+    const visitData = ref([]);
+    const wordData = ref([]);
 
     const animatedVisitCount = ref(0);
     const animatedTotalUsers = ref(0);
     const animatedMonthlyNewUsers = ref(0);
 
-    const visitData = [20, 25, 15, 35, 30]; // 示例数据
-    const wordData = [
-      { text: '舒适', size: 40 },
-      { text: '不懂', size: 30 },
-      { text: '质量', size: 20 },
-      { text: '包装', size: 50 },
-      { text: '手感', size: 60 },
-      { text: '娃娃', size: 30 },
-      { text: '哈哈', size: 36 },
-      { text: '嘻嘻', size: 42 },
-      { text: '呵呵', size: 11 },
-      { text: '呃呃', size: 3 },
-      { text: '实惠', size: 22 },
-      { text: '便宜', size: 60 },
-      { text: '好吃', size: 28 },
-      { text: '丰盛', size: 33 },
-      { text: '方便', size: 41 },
-      { text: '快捷', size: 11 },
-    ]; // 示例数据
-
     let chartInstance = null;
+
+    const fetchData = async () => {
+      try {
+        const visitResponse = await axios.get('/api/visit-count');
+        const userResponse = await axios.get('/api/user-stats');
+        const wordCloudResponse = await axios.get('/api/word-cloud');
+
+        visitCount.value = visitResponse.data.totalVisits;
+        totalUsers.value = userResponse.data.totalUsers;
+        monthlyNewUsers.value = userResponse.data.monthlyNewUsers;
+        visitData.value = userResponse.data.visitData;
+        wordData.value = wordCloudResponse.data;
+
+        animateValue(animatedVisitCount, visitCount.value, 700);
+        animateValue(animatedTotalUsers, totalUsers.value, 700);
+        animateValue(animatedMonthlyNewUsers, monthlyNewUsers.value, 700);
+        drawLineChart();
+        drawWordCloud();
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
     const animateValue = (refValue, targetValue, duration) => {
       let start = 0;
@@ -86,7 +91,7 @@ export default {
       const canvas = document.getElementById('lineChart');
       const ctx = canvas.getContext('2d');
       if (chartInstance) {
-        chartInstance.destroy(); // 销毁之前的图表实例
+        chartInstance.destroy();
       }
       chartInstance = new Chart(ctx, {
         type: 'line',
@@ -94,7 +99,7 @@ export default {
           labels: ['项目1', '项目2', '项目3', '项目4', '项目5'],
           datasets: [{
             label: '每月访问量',
-            data: visitData,
+            data: visitData.value,
             borderColor: 'rgba(75, 192, 192, 1)',
             backgroundColor: 'rgba(75, 192, 192, 0.2)',
             borderWidth: 2,
@@ -142,11 +147,10 @@ export default {
     };
 
     const drawWordCloud = () => {
-      d3.select('#wordCloud').selectAll('*').remove();  // 清除已有的 SVG 元素
-
+      d3.select('#wordCloud').selectAll('*').remove();
       const layout = cloud()
         .size([500, 300])
-        .words(wordData)
+        .words(wordData.value)
         .padding(5)
         .rotate(() => ~~(Math.random() * 2) * 90)
         .font('Impact')
@@ -186,17 +190,12 @@ export default {
     };
 
     onMounted(() => {
-      const duration = 700; // 规定时间为 2000 毫秒
-      animateValue(animatedVisitCount, visitCount.value, duration);
-      animateValue(animatedTotalUsers, totalUsers.value, duration);
-      animateValue(animatedMonthlyNewUsers, monthlyNewUsers.value, duration);
-      drawLineChart();
-      drawWordCloud();
+      fetchData();
     });
 
     onBeforeUnmount(() => {
       if (chartInstance) {
-        chartInstance.destroy(); // 组件卸载前销毁图表实例
+        chartInstance.destroy();
       }
     });
 
@@ -213,35 +212,38 @@ export default {
 </script>
 
 <style scoped>
+/* Styles remain unchanged */
 .stats-container {
   max-width: 1200px;
   margin: auto;
   padding: 20px;
-  font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
+  font-family: 'Roboto', sans-serif;
+  background-color: #fdfdfd;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease-in-out;
 }
 
 h1 {
   text-align: center;
   color: #333;
-  margin-bottom: 20px;
+  font-size: 2.5em;
+  margin-bottom: 30px;
 }
 
 .stat-section {
   display: flex;
   justify-content: space-around;
-  margin-bottom: 20px;
+  margin-bottom: 40px;
 }
 
 .stat-box {
-  background-color: #fff;
-  padding: 20px;
+  background-color: #f0f4f7;
+  padding: 25px;
   border-radius: 8px;
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
   text-align: center;
-  width: 250px;
+  width: 280px;
 }
 
 .stat-box h2 {
@@ -253,7 +255,7 @@ h1 {
 .stat-value {
   font-size: 2em;
   font-weight: bold;
-  color: #333;
+  color: #007BFF;
 }
 
 .chart-section {

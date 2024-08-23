@@ -126,6 +126,8 @@
 </template>
 
 <script>
+import axios from "axios";
+
 export default {
   name: 'WarehouseManagement',
   data() {
@@ -163,17 +165,29 @@ export default {
     this.filteredItems = this.items; // 初始化时显示所有食材
   },
   methods: {
-    search() {
+    async search() {
       // 过滤食材列表
-      this.filteredItems = this.items.filter(item => {
-        return (
-            (!this.searchName || item.name.includes(this.searchName)) &&
-            (!this.searchID || item.id == this.searchID) &&
-            (!this.searchGrade || item.grade === this.searchGrade) &&
-            (!this.searchExpiry || item.expiry === this.searchExpiry)
-        );
-      });
-      this.currentPage = 1; // 搜索后重置到第一页
+      //调用mock
+      try {
+        const response = await axios.get('http://127.0.0.1:4523/m1/4808550-4462943-default/api/ingredients/search', this.filteredItems);
+        if (response.status === 200) {
+          // 添加成功，将新食材加入到列表
+          this.filteredItems = this.items.filter(item => {
+            return (
+                (!this.searchName || item.name.includes(this.searchName)) &&
+                (!this.searchID || item.id == this.searchID) &&
+                (!this.searchGrade || item.grade === this.searchGrade) &&
+                (!this.searchExpiry || item.expiry === this.searchExpiry)
+            );
+          });
+          this.currentPage = 1; // 搜索后重置到第一页
+        } else {
+          console.error('搜索失败', response);
+        }
+      }
+      catch (error) {
+        console.error('请求失败', error);
+      }
     },
     prevPage() {
       if (this.currentPage > 1) {
@@ -194,42 +208,91 @@ export default {
     closeAddItem() {
       this.showAddItem = false;
     },
-    confirmAddItem() {
-      // 添加食材逻辑
-      const newId = this.items.length ? this.items[this.items.length - 1].id + 1 : 1;
-      const newItem = { ...this.newItem, id: newId };
-      this.items.push(newItem);
-      this.filteredItems = [...this.items]; // 同步更新过滤后的食材列表
-      this.closeAddItem();
-      this.resetNewItem();
+    async confirmAddItem() {
+      // 添加食材逻辑 - 调用 Apifox Mock 接口
+      try {
+        const response = await axios.post('http://127.0.0.1:4523/m1/4808550-4462943-default/api/ingredients/add', this.newItem);
+        if (response.status === 200) {
+          // 添加成功，将新食材加入到列表
+          const newId = this.items.length ? this.items[this.items.length - 1].id + 1 : 1;
+          const newItem = { ...this.newItem, id: newId };
+          this.items.push(newItem);
+          this.filteredItems = [...this.items]; // 同步更新过滤后的食材列表
+          this.closeAddItem();
+          this.resetNewItem();
+        } else {
+          console.error('添加食材失败', response);
+        }
+      } catch (error) {
+        console.error('请求失败', error);
+      }
     },
     resetNewItem() {
       this.newItem = { name: '', quantity: '', grade: 'A', expiry: '1 month' };
     },
     editItem(item) {
+
       this.selectedItem = { ...item };
       this.showEditItem = true;
     },
     closeEditItem() {
       this.showEditItem = false;
     },
-    confirmEditItem() {
+    async confirmEditItem() {
       // 更新食材信息逻辑
-      const index = this.items.findIndex(i => i.id === this.selectedItem.id);
-      if (index !== -1) {
-        this.items.splice(index, 1, this.selectedItem); // 使用 splice 更新食材信息
-        this.filteredItems = [...this.items]; // 同步更新过滤后的食材列表
+      //修改食材-调用apifox的mock
+      try {
+        const response = await axios.put('http://127.0.0.1:4523/m1/4808550-4462943-default/api/ingredients/update', this.selectedItem, this.showEditItem);
+        if (response.status === 200) {
+          const index = this.items.findIndex(i => i.id === this.selectedItem.id);
+          if (index !== -1) {
+            this.items.splice(index, 1, this.selectedItem); // 使用 splice 更新食材信息
+            this.filteredItems = [...this.items]; // 同步更新过滤后的食材列表
+          }
+          this.showEditItem = false;
+        } else {
+          console.error('修改食材失败', response);
+
+        }
       }
-      this.showEditItem = false;
+      catch (error) {
+        console.error('请求失败',error);
+      }
     },
-    deleteItem(itemId) {
-      // 删除食材逻辑
-      this.items = this.items.filter(i => i.id !== itemId);
-      this.filteredItems = this.items; // 同步更新过滤后的食材列表
+    async deleteItem(itemId) {
+      // 删除食材逻辑,调用apifox的mock
+      try{
+        const response = await axios.delete('http://127.0.0.1:4523/m1/4808550-4462943-default/api/ingredients/delete',this.item);
+        if (response.status === 200) {
+          //删除成功
+          this.items = this.items.filter(i => i.id !== itemId);
+          this.filteredItems = this.items; // 同步更新过滤后的食材列表
+        }
+        else{
+          console.error('删除失败',response);
+
+        }
+      }
+      catch (error){
+        console.error('请求失败',error);
+      }
     },
-    restock() {
-      // 进货逻辑
-      console.log('进货');
+    async restock() {
+      // 进货,调用apifox的mock
+      try{
+        const response = await axios.post('http://127.0.0.1:4523/m1/4808550-4462943-default/api/ingredients/restock',this.item);
+        if (response.status === 200) {
+          //进货逻辑
+          console.log('进货');
+        }
+        else{
+          console.error('进货失败',response);
+
+        }
+      }
+      catch (error){
+        console.error('请求失败',error);
+      }
     }
   }
 };
