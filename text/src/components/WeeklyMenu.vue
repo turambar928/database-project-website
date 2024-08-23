@@ -19,17 +19,21 @@
         <div class="dish-list">
           <div class="dish-item" v-for="dish in weeklyMenu[day]" :key="dish.id">
             <span>{{ dish.name }}</span>
-            <button v-if="status === '可编辑'" class="remove-button" @click="removeDish(day, dish.id)">X</button>
+            <button v-if="status === '可编辑'" class="remove-button" @click="removeDish(day, dish.id)">
+              <img src="close.png" alt="Remove" class="icon" />
+            </button>
           </div>
+          <button v-if="status === '可编辑'" class="add-button" @click="openAddDishDialog(day)">+</button>
         </div>
-        <button v-if="status === '可编辑'" class="add-button" @click="openAddDishDialog(day)">+</button>
       </div>
     </div>
 
     <div class="add-dish-dialog" v-if="showDialog">
       <div class="dialog-content">
         <h3>添加菜品</h3>
-        <button class="close-button" @click="closeAddDishDialog">X</button>
+        <button class="close-button" @click="closeAddDishDialog">
+          <img src="close.png" alt="Close" class="icon" />
+        </button>
         <label for="category">类别</label>
         <select v-model="newDish.category" id="category">
           <option value="category1">类别1</option>
@@ -157,7 +161,7 @@ export default {
 
 <style scoped>
 .weekly-menu {
-  font-family: 楷体;
+  font-family: Arial, Helvetica, sans-serif;
   padding: 20px;
 }
 .header {
@@ -185,6 +189,7 @@ export default {
   border: 1px solid #413d3d;
   padding: 10px;
   text-align: center;
+  position: relative;
 }
 .dish-list {
   margin-top: 10px;
@@ -193,24 +198,35 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 5px;
+  margin-bottom: 10px;
+  background: #f9f9f9;
+  border-radius: 5px;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: relative;
 }
 .remove-button {
-  background-color: #e74c3c;
-  color: white;
+  background-color: transparent;
   border: none;
-  border-radius: 50%;
-  width: 15px;
-  height: 15px;
   cursor: pointer;
+  padding: 0;
+  position: absolute;
+  right: -30px;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.3s;
 }
-.remove-button:hover {
-  background-color: #c0392b;
+.remove-button .icon {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
 }
+.remove-button:hover .icon {
+  transform: scale(1.2);
+}
+
 .add-button {
   background-color: green;
   color: white;
@@ -218,8 +234,21 @@ export default {
   border-radius: 50%;
   width: 20px;
   height: 20px;
+  font-size: 20px;
+  line-height: 30px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  margin-top: 15px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
+.add-button:hover {
+  background-color: #27ae60;
+  transform: scale(1.1);
+}
+
 .add-dish-dialog {
   position: fixed;
   top: 50%;
@@ -229,24 +258,45 @@ export default {
   border: 1px solid #ccc;
   padding: 20px;
   z-index: 1000;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 .dialog-content {
   position: relative;
 }
 .close-button {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
   position: absolute;
   top: 10px;
   right: 10px;
-  background: red;
-  color: white;
-  border: none;
-  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+.close-button .icon {
+  width: 15px;
+  height: 15px;
+  transition: transform 0.3s ease;
+}
+.close-button:hover .icon {
+  transform: scale(1.2);
+}
+
 .confirm-button {
-  background: green;
+  background-color: green;
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: 5px 10px;
   cursor: pointer;
+  margin-top: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+.confirm-button:hover {
+  background-color: #27ae60;
+  transform: scale(1.05);
 }
 </style>

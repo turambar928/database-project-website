@@ -1,5 +1,6 @@
 <template>
   <div class="dish-list">
+    <h2>菜品管理</h2>
     <div class="search-bar">
       <label for="dish-name">名称 </label>
       <input v-model="searchName" id="dish-name" placeholder="输入菜品名称">
