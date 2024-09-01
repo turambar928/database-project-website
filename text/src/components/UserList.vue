@@ -129,26 +129,23 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'UserList',
   data() {
     return {
       searchName: '',
       searchIdentity: '',
-      users: [
-        // 示例数据
-        { id: 1, nickname: 'a', phone: '500', identity: 'b', gender: '男' },
-        { id: 2, nickname: 'a', phone: '500', identity: 'b', gender: '男' },
-        // 添加更多用户以便分页展示
-      ],
-      filteredUsers: [], // 用于存储过滤后的用户列表
+      users: [],
+      filteredUsers: [],
       currentPage: 1,
       itemsPerPage: 8,
       showDetail: false,
-      showResetPassword: false, // 控制重置密码弹出框的显示
-      showEditUser: false, // 控制编辑用户信息弹出框的显示
+      showResetPassword: false,
+      showEditUser: false,
       selectedUser: {},
-      newPassword: '' // 示例新密码
+      newPassword: ''
     };
   },
   computed: {
@@ -162,88 +159,160 @@ export default {
     }
   },
   mounted() {
-    this.filteredUsers = this.users; // 初始化时显示所有用户
+    this.fetchUsers(); // 初始化时获取所有用户
   },
   methods: {
+    fetchUsers() {
+      axios.get('/api/users')
+          .then(response => {
+            this.users = response.data.data;
+            this.filteredUsers = this.users; // 初始化时显示所有用户
+          })
+          .catch(error => {
+            console.error('获取用户列表失败', error);
+          });
+    },
+
     search() {
-      // 过滤用户列表
-      this.filteredUsers = this.users.filter(user => {
-        return (
-            (!this.searchName || user.nickname.includes(this.searchName)) &&
-            (!this.searchIdentity || user.identity === this.searchIdentity)
-        );
-      });
-      this.currentPage = 1; // 搜索后重置到第一页
+      axios.get('/api/users/search', {
+        params: {
+          nickname: this.searchName,
+          identity: this.searchIdentity
+        }
+      })
+          .then(response => {
+            console.log(response.data); // 调试使用，打印搜索结果
+            this.filteredUsers = response.data.data;
+            this.currentPage = 1; // 搜索后重置到第一页
+          })
+          .catch(error => {
+            console.error('搜索用户失败', error);
+          });
     },
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
-    },
-    nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
-    },
-    goToPage(page) {
-      this.currentPage = page;
-    },
+
     viewDetail(user) {
-      this.selectedUser = { ...user };
-      this.showDetail = true;
+      axios.get(`/api/users/${user.id}`)
+          .then(response => {
+            console.log(response.data); // 调试使用，打印用户详细信息
+            this.selectedUser = response.data.data;
+            this.showDetail = true;
+          })
+          .catch(error => {
+            console.error('获取用户详细信息失败', error);
+          });
     },
+
     closeDetail() {
       this.showDetail = false;
     },
+
     confirmDetails() {
-      // 更新用户信息逻辑
-      this.showDetail = false;
+      axios.put(`/api/users/${this.selectedUser.id}`, this.selectedUser)
+          .then(response => {
+            console.log(response.data); // 调试使用，打印修改后的用户信息
+            const index = this.users.findIndex(u => u.id === this.selectedUser.id);
+            if (index !== -1) {
+              this.users.splice(index, 1, this.selectedUser); // 更新本地数据
+              this.filteredUsers = [...this.users]; // 同步更新过滤后的用户列表
+            }
+            this.showEditUser = false;
+          })
+          .catch(error => {
+            console.error('修改用户信息失败', error);
+          });
     },
+
     resetPassword(user) {
-      // 生成随机密码
-      this.newPassword = Math.random().toString(36).slice(-8);
-      this.selectedUser = { ...user, password: this.newPassword };
-      this.showResetPassword = true;
+      axios.post(`/api/users/${user.id}/reset_password`)
+          .then(response => {
+            console.log(response.data); // 调试使用，打印重置密码后的响应
+            this.newPassword = response.data.newPassword; // 假设API返回新密码
+            this.selectedUser = { ...user, password: this.newPassword };
+            this.showResetPassword = true;
+          })
+          .catch(error => {
+            console.error('重置密码失败', error);
+          });
     },
+
     closeResetPassword() {
       this.showResetPassword = false;
     },
+
     copyPassword() {
-      // 复制密码逻辑
       const copyText = this.newPassword;
       navigator.clipboard.writeText(copyText).then(() => {
         alert('密码已复制到剪贴板');
       });
     },
+
     confirmResetPassword() {
-      // 更新用户密码逻辑
-      const index = this.users.findIndex(u => u.id === this.selectedUser.id);
-      if (index !== -1) {
-        this.users[index].password = this.newPassword;
-        this.filteredUsers = [...this.users]; // 同步更新过滤后的用户列表
-      }
-      this.showResetPassword = false;
+      axios.post(`/api/users/${this.selectedUser.id}/reset_password`)
+          .then(response => {
+            console.log(response.data); // 调试使用，打印确认重置密码后的响应
+            const index = this.users.findIndex(u => u.id === this.selectedUser.id);
+            if (index !== -1) {
+              this.users[index].password = this.newPassword;
+              this.filteredUsers = [...this.users]; // 同步更新过滤后的用户列表
+            }
+            this.showResetPassword = false;
+          })
+          .catch(error => {
+            console.error('确认重置密码失败', error);
+          });
     },
+
     editUser(user) {
       this.selectedUser = { ...user };
       this.showEditUser = true;
     },
+
     closeEditUser() {
       this.showEditUser = false;
     },
+
     confirmEditUser() {
-      // 更新用户信息逻辑
-      const index = this.users.findIndex(u => u.id === this.selectedUser.id);
-      if (index !== -1) {
-        this.users.splice(index, 1, this.selectedUser); // 使用 splice 更新用户信息
-        this.filteredUsers = [...this.users]; // 同步更新过滤后的用户列表
-      }
-      this.showEditUser = false;
+      axios.put(`/api/users/${this.selectedUser.id}`, this.selectedUser)
+          .then(response => {
+            console.log(response.data); // 调试使用，打印编辑后的用户信息
+            const index = this.users.findIndex(u => u.id === this.selectedUser.id);
+            if (index !== -1) {
+              this.users.splice(index, 1, this.selectedUser); // 更新本地数据
+              this.filteredUsers = [...this.users]; // 同步更新过滤后的用户列表
+            }
+            this.showEditUser = false;
+          })
+          .catch(error => {
+            console.error('修改用户信息失败', error);
+          });
     },
+
     deleteUser(userId) {
-      // 删除用户逻辑
-      this.users = this.users.filter(u => u.id !== userId);
-      this.filteredUsers = this.users; // 同步更新过滤后的用户列表
+      axios.delete(`/api/users/${userId}`)
+          .then(response => {
+            console.log(response.data); // 调试使用，打印删除用户后的响应
+            this.users = this.users.filter(u => u.id !== userId);
+            this.filteredUsers = this.users; // 同步更新过滤后的用户列表
+          })
+          .catch(error => {
+            console.error('删除用户失败', error);
+          });
+    },
+
+    prevPage() {
+      if (this.currentPage > 1) {
+        this.currentPage--;
+      }
+    },
+
+    nextPage() {
+      if (this.currentPage < this.totalPages) {
+        this.currentPage++;
+      }
+    },
+
+    goToPage(page) {
+      this.currentPage = page;
     }
   }
 };
