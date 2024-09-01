@@ -40,7 +40,7 @@ export default {
 .canteen-info {
   max-width: 1000px;
   margin: auto;
-  padding: 20px;
+  padding: 10px; /* 调整内边距 */
   font-family: 'Comic Sans MS', cursive, sans-serif;
   background-color: #fdfdff;
   border-radius: 8px;
@@ -50,8 +50,8 @@ export default {
 h1 {
   text-align: center;
   color: #ff6f61;
-  margin-bottom: 20px;
-  font-size: 2.5em;
+  margin-bottom: 15px; /* 调整标题下方的间距 */
+  font-size: 2em; /* 调整标题字体大小 */
 }
 
 .canteen-details {
@@ -62,7 +62,7 @@ h1 {
 
 .canteen-images {
   display: flex;
-  gap: 20px;
+  gap: 10px; /* 减少图片之间的间距 */
   flex-wrap: wrap;
   justify-content: center;
 }
@@ -71,25 +71,25 @@ h1 {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   width: 100%;
-  max-width: 300px;
+  max-width: 200px; /* 调整图片最大宽度 */
   height: auto;
 }
 
 .canteen-description {
   text-align: center;
-  margin-top: 20px;
+  margin-top: 10px; /* 调整描述与图片的间距 */
 }
 
 .canteen-description h2 {
   color: #333;
-  font-size: 2em;
-  margin-bottom: 10px;
+  font-size: 1.5em; /* 调整标题字体大小 */
+  margin-bottom: 5px; /* 调整标题下方的间距 */
 }
 
 .canteen-description p {
-  font-size: 1.2em;
+  font-size: 1em; /* 调整描述字体大小 */
   color: #555;
-  margin: 5px 0;
+  margin: 3px 0; /* 调整描述行间距 */
 }
 
 .canteen-description strong {

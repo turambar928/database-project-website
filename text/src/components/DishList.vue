@@ -1,5 +1,6 @@
 <template>
   <div class="dish-list">
+    <h2>菜品管理</h2>
     <div class="search-bar">
       <label for="dish-name">名称 </label>
       <input v-model="searchName" id="dish-name" placeholder="输入菜品名称">
@@ -192,9 +193,6 @@ export default {
   }
 };
 
-
-
-
     const updateIngredientName = (index) => {
       const selectedRecipe = recipes.value.find(recipe => recipe.id === form.value.recipe[index].IngredientId);
       if (selectedRecipe) {
@@ -224,29 +222,45 @@ export default {
     };
 
     const openEditDishForm = async (dish) => {
-      isEditing.value = true;
-      showForm.value = true;
-      form.value = { ...dish };
-      imagePreviewUrl.value = form.value.image || '';
-      await fetchRecipes(); // 获取可用食材的API调用
-      form.value.recipe.forEach((ingredient, index) => {
-        updateIngredientName(index);
-      });
-    };
+  isEditing.value = true;
+  showForm.value = true;
+  form.value = { ...dish };
+  imagePreviewUrl.value = form.value.image || '';
+
+  await fetchRecipes(); // 获取可用食材的API调用
+
+  // 确保 recipe 存在且为数组
+  if (Array.isArray(form.value.recipe)) {
+    form.value.recipe.forEach((ingredient, index) => {
+      updateIngredientName(index);
+    });
+  } else {
+    console.warn('form.value.recipe 不是一个有效的数组:', form.value.recipe);
+  }
+};
+
 
     const saveDish = async () => {
-      try {
-        form.value.id = generateUniqueId();
-        form.value.image = imagePreviewUrl.value;
-        const response = await axios.post('/api/dishes', form.value);
-        dishes.value.push(response.data);
-        filteredDishes.value = dishes.value;
-        cancelForm();
-        goToPage(currentPage.value);
-      } catch (error) {
-        console.error('保存菜品失败:', error);
-      }
-    };
+  try {
+    // 表单验证：检查必填字段是否为空
+    if (!form.value.name || !form.value.category || !form.value.price || form.value.recipe.length === 0) {
+      alert('请填写所有必需的字段，包括菜品名称、类别、价格和至少一个配方。');
+      return; // 阻止保存操作
+    }
+
+    // 如果所有字段都已填写，继续保存菜品
+    form.value.id = generateUniqueId();
+    form.value.image = imagePreviewUrl.value;
+    const response = await axios.post('/api/dishes', form.value);
+    dishes.value.push(response.data);
+    filteredDishes.value = dishes.value;
+    cancelForm();
+    goToPage(currentPage.value);
+  } catch (error) {
+    console.error('保存菜品失败:', error);
+  }
+};
+
 
     const updateDish = async () => {
       try {
@@ -282,6 +296,10 @@ export default {
     };
 
     const addIngredient = () => {
+      if (!Array.isArray(form.value.recipe)) {
+    // 如果 recipe 未初始化或不是数组，则初始化为一个空数组
+          form.value.recipe = [];
+      }
       form.value.recipe.push({ IngredientId: '', IngredientName: '', account: '' });
     };
 

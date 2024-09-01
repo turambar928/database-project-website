@@ -53,7 +53,7 @@
         <div class="modal-content">
           <button class="close-button" @click="closeModal">X</button>
           <h3>{{ isEditing ? '修改职工' : '添加职工' }}</h3>
-          <form @submit.prevent="isEditing ? updateEmployee() : addEmployee()">
+          <form @submit.prevent="isEditing ? updateEmployee() : addEmployee()" class="modal-form">
             <div class="form-group">
               <label>姓名</label>
               <input v-model="employeeForm.name" required class="input-field" />
@@ -80,7 +80,7 @@
               <label>工资</label>
               <input v-model="employeeForm.salary" type="number" required class="input-field" />
             </div>
-            <button type="submit" class="button primary">确认</button>
+            <button type="submit" class="button primary confirm-button">确认</button>
           </form>
         </div>
       </div>
@@ -335,7 +335,7 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 /* Container */
 .container {
   max-width: 1200px;
@@ -519,6 +519,7 @@ export default {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* 深度阴影 */
   position: relative;
   animation: fadeIn 0.3s ease-in-out; /* 弹出动画 */
+  padding-bottom: 60px; /* 为表单底部留出空间 */
 }
 
 @keyframes fadeIn {
@@ -625,6 +626,14 @@ export default {
 .form-group select:focus {
   border-color: #007bff;
   background-color: #fff;
+}
+
+/* Right-aligned confirm button */
+.confirm-button {
+  position: absolute;
+  width: 15%;
+  bottom: 10px;
+  right: 10px;
 }
 
 /* Pagination */
