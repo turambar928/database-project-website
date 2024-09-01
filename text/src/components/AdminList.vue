@@ -5,8 +5,11 @@
       <input type="text" placeholder="昵称" v-model="searchName" />
       <select v-model="searchPosition">
         <option value="">职位</option>
-        <option value="admin">管理员</option>
-        <option value="user">用户</option>
+        <option value="财务">财务</option>
+        <option value="职工">职工</option>
+        <option value="仓库">仓库</option>
+        <option value="用户">用户</option>
+        <option value="总管理">总管理</option>
       </select>
       <button @click="search">搜索</button>
       <button @click="openAddAdmin">添加管理员</button>
@@ -34,7 +37,7 @@
           <button v-if="paginatedAdmins[i - 1]" class="btn blue" @click="viewDetails(paginatedAdmins[i - 1])">查看</button>
         </td>
         <td>
-          <button v-if="paginatedAdmins[i - 1]" class="btn yellow" @click="resetPassword(paginatedAdmins[i - 1])">重置密码</button>
+          <button v-if="paginatedAdmins[i - 1]" class="btn yellow" @click="confirmResetPassword(paginatedAdmins[i - 1])">重置密码</button>
           <button v-if="paginatedAdmins[i - 1]" class="btn blue" @click="editAdmin(paginatedAdmins[i - 1])">修改</button>
           <button v-if="paginatedAdmins[i - 1]" class="btn red" @click="deleteAdmin(paginatedAdmins[i - 1].id)">删除</button>
         </td>
@@ -57,86 +60,123 @@
         <p><strong>手机号：</strong> {{ selectedAdmin.phone }}</p>
         <p><strong>职位：</strong> {{ selectedAdmin.position }}</p>
         <p><strong>性别：</strong> {{ selectedAdmin.gender }}</p>
+        <p><strong>邮箱：</strong> {{ selectedAdmin.email }}</p>
+        <p><strong>身份证：</strong> {{ selectedAdmin.idCard }}</p>
       </div>
     </div>
 
     <!-- 添加管理员弹出框 -->
     <div v-if="showAddAdmin" class="modal">
-      <div class="modal-content">
+      <div class="modal-content form-container">
         <span class="close" @click="closeAddAdmin">&times;</span>
         <h3>添加管理员</h3>
         <form @submit.prevent="confirmAddAdmin">
           <div class="form-group">
             <label for="newName">姓名</label>
-            <input type="text" id="newName" v-model="newAdmin.name" />
+            <input type="text" id="newName" v-model="newAdmin.name" class="input-field" />
           </div>
           <div class="form-group">
             <label for="newPhone">手机号</label>
-            <input type="text" id="newPhone" v-model="newAdmin.phone" />
+            <input type="text" id="newPhone" v-model="newAdmin.phone" class="input-field" />
           </div>
           <div class="form-group">
             <label for="newGender">性别</label>
-            <select id="newGender" v-model="newAdmin.gender">
+            <select id="newGender" v-model="newAdmin.gender" class="input-field">
               <option value="男">男</option>
               <option value="女">女</option>
             </select>
           </div>
           <div class="form-group">
             <label for="newPosition">职位</label>
-            <select id="newPosition" v-model="newAdmin.position">
-              <option value="admin">管理员</option>
-              <option value="user">用户</option>
+            <select id="newPosition" v-model="newAdmin.position" class="input-field">
+              <option value="财务">财务</option>
+              <option value="职工">职工</option>
+              <option value="仓库">仓库</option>
+              <option value="用户">用户</option>
+              <option value="总管理">总管理</option>
             </select>
           </div>
-          <button type="submit" class="btn green">确认</button>
+          <div class="form-group">
+            <label for="newEmail">邮箱</label>
+            <input type="email" id="newEmail" v-model="newAdmin.email" class="input-field" />
+          </div>
+          <div class="form-group">
+            <label for="newIdCard">身份证</label>
+            <input type="text" id="newIdCard" v-model="newAdmin.idCard" class="input-field" />
+          </div>
+          <div class="button-group">
+            <button type="submit" class="btn green">确认</button>
+          </div>
         </form>
       </div>
     </div>
 
     <!-- 修改管理员信息弹出框 -->
     <div v-if="showEditAdmin" class="modal">
-      <div class="modal-content">
+      <div class="modal-content form-container">
         <span class="close" @click="closeEditAdmin">&times;</span>
         <h3>修改管理员信息</h3>
         <form @submit.prevent="confirmEditAdmin">
           <div class="form-group">
             <label for="editName">姓名</label>
-            <input type="text" id="editName" v-model="selectedAdmin.name" />
+            <input type="text" id="editName" v-model="selectedAdmin.name" class="input-field" />
           </div>
           <div class="form-group">
             <label for="editPhone">手机号</label>
-            <input type="text" id="editPhone" v-model="selectedAdmin.phone" />
+            <input type="text" id="editPhone" v-model="selectedAdmin.phone" class="input-field" />
           </div>
           <div class="form-group">
             <label for="editGender">性别</label>
-            <select id="editGender" v-model="selectedAdmin.gender">
+            <select id="editGender" v-model="selectedAdmin.gender" class="input-field">
               <option value="男">男</option>
               <option value="女">女</option>
             </select>
           </div>
           <div class="form-group">
             <label for="editPosition">职位</label>
-            <select id="editPosition" v-model="selectedAdmin.position">
-              <option value="admin">管理员</option>
-              <option value="user">用户</option>
+            <select id="editPosition" v-model="selectedAdmin.position" class="input-field">
+              <option value="财务">财务</option>
+              <option value="职工">职工</option>
+              <option value="仓库">仓库</option>
+              <option value="用户">用户</option>
+              <option value="总管理">总管理</option>
             </select>
           </div>
-          <button type="submit" class="btn green">确认</button>
+          <div class="form-group">
+            <label for="editEmail">邮箱</label>
+            <input type="email" id="editEmail" v-model="selectedAdmin.email" class="input-field" />
+          </div>
+          <div class="form-group">
+            <label for="editIdCard">身份证</label>
+            <input type="text" id="editIdCard" v-model="selectedAdmin.idCard" class="input-field" />
+          </div>
+          <div class="button-group">
+            <button type="submit" class="btn green">确认</button>
+          </div>
         </form>
       </div>
     </div>
 
-    <!-- 重置密码弹出框 -->
+    <!-- 确认重置密码弹出框 -->
     <div v-if="showResetPassword" class="modal">
       <div class="modal-content">
         <span class="close" @click="closeResetPassword">&times;</span>
+        <h3>确认重置密码</h3>
+        <p>确定要重置此管理员的密码吗？</p>
+        <button @click="resetPassword(selectedAdmin)" class="btn green">确认重置</button>
+      </div>
+    </div>
+
+    <!-- 重置密码显示弹出框 -->
+    <div v-if="showResetPasswordConfirmed" class="modal">
+      <div class="modal-content">
+        <span class="close" @click="closeResetPasswordConfirmed">&times;</span>
         <h3>重置密码</h3>
-        <p>已重置密码！</p>
+        <p>密码已重置！</p>
         <div class="reset-password-container">
           <input type="text" v-model="newPassword" readonly />
           <button @click="copyPassword">点击复制</button>
         </div>
-        <button @click="confirmResetPassword" class="btn green">确认</button>
       </div>
     </div>
   </div>
@@ -150,21 +190,20 @@ export default {
       searchName: '',
       searchPosition: '',
       admins: [
-        // 示例数据
-        { id: 1, name: 'a', phone: '500', position: 'b', gender: '男' },
-        { id: 2, name: 'a', phone: '500', position: 'b', gender: '男' },
-        // 添加更多管理员
+        { id: 1, name: 'a', phone: '500', position: '职工', gender: '男', email: 'a@example.com', idCard: '123456' },
+        { id: 2, name: 'b', phone: '600', position: '仓库', gender: '女', email: 'b@example.com', idCard: '654321' },
       ],
-      filteredAdmins: [], // 用于存储过滤后的管理员列表
+      filteredAdmins: [],
       currentPage: 1,
       itemsPerPage: 8,
       showDetail: false,
-      showAddAdmin: false, // 控制添加管理员弹出框的显示
-      showEditAdmin: false, // 控制编辑管理员信息弹出框的显示
-      showResetPassword: false, // 控制重置密码弹出框的显示
+      showAddAdmin: false,
+      showEditAdmin: false,
+      showResetPassword: false,
+      showResetPasswordConfirmed: false,
       selectedAdmin: {},
-      newAdmin: { name: '', phone: '', gender: '男', position: 'admin' },
-      newPassword: '' // 示例新密码
+      newAdmin: { name: '', phone: '', gender: '男', position: '财务', email: '', idCard: '' },
+      newPassword: ''
     };
   },
   computed: {
@@ -178,18 +217,17 @@ export default {
     }
   },
   mounted() {
-    this.filteredAdmins = this.admins; // 初始化时显示所有管理员
+    this.filteredAdmins = this.admins;
   },
   methods: {
     search() {
-      // 过滤管理员列表
       this.filteredAdmins = this.admins.filter(admin => {
         return (
             (!this.searchName || admin.name.includes(this.searchName)) &&
             (!this.searchPosition || admin.position === this.searchPosition)
         );
       });
-      this.currentPage = 1; // 搜索后重置到第一页
+      this.currentPage = 1;
     },
     prevPage() {
       if (this.currentPage > 1) {
@@ -218,41 +256,37 @@ export default {
       this.showAddAdmin = false;
     },
     confirmAddAdmin() {
-      // 添加管理员逻辑
       const newId = this.admins.length ? this.admins[this.admins.length - 1].id + 1 : 1;
-      const newAdmin = { ...this.newAdmin, id: newId };
+      const newAdmin = { ...this.newAdmin, id: newId, nickname: '管理员', password: '默认密码' };
       this.admins.push(newAdmin);
-      this.filteredAdmins = [...this.admins]; // 同步更新过滤后的管理员列表
+      this.filteredAdmins = [...this.admins];
       this.closeAddAdmin();
       this.resetNewAdmin();
     },
     resetNewAdmin() {
-      this.newAdmin = { name: '', phone: '', gender: '男', position: 'admin' };
+      this.newAdmin = { name: '', phone: '', gender: '男', position: '财务', email: '', idCard: '' };
+    },
+    confirmResetPassword(admin) {
+      this.selectedAdmin = admin;
+      this.showResetPassword = true;
     },
     resetPassword(admin) {
-      // 生成随机密码
       this.newPassword = Math.random().toString(36).slice(-8);
       this.selectedAdmin = { ...admin, password: this.newPassword };
-      this.showResetPassword = true;
+      this.showResetPassword = false;
+      this.showResetPasswordConfirmed = true;
     },
     closeResetPassword() {
       this.showResetPassword = false;
     },
+    closeResetPasswordConfirmed() {
+      this.showResetPasswordConfirmed = false;
+    },
     copyPassword() {
-      // 复制密码逻辑
       const copyText = this.newPassword;
       navigator.clipboard.writeText(copyText).then(() => {
         alert('密码已复制到剪贴板');
       });
-    },
-    confirmResetPassword() {
-      // 更新管理员密码逻辑
-      const index = this.admins.findIndex(a => a.id === this.selectedAdmin.id);
-      if (index !== -1) {
-        this.admins[index].password = this.newPassword;
-        this.filteredAdmins = [...this.admins]; // 同步更新过滤后的管理员列表
-      }
-      this.showResetPassword = false;
     },
     editAdmin(admin) {
       this.selectedAdmin = { ...admin };
@@ -262,18 +296,16 @@ export default {
       this.showEditAdmin = false;
     },
     confirmEditAdmin() {
-      // 更新管理员信息逻辑
       const index = this.admins.findIndex(a => a.id === this.selectedAdmin.id);
       if (index !== -1) {
-        this.admins.splice(index, 1, this.selectedAdmin); // 使用 splice 更新管理员信息
-        this.filteredAdmins = [...this.admins]; // 同步更新过滤后的管理员列表
+        this.admins.splice(index, 1, this.selectedAdmin);
+        this.filteredAdmins = [...this.admins];
       }
       this.showEditAdmin = false;
     },
     deleteAdmin(adminId) {
-      // 删除管理员逻辑
       this.admins = this.admins.filter(a => a.id !== adminId);
-      this.filteredAdmins = this.admins; // 同步更新过滤后的管理员列表
+      this.filteredAdmins = this.admins;
     }
   }
 };
@@ -313,14 +345,17 @@ th {
 }
 
 .table-row {
-  height: 50px; /* 固定行高 */
+  height: 50px;
 }
 
 .btn {
-  padding: 5px 10px;
   margin: 2px;
-  border: none; /* 移除黑框 */
+  border: 1px solid #ddd;
+  border-radius: 4px;
   cursor: pointer;
+  background-color: #f8f9fa;
+  color: black;
+  padding: 5px 10px;
 }
 
 .btn.blue {
@@ -341,6 +376,11 @@ th {
 .btn.green {
   background-color: #28a745;
   color: white;
+}
+
+.center-button {
+  display: block;
+  margin: 20px auto;
 }
 
 .pagination {
@@ -379,6 +419,36 @@ th {
   border-radius: 5px;
   position: relative;
   width: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-container {
+  width: 300px;
+  margin: 0 auto;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.form-group label {
+  width: 80px;
+}
+
+.form-group .input-field {
+  width: 100%;
+  padding: 5px;
+  box-sizing: border-box;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end; /* 将按钮对齐到右边 */
+  margin-top: 20px;
 }
 
 .close {

@@ -5,41 +5,44 @@
       <input type="text" placeholder="昵称" v-model="searchName" />
       <select v-model="searchIdentity">
         <option value="">身份</option>
-        <option value="admin">管理员</option>
-        <option value="user">用户</option>
+        <option value="普通用户">普通用户</option>
+        <option value="志愿者">志愿者</option>
+        <option value="老人">老人</option>
       </select>
-      <button @click="search">搜索</button>
+      <button @click="search" class="btn blue">搜索</button>
     </div>
-    <table>
-      <thead>
-      <tr>
-        <th>ID</th>
-        <th>昵称</th>
-        <th>手机号</th>
-        <th>身份</th>
-        <th>性别</th>
-        <th>详细信息</th>
-        <th>操作</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr v-for="i in itemsPerPage" :key="i" class="table-row">
-        <td>{{ paginatedUsers[i - 1] ? paginatedUsers[i - 1].id : '' }}</td>
-        <td>{{ paginatedUsers[i - 1] ? paginatedUsers[i - 1].nickname : '' }}</td>
-        <td>{{ paginatedUsers[i - 1] ? paginatedUsers[i - 1].phone : '' }}</td>
-        <td>{{ paginatedUsers[i - 1] ? paginatedUsers[i - 1].identity : '' }}</td>
-        <td>{{ paginatedUsers[i - 1] ? paginatedUsers[i - 1].gender : '' }}</td>
-        <td>
-          <button v-if="paginatedUsers[i - 1]" class="btn blue" @click="viewDetail(paginatedUsers[i - 1])">查看</button>
-        </td>
-        <td>
-          <button v-if="paginatedUsers[i - 1]" class="btn yellow" @click="resetPassword(paginatedUsers[i - 1])">重置密码</button>
-          <button v-if="paginatedUsers[i - 1]" class="btn blue" @click="editUser(paginatedUsers[i - 1])">修改</button>
-          <button v-if="paginatedUsers[i - 1]" class="btn red" @click="deleteUser(paginatedUsers[i - 1].id)">删除</button>
-        </td>
-      </tr>
-      </tbody>
-    </table>
+    <div class="table-container">
+      <table>
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>昵称</th>
+          <th>手机号</th>
+          <th>身份</th>
+          <th>性别</th>
+          <th>详细信息</th>
+          <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="(user, index) in paginatedUsersWithPadding" :key="index" class="table-row">
+          <td>{{ user ? user.accountId : '' }}</td>
+          <td>{{ user ? user.accountName : '' }}</td>
+          <td>{{ user ? user.phoneNum : '' }}</td>
+          <td>{{ user ? user.identity : '' }}</td>
+          <td>{{ user ? user.gender : '' }}</td>
+          <td>
+            <button v-if="user" class="btn small blue" @click="viewDetail(user)">查看</button>
+          </td>
+          <td class="action-buttons">
+            <button v-if="user" class="btn small yellow" @click="confirmResetPassword(user)">重置密码</button>
+            <button v-if="user" class="btn small blue" @click="editUser(user)">修改</button>
+            <button v-if="user" class="btn small red" @click="deleteUser(user.accountId)">删除</button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
     <div class="pagination">
       <button @click="prevPage" :disabled="currentPage === 1">«</button>
       <span v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="{'active': currentPage === page}">{{ page }}</span>
@@ -51,31 +54,22 @@
       <div class="modal-content">
         <span class="close" @click="closeDetail">&times;</span>
         <h3>用户信息</h3>
-        <form @submit.prevent="confirmDetails">
-          <div class="form-group">
-            <label for="nickname">昵称</label>
-            <input type="text" id="nickname" v-model="selectedUser.nickname" disabled />
-          </div>
-          <div class="form-group">
-            <label for="phone">手机号</label>
-            <input type="text" id="phone" v-model="selectedUser.phone" disabled />
-          </div>
-          <div class="form-group">
-            <label for="gender">性别</label>
-            <select id="gender" v-model="selectedUser.gender">
-              <option value="男">男</option>
-              <option value="女">女</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="identity">身份</label>
-            <select id="identity" v-model="selectedUser.identity">
-              <option value="admin">管理员</option>
-              <option value="user">用户</option>
-            </select>
-          </div>
-          <button type="submit" class="btn green">确认</button>
-        </form>
+        <p><strong>ID：</strong> {{ selectedUser.accountId }}</p>
+        <p><strong>昵称：</strong> {{ selectedUser.accountName }}</p>
+        <p><strong>手机号：</strong> {{ selectedUser.phoneNum }}</p>
+        <p><strong>性别：</strong> {{ selectedUser.gender }}</p>
+        <p><strong>身份：</strong> {{ selectedUser.identity }}</p>
+      </div>
+    </div>
+
+    <!-- 重置密码确认弹出框 -->
+    <div v-if="showResetPasswordConfirm" class="modal">
+      <div class="modal-content">
+        <span class="close" @click="closeResetPasswordConfirm">&times;</span>
+        <h3>确认重置密码</h3>
+        <p>确定要重置密码吗？</p>
+        <button @click="resetPassword(selectedUser)" class="btn green">确认</button>
+        <button @click="closeResetPasswordConfirm" class="btn red">取消</button>
       </div>
     </div>
 
@@ -87,9 +81,9 @@
         <p>已重置密码！</p>
         <div class="reset-password-container">
           <input type="text" v-model="newPassword" readonly />
-          <button @click="copyPassword">点击复制</button>
+          <button @click="copyPassword" class="btn blue">点击复制</button>
         </div>
-        <button @click="confirmResetPassword" class="btn green">确认</button>
+        <button @click="closeResetPassword" class="btn green">确认</button>
       </div>
     </div>
 
@@ -101,24 +95,24 @@
         <form @submit.prevent="confirmEditUser">
           <div class="form-group">
             <label for="editNickname">昵称</label>
-            <input type="text" id="editNickname" v-model="selectedUser.nickname" />
+            <input type="text" id="editNickname" v-model="selectedUser.accountName" />
           </div>
           <div class="form-group">
             <label for="editPhone">手机号</label>
-            <input type="text" id="editPhone" v-model="selectedUser.phone" />
+            <input type="text" id="editPhone" v-model="selectedUser.phoneNum" />
           </div>
           <div class="form-group">
             <label for="editGender">性别</label>
             <select id="editGender" v-model="selectedUser.gender">
-              <option value="男">男</option>
-              <option value="女">女</option>
+              <option value="male">男</option>
+              <option value="female">女</option>
             </select>
           </div>
           <div class="form-group">
             <label for="editIdentity">身份</label>
             <select id="editIdentity" v-model="selectedUser.identity">
               <option value="admin">管理员</option>
-              <option value="user">用户</option>
+              <option value="user">普通用户</option>
             </select>
           </div>
           <button type="submit" class="btn green">确认</button>
@@ -140,8 +134,9 @@ export default {
       users: [],
       filteredUsers: [],
       currentPage: 1,
-      itemsPerPage: 8,
+      itemsPerPage: 10,  // 每页10条记录
       showDetail: false,
+      showResetPasswordConfirm: false,
       showResetPassword: false,
       showEditUser: false,
       selectedUser: {},
@@ -156,129 +151,102 @@ export default {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
       return this.filteredUsers.slice(start, end);
+    },
+    paginatedUsersWithPadding() {
+      const users = this.paginatedUsers;
+      const paddingCount = this.itemsPerPage - users.length;
+      return users.concat(Array(paddingCount).fill(null)); // 填充空白行
     }
   },
   mounted() {
-    this.fetchUsers(); // 初始化时获取所有用户
+    this.fetchUsers();
   },
   methods: {
     fetchUsers() {
-      axios.get('/api/users')
+      axios.get('http://8.136.125.61/api/account/getAllAccount')
           .then(response => {
-            this.users = response.data.data;
-            this.filteredUsers = this.users; // 初始化时显示所有用户
+            this.users = response.data || [];
+            this.filteredUsers = this.users;
           })
           .catch(error => {
             console.error('获取用户列表失败', error);
           });
     },
-
     search() {
-      axios.get('/api/users/search', {
+      axios.get('http://8.136.125.61/api/account/getAllAccount', {
         params: {
           nickname: this.searchName,
           identity: this.searchIdentity
         }
       })
           .then(response => {
-            console.log(response.data); // 调试使用，打印搜索结果
-            this.filteredUsers = response.data.data;
-            this.currentPage = 1; // 搜索后重置到第一页
+            this.filteredUsers = response.data || [];
+            this.currentPage = 1;
           })
           .catch(error => {
             console.error('搜索用户失败', error);
           });
     },
-
     viewDetail(user) {
-      axios.get(`/api/users/${user.id}`)
+      if (!user) return;  // 确保用户存在
+      axios.get(`http://8.136.125.61/api/users/${user.accountId}`)
           .then(response => {
-            console.log(response.data); // 调试使用，打印用户详细信息
-            this.selectedUser = response.data.data;
-            this.showDetail = true;
+            if (response.data.success) {
+              this.selectedUser = response.data.response[0];
+              this.showDetail = true;
+            } else {
+              console.error('获取用户详细信息失败', response.data.msg);
+            }
           })
           .catch(error => {
             console.error('获取用户详细信息失败', error);
           });
     },
-
     closeDetail() {
       this.showDetail = false;
     },
-
-    confirmDetails() {
-      axios.put(`/api/users/${this.selectedUser.id}`, this.selectedUser)
-          .then(response => {
-            console.log(response.data); // 调试使用，打印修改后的用户信息
-            const index = this.users.findIndex(u => u.id === this.selectedUser.id);
-            if (index !== -1) {
-              this.users.splice(index, 1, this.selectedUser); // 更新本地数据
-              this.filteredUsers = [...this.users]; // 同步更新过滤后的用户列表
-            }
-            this.showEditUser = false;
-          })
-          .catch(error => {
-            console.error('修改用户信息失败', error);
-          });
+    confirmResetPassword(user) {
+      this.selectedUser = user;
+      this.showResetPasswordConfirm = true;
     },
-
     resetPassword(user) {
-      axios.post(`/api/users/${user.id}/reset_password`)
+      axios.post(`http://8.136.125.61/api/users/${user.accountId}/reset_password`)
           .then(response => {
-            console.log(response.data); // 调试使用，打印重置密码后的响应
-            this.newPassword = response.data.newPassword; // 假设API返回新密码
+            this.newPassword = response.data.newPassword || '';
             this.selectedUser = { ...user, password: this.newPassword };
+            this.showResetPasswordConfirm = false;
             this.showResetPassword = true;
           })
           .catch(error => {
             console.error('重置密码失败', error);
           });
     },
-
+    closeResetPasswordConfirm() {
+      this.showResetPasswordConfirm = false;
+    },
     closeResetPassword() {
       this.showResetPassword = false;
     },
-
     copyPassword() {
       const copyText = this.newPassword;
       navigator.clipboard.writeText(copyText).then(() => {
         alert('密码已复制到剪贴板');
       });
     },
-
-    confirmResetPassword() {
-      axios.post(`/api/users/${this.selectedUser.id}/reset_password`)
-          .then(response => {
-            console.log(response.data); // 调试使用，打印确认重置密码后的响应
-            const index = this.users.findIndex(u => u.id === this.selectedUser.id);
-            if (index !== -1) {
-              this.users[index].password = this.newPassword;
-              this.filteredUsers = [...this.users]; // 同步更新过滤后的用户列表
-            }
-            this.showResetPassword = false;
-          })
-          .catch(error => {
-            console.error('确认重置密码失败', error);
-          });
-    },
-
     editUser(user) {
       this.selectedUser = { ...user };
       this.showEditUser = true;
     },
-
     closeEditUser() {
       this.showEditUser = false;
     },
-
     confirmEditUser() {
-      axios.put(`/api/users/${this.selectedUser.id}`, this.selectedUser)
-          .then(response => {
-            console.log(response.data); // 调试使用，打印编辑后的用户信息
-            const index = this.users.findIndex(u => u.id === this.selectedUser.id);
+      axios.put(`http://8.136.125.61/api/users/${this.selectedUser.accountId}`, this.selectedUser)
+          .then(() => {
+            const index = this.users.findIndex(u => u.accountId === this.selectedUser.accountId);
             if (index !== -1) {
-              this.users.splice(index, 1, this.selectedUser); // 更新本地数据
-              this.filteredUsers = [...this.users]; // 同步更新过滤后的用户列表
+              this.users.splice(index, 1, this.selectedUser);
+              this.filteredUsers = [...this.users];
             }
             this.showEditUser = false;
           })
@@ -286,31 +254,26 @@ export default {
             console.error('修改用户信息失败', error);
           });
     },
-
     deleteUser(userId) {
-      axios.delete(`/api/users/${userId}`)
-          .then(response => {
-            console.log(response.data); // 调试使用，打印删除用户后的响应
-            this.users = this.users.filter(u => u.id !== userId);
-            this.filteredUsers = this.users; // 同步更新过滤后的用户列表
+      axios.delete(`http://8.136.125.61/api/users/${userId}`)
+          .then(() => {
+            this.users = this.users.filter(u => u.accountId !== userId);
+            this.filteredUsers = this.users;
           })
           .catch(error => {
             console.error('删除用户失败', error);
           });
     },
-
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
       }
     },
-
     nextPage() {
       if (this.currentPage < this.totalPages) {
         this.currentPage++;
       }
     },
-
     goToPage(page) {
       this.currentPage = page;
     }
@@ -324,20 +287,19 @@ export default {
   padding: 20px;
 }
 
-.search-bar {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.search-bar input,
-.search-bar select {
-  margin-right: 10px;
+.table-container {
+  width: 100%;
+  overflow-x: auto; /* 确保在小屏幕上可滚动 */
+  margin: 0; /* 去掉容器的外边距 */
+  padding: 0; /* 去掉容器的内边距 */
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
+  margin-bottom: 20px;
+  min-width: 600px; /* 设置表格最小宽度 */
+  table-layout: fixed; /* 固定表格布局 */
 }
 
 th,
@@ -345,21 +307,33 @@ td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: left;
-}
-
-th {
-  background-color: #f2f2f2;
+  box-sizing: border-box; /* 确保内边距不影响总宽度 */
 }
 
 .table-row {
-  height: 50px; /* 固定行高 */
+  height: 50px;
+  box-sizing: border-box; /* 确保行的内边距不影响布局 */
+}
+
+.no-data {
+  text-align: center;
+  padding: 20px;
+  color: #999;
 }
 
 .btn {
   padding: 5px 10px;
   margin: 2px;
-  border: none; /* 移除黑框 */
+  border: 1px solid #ddd;
+  border-radius: 4px;
   cursor: pointer;
+  background-color: #f8f9fa;
+  color: black;
+}
+
+.btn.small {
+  padding: 5px;
+  width: auto;
 }
 
 .btn.blue {
@@ -382,9 +356,16 @@ th {
   color: white;
 }
 
+.action-buttons {
+  display: flex;
+  gap: 1px; /* 调整按钮之间的间距 */
+  justify-content: flex-start; /* 按钮靠左对齐 */
+}
+
 .pagination {
   display: flex;
   justify-content: center;
+  align-items: center;
   margin-top: 20px;
 }
 
@@ -454,5 +435,9 @@ th {
 .reset-password-container input {
   flex: 1;
   margin-right: 10px;
+}
+
+.full-width {
+  width: 100%;
 }
 </style>
