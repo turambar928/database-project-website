@@ -3,8 +3,8 @@
     <h2>菜品管理</h2>
     <div class="search-bar">
       <label for="dish-name">名称 </label>
-      <input v-model="searchName" id="dish-name" placeholder="输入菜品名称">
-      
+      <input v-model="searchName" id="dish-name" placeholder="输入菜品名称" />
+
       <label for="dish-category">类别 </label>
       <select v-model="searchCategory" id="dish-category">
         <option value="">请选择</option>
@@ -13,7 +13,7 @@
         <option value="蛋糕">蛋糕</option>
         <!-- 更多类别选项 -->
       </select>
-      
+
       <button @click="searchDishes">搜索</button>
       <button @click="openAddDishForm">+</button>
     </div>
@@ -22,19 +22,19 @@
       <div class="dish-form-container">
         <div class="dish-form">
           <h3>{{ isEditing ? '编辑菜品' : '添加菜品' }}</h3>
-          
+
           <!-- 图片预览和上传 -->
           <div class="image-preview">
-            <img :src="imagePreviewUrl" alt="预览图片" v-if="imagePreviewUrl"/>
+            <img :src="imagePreviewUrl" alt="预览图片" v-if="imagePreviewUrl" />
             <button @click="triggerFileInput">修改图片</button>
             <input type="file" ref="fileInput" @change="handleFileChange" style="display: none;" />
           </div>
 
           <label for="dish-form-name">菜品名称</label>
-          <input v-model="form.name" id="dish-form-name" placeholder="输入菜品名称">
+          <input v-model="form.dishName" id="dish-form-name" placeholder="输入菜品名称" />
 
           <label for="dish-form-price">价格</label>
-          <input v-model="form.price" id="dish-form-price" placeholder="输入菜品价格">
+          <input v-model="form.price" id="dish-form-price" placeholder="输入菜品价格" />
 
           <label for="dish-form-category">类别</label>
           <select v-model="form.category" id="dish-form-category">
@@ -60,17 +60,17 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(ingredient, index) in form.recipe" :key="index">
+                <tr v-for="(ingredient, index) in form.formula" :key="index">
                   <td>
                     <select v-model="ingredient.IngredientId" @change="updateIngredientName(index)">
                       <option :value="ingredient.IngredientId">{{ ingredient.IngredientName }}</option>
                       <option v-for="recipe in availableRecipes" :key="recipe.IngredientId" :value="recipe.IngredientId">
-                        {{ recipe.IngredientName}}
+                        {{ recipe.IngredientName }}
                       </option>
                     </select>
                   </td>
                   <td>
-                    <input v-model="ingredient.account" placeholder="输入原料数量" />
+                    <input v-model="ingredient.amount" placeholder="输入原料数量" />
                   </td>
                   <td>
                     <button @click="removeIngredient(index)" class="delete-button">删除</button>
@@ -87,24 +87,24 @@
         </div>
       </div>
     </div>
-    
+
     <div class="dish-container">
-      <div v-for="dish in paginatedDishes" :key="dish.id" class="dish-item">
-        <img :src="dish.image" alt="Dish Image">
+      <div v-for="dish in paginatedDishes" :key="dish.dishId" class="dish-item">
+        <img :src="dish.image" alt="Dish Image" />
         <div class="dish-details">
-          <h3>{{ dish.name }}</h3>
+          <h3>{{ dish.dishName }}</h3>
           <p>类别: {{ dish.category }}</p>
           <p>配方:</p>
           <ul>
-            <li v-for="(ingredient, index) in dish.recipe" :key="index">
-              {{ ingredient.IngredientName }} - 数量: {{ ingredient.account }}
+            <li v-for="(ingredient, index) in dish.formula" :key="index">
+              {{ ingredient.IngredientName }} - 数量: {{ ingredient.amount }}
             </li>
           </ul>
         </div>
         <div class="dish-actions">
           <span class="dish-price">价格: {{ dish.price }}</span>
           <div class="action-buttons">
-            <button @click.stop="deleteDish(dish.id)">删除</button>
+            <button @click.stop="deleteDish(dish.dishId)">删除</button>
             <button @click.stop="openEditDishForm(dish)">修改</button>
           </div>
         </div>
@@ -124,7 +124,7 @@
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 
-axios.defaults.baseURL = 'https://apifoxmock.com/m1/4808550-4462943-default'; // 替换为实际的 Mock URL
+axios.defaults.baseURL = 'http://8.136.125.61'; // 替换为实际的 API URL
 
 export default {
   setup() {
@@ -132,7 +132,6 @@ export default {
     const searchCategory = ref('');
     const dishes = ref([]);
     const filteredDishes = ref([]);
-    const recipes = ref([]);
     const availableRecipes = ref([]);
     const currentPage = ref(1);
     const itemsPerPage = ref(10);
@@ -140,15 +139,14 @@ export default {
     const isEditing = ref(false);
     const imagePreviewUrl = ref('');
     const form = ref({
-      id: null,
-      name: '',
+      dishId: null,
+      dishName: '',
       category: '',
-      recipe: [],
+      formula: [],
       price: '',
       image: ''
     });
     const pageInput = ref(1);
-
     const fileInput = ref(null); // 使用 ref 来管理 file input 的引用
 
     const generateUniqueId = () => {
@@ -156,25 +154,31 @@ export default {
     };
 
     const fetchDishes = async () => {
-      try {
-        const response = await axios.get('/api/dishes/search');
-        if (response.data.success) {
-          dishes.value = Array.isArray(response.data.response) ? response.data.response : [];
-          filteredDishes.value = dishes.value;
-        }
-      } catch (error) {
-        console.error('获取菜品数据失败:', error);
-      }
-    };
+  try {
+    const response = await axios.get('/api/dishes/search');
+    if (response.data.success) {
+      dishes.value = Array.isArray(response.data.response) ? response.data.response : [];
+      filteredDishes.value = dishes.value;
+    } else {
+      console.error('API 请求成功，但返回的 success 为 false:', response.data.message);
+    }
+  } catch (error) {
+    console.error('获取菜品数据失败:', error.message);
+    console.error('请求配置:', error.config);
+    if (error.response) {
+      console.error('响应状态码:', error.response.status);
+      console.error('响应数据:', error.response.data);
+    }
+  }
+};
+
 
     const fetchRecipes = async () => {
       try {
         const response = await axios.get('/api/ingredients/search');
-        console.log('API Response:', response.data);
         if (response.data.success) {
           if (Array.isArray(response.data.data) && response.data.data.length > 0) {
             availableRecipes.value = response.data.data;
-            console.log('Available Recipes:', availableRecipes.value);
           } else {
             console.error('API 返回的 data 为空或不是数组:', response.data.data);
           }
@@ -188,24 +192,25 @@ export default {
     };
 
     const updateIngredientName = (index) => {
-      const selectedRecipe = recipes.value.find(recipe => recipe.id === form.value.recipe[index].IngredientId);
+      const selectedRecipe = availableRecipes.value.find(recipe => recipe.IngredientId === form.value.formula[index].IngredientId);
       if (selectedRecipe) {
-        form.value.recipe[index].IngredientName = selectedRecipe.name;
+        form.value.formula[index].IngredientName = selectedRecipe.IngredientName;
       }
     };
 
     const searchDishes = () => {
       filteredDishes.value = dishes.value.filter(dish => {
-        return (searchName.value === '' || dish.name.includes(searchName.value)) &&
+        return (searchName.value === '' || dish.dishName.includes(searchName.value)) &&
                (searchCategory.value === '' || dish.category === searchCategory.value);
       });
       currentPage.value = 1;
     };
 
     const goToPage = (page) => {
-      if (page >= 1 && page <= totalPages.value) {
-        currentPage.value = page;
-        pageInput.value = page;
+      const pageNum = Number(page);
+      if (pageNum >= 1 && pageNum <= totalPages.value) {
+        currentPage.value = pageNum;
+        pageInput.value = pageNum;
       }
     };
 
@@ -221,14 +226,14 @@ export default {
       form.value = { ...dish };
       imagePreviewUrl.value = form.value.image || '';
 
-      await fetchRecipes(); // 获取可用食材的API调用
+      await fetchRecipes();
 
-      if (Array.isArray(form.value.recipe)) {
-        form.value.recipe.forEach((ingredient, index) => {
+      if (Array.isArray(form.value.formula)) {
+        form.value.formula.forEach((ingredient, index) => {
           updateIngredientName(index);
         });
       } else {
-        console.warn('form.value.recipe 不是一个有效的数组:', form.value.recipe);
+        console.warn('form.value.formula 不是一个有效的数组:', form.value.formula);
       }
     };
 
@@ -252,7 +257,7 @@ export default {
 
     const saveDish = async () => {
       try {
-        if (!form.value.name || !form.value.category || !form.value.price || form.value.recipe.length === 0) {
+        if (!form.value.dishName || !form.value.category || !form.value.price || form.value.formula.length === 0) {
           alert('请填写所有必需的字段，包括菜品名称、类别、价格和至少一个配方。');
           return;
         }
@@ -266,7 +271,7 @@ export default {
           }
         }
 
-        form.value.id = generateUniqueId();
+        form.value.dishId = generateUniqueId();
         const response = await axios.post('/api/dishes', form.value);
         dishes.value.push(response.data);
         filteredDishes.value = dishes.value;
@@ -288,8 +293,8 @@ export default {
           }
         }
 
-        await axios.put(`/api/dishes/${form.value.id}`, form.value);
-        const index = dishes.value.findIndex(d => d.id === form.value.id);
+        await axios.put(`/api/dishes/${form.value.dishId}`, form.value);
+        const index = dishes.value.findIndex(d => d.dishId === form.value.dishId);
         if (index !== -1) {
           dishes.value.splice(index, 1, { ...form.value });
           filteredDishes.value = dishes.value;
@@ -308,10 +313,10 @@ export default {
 
     const resetForm = () => {
       form.value = {
-        id: null,
-        name: '',
+        dishId: null,
+        dishName: '',
         category: '',
-        recipe: [],
+        formula: [],
         price: '',
         image: ''
       };
@@ -319,20 +324,17 @@ export default {
     };
 
     const addIngredient = () => {
-      if (!Array.isArray(form.value.recipe)) {
-        form.value.recipe = [];
-      }
-      form.value.recipe.push({ IngredientId: '', IngredientName: '', account: '' });
+      form.value.formula.push({ IngredientId: '', IngredientName: '', amount: '' });
     };
 
     const removeIngredient = (index) => {
-      form.value.recipe.splice(index, 1);
+      form.value.formula.splice(index, 1);
     };
 
     const deleteDish = async (id) => {
       try {
         await axios.delete(`/api/dishes/${id}`);
-        dishes.value = dishes.value.filter(dish => dish.id !== id);
+        dishes.value = dishes.value.filter(dish => dish.dishId !== id);
         filteredDishes.value = dishes.value;
         goToPage(currentPage.value);
       } catch (error) {
@@ -353,8 +355,7 @@ export default {
 
     const paginatedDishes = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage.value;
-      const end = start + itemsPerPage.value;
-      return filteredDishes.value.slice(start, end);
+      return filteredDishes.value.slice(start, start + itemsPerPage.value);
     });
 
     const totalPages = computed(() => {
@@ -370,7 +371,6 @@ export default {
       searchCategory,
       dishes,
       filteredDishes,
-      recipes,
       availableRecipes,
       currentPage,
       itemsPerPage,

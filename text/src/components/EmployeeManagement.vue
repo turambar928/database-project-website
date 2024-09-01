@@ -281,20 +281,29 @@ export default {
     };
 
     const batchPaySalary = async () => {
-      try {
-        await Promise.all(selectedEmployees.value.map(async (id) => {
-          const employee = employees.value.find(emp => emp.employeeId === id);
-          if (employee) {
-            employee.paid = 1;
-            await axios.put(`/api/employee/${id}`, employee);
-            console.log(`Paid salary to ${employee.employeeName}`);
-          }
-        }));
-        closeBatchModal();
-      } catch (error) {
-        console.error('Error in batch pay salary:', error);
-      }
+  try {
+    const salaryData = {
+      salaries: selectedEmployees.value.map(id => {
+        const employee = employees.value.find(emp => emp.employeeId === id);
+        return { employeeId: id, amount: employee.salary };
+      })
     };
+
+    const response = await axios.post('/api/employee/paySalary', salaryData);
+
+    if (response.status === 200) {
+      alert('工资发放成功');
+      // 更新职工信息或界面
+      fetchEmployees(); // 或者根据你的逻辑进行更新
+      closeBatchModal();
+    } else {
+      console.error('工资发放失败:', response.data.message);
+    }
+  } catch (error) {
+    console.error('Error in batch pay salary:', error);
+  }
+};
+
 
     const resetForm = () => {
       employeeForm.employeeName = '';
