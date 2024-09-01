@@ -120,7 +120,6 @@
   </div>
 </template>
 
-
 <script>
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
@@ -150,7 +149,7 @@ export default {
     });
     const pageInput = ref(1);
 
-    const fileInput = ref(null);  // 使用 ref 来管理 file input 的引用
+    const fileInput = ref(null); // 使用 ref 来管理 file input 的引用
 
     const generateUniqueId = () => {
       return `dish-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
@@ -169,29 +168,24 @@ export default {
     };
 
     const fetchRecipes = async () => {
-  try {
-    const response = await axios.get('/api/ingredients/search');
-
-    // 输出 API 响应的整个数据结构，帮助调试
-    console.log('API Response:', response.data);
-
-    // 检查 success 是否为 true
-    if (response.data.success) {
-      // 确保 data 是数组并且有内容
-      if (Array.isArray(response.data.data) && response.data.data.length > 0) {
-        availableRecipes.value = response.data.data;
-        console.log('Available Recipes:', availableRecipes.value);
-      } else {
-        console.error('API 返回的 data 为空或不是数组:', response.data.data);
+      try {
+        const response = await axios.get('/api/ingredients/search');
+        console.log('API Response:', response.data);
+        if (response.data.success) {
+          if (Array.isArray(response.data.data) && response.data.data.length > 0) {
+            availableRecipes.value = response.data.data;
+            console.log('Available Recipes:', availableRecipes.value);
+          } else {
+            console.error('API 返回的 data 为空或不是数组:', response.data.data);
+          }
+        } else {
+          console.error('API 请求成功，但返回的 success 为 false:', response.data.message);
+          alert('错误: ' + response.data.message);
+        }
+      } catch (error) {
+        console.error('获取配方数据失败:', error);
       }
-    } else {
-      console.error('API 请求成功，但返回的 success 为 false:', response.data.message);
-      alert('错误: ' + response.data.message);
-    }
-  } catch (error) {
-    console.error('获取配方数据失败:', error);
-  }
-};
+    };
 
     const updateIngredientName = (index) => {
       const selectedRecipe = recipes.value.find(recipe => recipe.id === form.value.recipe[index].IngredientId);
@@ -222,49 +216,78 @@ export default {
     };
 
     const openEditDishForm = async (dish) => {
-  isEditing.value = true;
-  showForm.value = true;
-  form.value = { ...dish };
-  imagePreviewUrl.value = form.value.image || '';
+      isEditing.value = true;
+      showForm.value = true;
+      form.value = { ...dish };
+      imagePreviewUrl.value = form.value.image || '';
 
-  await fetchRecipes(); // 获取可用食材的API调用
+      await fetchRecipes(); // 获取可用食材的API调用
 
-  // 确保 recipe 存在且为数组
-  if (Array.isArray(form.value.recipe)) {
-    form.value.recipe.forEach((ingredient, index) => {
-      updateIngredientName(index);
-    });
-  } else {
-    console.warn('form.value.recipe 不是一个有效的数组:', form.value.recipe);
-  }
-};
+      if (Array.isArray(form.value.recipe)) {
+        form.value.recipe.forEach((ingredient, index) => {
+          updateIngredientName(index);
+        });
+      } else {
+        console.warn('form.value.recipe 不是一个有效的数组:', form.value.recipe);
+      }
+    };
 
+    const uploadImage = async (file) => {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      try {
+        const response = await axios.post('/api/image', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        return response.data.url; // 假设服务器返回图片URL
+      } catch (error) {
+        console.error('上传图片失败:', error);
+        alert('上传图片失败，请重试。');
+        return null;
+      }
+    };
 
     const saveDish = async () => {
-  try {
-    // 表单验证：检查必填字段是否为空
-    if (!form.value.name || !form.value.category || !form.value.price || form.value.recipe.length === 0) {
-      alert('请填写所有必需的字段，包括菜品名称、类别、价格和至少一个配方。');
-      return; // 阻止保存操作
-    }
+      try {
+        if (!form.value.name || !form.value.category || !form.value.price || form.value.recipe.length === 0) {
+          alert('请填写所有必需的字段，包括菜品名称、类别、价格和至少一个配方。');
+          return;
+        }
 
-    // 如果所有字段都已填写，继续保存菜品
-    form.value.id = generateUniqueId();
-    form.value.image = imagePreviewUrl.value;
-    const response = await axios.post('/api/dishes', form.value);
-    dishes.value.push(response.data);
-    filteredDishes.value = dishes.value;
-    cancelForm();
-    goToPage(currentPage.value);
-  } catch (error) {
-    console.error('保存菜品失败:', error);
-  }
-};
+        if (fileInput.value.files[0]) {
+          const uploadedImageUrl = await uploadImage(fileInput.value.files[0]);
+          if (uploadedImageUrl) {
+            form.value.image = uploadedImageUrl;
+          } else {
+            return;
+          }
+        }
 
+        form.value.id = generateUniqueId();
+        const response = await axios.post('/api/dishes', form.value);
+        dishes.value.push(response.data);
+        filteredDishes.value = dishes.value;
+        cancelForm();
+        goToPage(currentPage.value);
+      } catch (error) {
+        console.error('保存菜品失败:', error);
+      }
+    };
 
     const updateDish = async () => {
       try {
-        form.value.image = imagePreviewUrl.value;
+        if (fileInput.value.files[0]) {
+          const updatedImageUrl = await uploadImage(fileInput.value.files[0]);
+          if (updatedImageUrl) {
+            form.value.image = updatedImageUrl;
+          } else {
+            return;
+          }
+        }
+
         await axios.put(`/api/dishes/${form.value.id}`, form.value);
         const index = dishes.value.findIndex(d => d.id === form.value.id);
         if (index !== -1) {
@@ -297,8 +320,7 @@ export default {
 
     const addIngredient = () => {
       if (!Array.isArray(form.value.recipe)) {
-    // 如果 recipe 未初始化或不是数组，则初始化为一个空数组
-          form.value.recipe = [];
+        form.value.recipe = [];
       }
       form.value.recipe.push({ IngredientId: '', IngredientName: '', account: '' });
     };
@@ -326,7 +348,7 @@ export default {
     };
 
     const triggerFileInput = () => {
-      fileInput.value.click();  // 使用 ref 的方法调用 input 的 click 事件
+      fileInput.value.click();
     };
 
     const paginatedDishes = computed(() => {
@@ -372,7 +394,7 @@ export default {
       deleteDish,
       handleFileChange,
       triggerFileInput,
-      fileInput,  // 确保 ref 变量正确返回
+      fileInput,
       paginatedDishes,
       totalPages,
       pageInput
