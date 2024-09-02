@@ -227,7 +227,7 @@ export default {
   methods: {
     async fetchWarehouseData() {
       try {
-        const response = await axios.get('http://8.136.125.61/api/repo/search/', {
+        const response = await axios.get('http://8.136.125.61/api/ingredients/search', {
           headers: {
             'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAwMiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTEyMjMxNywiZXhwIjoyMDg1MTIyMzE3LCJpYXQiOjE3MjUxMjIzMTcsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.iuxCr68lU34uW5KsZj2c15bwTFsdiguorpWyo_6quP0'
           }
@@ -337,8 +337,14 @@ export default {
     },
 
     async deleteItem(itemId) {
+
+      if (!itemId) {
+        console.error('ID无效');
+        return;
+      }
+
       try {
-        const response = await axios.delete(`http://8.136.125.61/api/repo/delete`, {
+        const response = await axios.delete(`http://8.136.125.61/api/ingredients/delete/${itemId}`, {
           headers: {
             'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAwMiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTEyMjMxNywiZXhwIjoyMDg1MTIyMzE3LCJpYXQiOjE3MjUxMjIzMTcsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.iuxCr68lU34uW5KsZj2c15bwTFsdiguorpWyo_6quP0'
           }
@@ -402,6 +408,8 @@ export default {
     addItem() {
       this.showAddItem = true;
     },
+
+    
 
     closeAddItem() {
       this.showAddItem = false;
