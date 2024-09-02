@@ -270,8 +270,9 @@ export default {
     },
 
     async confirmAddItem() {
+      // 将前端输入的数据映射到API请求体所需的字段名
       const requestPayload = {
-        name: this.newItem.name,
+        IngredientName: this.newItem.name, // 修改字段名为后端要求的IngredientName
         quantity: this.newItem.quantity,
         grade: this.newItem.grade,
         expiry: this.newItem.expiry
@@ -298,6 +299,7 @@ export default {
         console.error('请求失败', error.response ? error.response.data : error.message);
       }
     },
+
 
     resetNewItem() {
       this.newItem = { name: '', quantity: 0, grade: '1', expiry: '2024-09-11' };
