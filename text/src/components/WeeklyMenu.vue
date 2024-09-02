@@ -56,6 +56,10 @@
 <script>
 import axios from 'axios';
 
+// 配置全局的axios默认值
+axios.defaults.baseURL = 'http://8.136.125.61/api'; // 设置API的基础URL
+axios.defaults.headers.common['Authorization'] = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAwMiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTEyMjMxNywiZXhwIjoyMDg1MTIyMzE3LCJpYXQiOjE3MjUxMjIzMTcsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.iuxCr68lU34uW5KsZj2c15bwTFsdiguorpWyo_6quP0'; // 设置全局的Authorization头部
+
 export default {
   data() {
     return {
@@ -91,68 +95,142 @@ export default {
     },
   },
   methods: {
-  fetchWeeklyMenu() {
-    const selectedDate = new Date(this.menuDate);
-    const weekStartDate = this.getWeekStartDate(selectedDate);
-    axios.get(`/api/menu?date=${weekStartDate.toISOString().split('T')[0]}`)
-      .then(response => {
-        this.weeklyMenu = response.data; // 假设API返回的格式与weeklyMenu相同
-      })
-      .catch(error => {
-        console.error('Error fetching menu:', error);
-      });
-  },
-  getWeekStartDate(date) {
-  const dayOfWeek = date.getDay(); // 获取星期几，0（周日）到 6（周六）
-  const startOfWeek = new Date(date);
-  startOfWeek.setHours(0, 0, 0, 0); // 将时间部分设为 00:00:00.000
-  const diff = (dayOfWeek === 0 ? 6 : dayOfWeek - 1); // 计算到周一的差距
-  startOfWeek.setDate(date.getDate() - diff); // 得到周一的日期
-  return startOfWeek;
-},
-  openAddDishDialog(day) {
-    if (this.status === '可编辑') {
-      this.currentDay = day;
-      this.showDialog = true;
-    }
-  },
-  closeAddDishDialog() {
-    this.showDialog = false;
-  },
-  addDish() {
-    if (this.newDish.name && this.newDish.category) {
-      axios.post('/api/menu/add', {
-        date: this.menuDate,
-        day: this.currentDay,
-        dish: {
-          category: this.newDish.category,
-          name: this.newDish.name
-        }
-      }).then(response => {
-        this.weeklyMenu[this.currentDay].push(response.data.dish);
-        this.newDish = { category: "", name: "" };
-        this.closeAddDishDialog();
-      }).catch(error => {
-        console.error('Error adding dish:', error);
-      });
-    } else {
-      alert("请填写完整的菜品信息");
-    }
-  },
-  removeDish(day, id) {
-  if (this.status === '可编辑') {
-    axios.delete(`/api/menu/${id}`)
-      .then(response => {
-        // 假设后端返回更新后的当天菜品数组
-        this.weeklyMenu[day] = response.data.updatedDishes;
-      })
-      .catch(error => {
-        console.error('Error removing dish:', error);
-      });
-  }
-}
 
-},
+    fetchWeeklyMenu() {
+      const selectedDate = new Date(this.menuDate);
+      const url = `http://8.136.125.61/api/menu?date=${selectedDate.toISOString().split('T')[0]}`;
+
+      axios.get(url)
+          .then(response => {
+            console.log('API响应数据:', response.data); // 打印完整的响应数据
+
+            // 检查 response.data 是否包含预期的数据结构
+            if (response.data) {
+              console.log('获取菜单成功:', response.data); // 打印成功信息
+
+              const menuData = response.data; // 获取API返回的数据
+
+              // 将API返回的数据映射到weeklyMenu
+              this.weeklyMenu = {
+                "星期一": menuData.mon || [], // 如果不存在则设置为空数组
+                "星期二": menuData.tue || [],
+                "星期三": menuData.wed || [],
+                "星期四": menuData.thu || [],
+                "星期五": menuData.fri || [],
+                "星期六": menuData.sat || [],
+                "星期日": menuData.sun || []
+              };
+            } else {
+              console.error('获取菜单失败: 数据为空或格式不正确');
+              this.clearWeeklyMenu(); // 清除菜单显示
+            }
+          })
+          .catch(error => {
+            const errorMessage = error?.response?.data?.message || '未知错误';
+            if (error.response && error.response.status === 400) {
+              console.error('请求格式错误或请求日期超出范围:', errorMessage);
+            } else {
+              console.error('Error fetching menu:', errorMessage);
+            }
+            this.clearWeeklyMenu(); // 发生错误时清空菜单显示
+          });
+    },
+
+
+
+
+    clearWeeklyMenu() {
+      // 清除每周菜单
+      this.weeklyMenu = {
+        "星期一": [],
+        "星期二": [],
+        "星期三": [],
+        "星期四": [],
+        "星期五": [],
+        "星期六": [],
+        "星期日": [],
+      };
+    },
+
+
+
+    getWeekStartDate(date) {
+      const dayOfWeek = date.getDay(); // 获取星期几，0（周日）到 6（周六）
+      const startOfWeek = new Date(date);
+      startOfWeek.setHours(0, 0, 0, 0); // 将时间部分设为 00:00:00.000
+      const diff = (dayOfWeek === 0 ? 6 : dayOfWeek - 1); // 计算到周一的差距
+      startOfWeek.setDate(date.getDate() - diff); // 得到周一的日期
+      return startOfWeek;
+    },
+    openAddDishDialog(day) {
+      if (this.status === '可编辑') {
+        this.currentDay = day;
+        this.showDialog = true;
+      }
+    },
+    closeAddDishDialog() {
+      this.showDialog = false;
+    },
+
+
+
+    addDish() {
+      if (this.newDish.name && this.newDish.category) {
+        axios.post('http://8.136.125.61/api/menu/add', {
+          date: this.menuDate, // 传递用户选择的日期
+          day: this.currentDay, // 传递选定的星期几
+          dish: {
+            category: this.newDish.category,
+            name: this.newDish.name
+          }
+        }).then(response => {
+          if (response.data.success) {
+            console.log('添加菜品成功:', response.data);
+            this.weeklyMenu[this.currentDay].push(response.data.dish); // 假设后端返回新添加的菜品信息
+            this.newDish = { category: "", name: "" }; // 重置新菜品输入
+            this.closeAddDishDialog();
+          } else {
+            console.error('添加菜品失败:', response.data.message);
+          }
+        }).catch(error => {
+          console.error('Error adding dish:', error);
+        });
+      } else {
+        alert("请填写完整的菜品信息");
+      }
+    },
+
+
+
+    removeDish(day, id) {
+      if (this.status === '可编辑') {
+        axios.delete('/menu/delete', {
+          data: {
+            request: {
+              dishId: id.toString()  // 确保 dishId 是字符串
+            }
+          }
+        })
+            .then(response => {
+              if (response.data.success) {
+                this.weeklyMenu[day] = response.data.updatedDishes; // 假设后端返回更新后的当天菜品数组
+              } else {
+                console.error('删除菜品失败:', response.data.message);
+              }
+            })
+            .catch(error => {
+              console.error('Error removing dish:', error);
+            });
+      }
+    }
+
+
+
+
+  },
+
+
+
   mounted() {
     this.fetchWeeklyMenu(); // 组件加载时获取当前周的菜单
   },
