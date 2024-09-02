@@ -4,10 +4,11 @@
     <div class="search-bar">
       <input type="text" placeholder="昵称" v-model="searchName" />
       <select v-model="searchIdentity">
-        <option value="">身份</option>
-        <option value="普通用户">普通用户</option>
-        <option value="志愿者">志愿者</option>
-        <option value="老人">老人</option>
+        <option value="">identity</option>
+        <option value="user">user</option>
+        <option value="volunteer">volunteer</option>
+        <option value="elder">elder</option>
+        <option value="admin">admin</option>
       </select>
       <button @click="search" class="btn blue">搜索</button>
     </div>
@@ -25,19 +26,24 @@
         </tr>
         </thead>
         <tbody>
-        <tr v-for="(user, index) in paginatedUsersWithPadding" :key="index" class="table-row">
-          <td>{{ user ? user.accountId : '' }}</td>
-          <td>{{ user ? user.accountName : '' }}</td>
-          <td>{{ user ? user.phoneNum : '' }}</td>
-          <td>{{ user ? user.identity : '' }}</td>
-          <td>{{ user ? user.gender : '' }}</td>
+        <!-- 使用 v-if 检查是否有用户数据 -->
+        <tr v-if="filteredUsers.length === 0">
+          <td colspan="7" class="no-data">没有找到匹配的用户</td>
+        </tr>
+        <!-- 循环用户数据 -->
+        <tr v-for="(user, index) in paginatedUsers" :key="index" class="table-row">
+          <td>{{ user.accountId }}</td>
+          <td>{{ user.accountName }}</td>
+          <td>{{ user.phoneNum }}</td>
+          <td>{{ user.identity }}</td>
+          <td>{{ user.gender }}</td>
           <td>
-            <button v-if="user" class="btn small blue" @click="viewDetail(user)">查看</button>
+            <button class="btn small blue" @click="viewDetail(user)">查看</button>
           </td>
           <td class="action-buttons">
-            <button v-if="user" class="btn small yellow" @click="confirmResetPassword(user)">重置密码</button>
-            <button v-if="user" class="btn small blue" @click="editUser(user)">修改</button>
-            <button v-if="user" class="btn small red" @click="deleteUser(user.accountId)">删除</button>
+            <button class="btn small yellow" @click="confirmResetPassword(user)">重置密码</button>
+            <button class="btn small blue" @click="editUser(user)">修改</button>
+            <button class="btn small red" @click="deleteUser(user.accountId)">删除</button>
           </td>
         </tr>
         </tbody>
@@ -54,11 +60,10 @@
       <div class="modal-content">
         <span class="close" @click="closeDetail">&times;</span>
         <h3>用户信息</h3>
-        <p><strong>ID：</strong> {{ selectedUser.accountId }}</p>
-        <p><strong>昵称：</strong> {{ selectedUser.accountName }}</p>
-        <p><strong>手机号：</strong> {{ selectedUser.phoneNum }}</p>
-        <p><strong>性别：</strong> {{ selectedUser.gender }}</p>
-        <p><strong>身份：</strong> {{ selectedUser.identity }}</p>
+        <p><strong>姓名：</strong> {{ selectedUser.name || '空' }}</p>
+        <p><strong>身份证号：</strong> {{ selectedUser.idNumber || '空' }}</p>
+        <p><strong>生日：</strong> {{ selectedUser.birthday || '空' }}</p>
+        <p><strong>地址：</strong> {{ selectedUser.address || '空' }}</p>
       </div>
     </div>
 
@@ -134,7 +139,7 @@ export default {
       users: [],
       filteredUsers: [],
       currentPage: 1,
-      itemsPerPage: 10,  // 每页10条记录
+      itemsPerPage: 10, // 每页10条记录
       showDetail: false,
       showResetPasswordConfirm: false,
       showResetPassword: false,
@@ -151,11 +156,6 @@ export default {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
       return this.filteredUsers.slice(start, end);
-    },
-    paginatedUsersWithPadding() {
-      const users = this.paginatedUsers;
-      const paddingCount = this.itemsPerPage - users.length;
-      return users.concat(Array(paddingCount).fill(null)); // 填充空白行
     }
   },
   mounted() {
@@ -163,36 +163,53 @@ export default {
   },
   methods: {
     fetchUsers() {
-      axios.get('http://8.136.125.61/api/account/getAllAccount')
-          .then(response => {
-            this.users = response.data || [];
+      axios
+          .get('http://8.136.125.61/api/users/search')
+          .then((response) => {
+            this.users = response.data.response || [];
             this.filteredUsers = this.users;
           })
-          .catch(error => {
+          .catch((error) => {
             console.error('获取用户列表失败', error);
           });
     },
     search() {
-      axios.get('http://8.136.125.61/api/account/getAllAccount', {
-        params: {
-          nickname: this.searchName,
-          identity: this.searchIdentity
-        }
-      })
-          .then(response => {
-            this.filteredUsers = response.data || [];
-            this.currentPage = 1;
+
+      axios
+          .get('http://8.136.125.61/api/users/search', {
+            params: {
+              accountName: this.searchName || undefined,
+              identity: this.searchIdentity || undefined,
+            },
           })
-          .catch(error => {
+          .then((response) => {
+            if (response.data.success) {
+              this.filteredUsers = response.data.response.map(user => ({
+                ...user,
+                gender: user.gender || '未知', // 处理 gender 可能为 null 的情况
+              }));
+              this.currentPage = 1;
+            } else {
+              console.error('搜索用户失败：', response.data.msg);
+              this.filteredUsers = [];
+            }
+          })
+          .catch((error) => {
             console.error('搜索用户失败', error);
           });
     },
     viewDetail(user) {
-      if (!user) return;  // 确保用户存在
+      if (!user) return; // 确保用户存在
       axios.get(`http://8.136.125.61/api/users/${user.accountId}`)
           .then(response => {
             if (response.data.success) {
-              this.selectedUser = response.data.response[0];
+              const userData = response.data.response[0];
+              this.selectedUser = {
+                name: userData.name || '空',
+                idNumber: userData.idNumber || '空',
+                birthday: userData.birthday || '空',
+                address: userData.address || '空'
+              };
               this.showDetail = true;
             } else {
               console.error('获取用户详细信息失败', response.data.msg);
@@ -210,9 +227,9 @@ export default {
       this.showResetPasswordConfirm = true;
     },
     resetPassword(user) {
-      axios.post(`http://8.136.125.61/api/users/${user.accountId}/reset_password`)
+      axios.post(`http://8.136.125.61/api/users/resetpsd/${user.accountId}`)
           .then(response => {
-            this.newPassword = response.data.newPassword || '';
+            this.newPassword = response.data.password || '';  // 确认 'password' 是返回的新密码字段
             this.selectedUser = { ...user, password: this.newPassword };
             this.showResetPasswordConfirm = false;
             this.showResetPassword = true;
@@ -289,11 +306,11 @@ export default {
 
 .table-container {
   width: 100%;
-  overflow-x: auto; /* 确保在小屏幕上可滚动 */
-  margin: 0; /* 去掉容器的外边距 */
-  padding: 0; /* 去掉容器的内边距 */
+  overflow-x: auto;
+  margin: 0;
+  padding: 0;
+  min-height: 500px;  /* 根据需要调整，确保即使数据少时也有足够的空间 */
 }
-
 table {
   width: 100%;
   border-collapse: collapse;
@@ -367,8 +384,8 @@ td {
   justify-content: center;
   align-items: center;
   margin-top: 20px;
+  min-height: 50px;  /* 设置一个最小高度 */
 }
-
 .pagination button,
 .pagination span {
   margin: 0 5px;
