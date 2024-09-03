@@ -244,7 +244,7 @@ export default {
           closeModal();
           totalPages.value = Math.ceil(employees.value.length / itemsPerPage);
           currentPage.value = totalPages.value;
-          window.location.href = 'URL1';
+          fetchEmployees();
         }
       } catch (error) {
         if (error.response && error.response.status === 400) {
