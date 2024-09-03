@@ -103,14 +103,19 @@
                   <th>ID</th>
                   <th>姓名</th>
                   <th>工资</th>
+                  <th>本月是否已发工资</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="employee in employees" :key="employee.employeeId">
-                  <td><input type="checkbox" v-model="selectedEmployees" :value="employee.employeeId" /></td>
+                  <td><input v-if="!employee.isPaidThisMonth" type="checkbox" v-model="selectedEmployees" :value="employee.employeeId" /></td>
                   <td>{{ employee.employeeId }}</td>
                   <td>{{ employee.employeeName }}</td>
                   <td>{{ employee.salary }}</td>
+                  <td>
+                     <span v-if="employee.isPaidThisMonth">已发放</span>
+                     <span v-else>未发放</span>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -249,7 +254,6 @@ export default {
       } catch (error) {
         if (error.response && error.response.status === 400) {
           console.error('Employee ID already exists');
-          window.location.href = 'URL2';
         } else {
           console.error('Error adding employee:', error);
         }
@@ -269,40 +273,54 @@ export default {
 
     const deleteEmployee = async (id) => {
       try {
-        await axios.delete(`/api/employee/${id}`);
+        const response= await axios.delete(`/api/employee/${id}`,{
+          headers: {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw' // 添加Authorization头部
+          }
+        });
+        // 在收到响应后，打印服务器返回的响应数据
+        console.log('删除请求成功，服务器响应:', response.data);
+        
         employees.value = employees.value.filter(employee => employee.employeeId !== id);
         totalPages.value = Math.ceil(employees.value.length / itemsPerPage);
+        fetchEmployees();
         if (currentPage.value > totalPages.value) {
           currentPage.value = totalPages.value;
         }
       } catch (error) {
-        console.error('Error deleting employee:', error);
+        console.error('删除职工失败:', error);
       }
     };
 
     const batchPaySalary = async () => {
   try {
-    const salaryData = {
-      salaries: selectedEmployees.value.map(id => {
-        const employee = employees.value.find(emp => emp.employeeId === id);
-        return { employeeId: id, amount: employee.salary };
-      })
-    };
-
-    const response = await axios.post('/api/employee/paySalary', salaryData);
+    const employeeIds = selectedEmployees.value; // 获取员工ID列表，确保它是一个字符串数组
+    console.log('所有员工的isPaidThisMonth属性:');
+    employees.value.forEach(employee => {
+      console.log(`员工ID: ${employee.employeeId}, isPaidThisMonth: ${employee.isPaidThisMonth}`);
+    });
+    const response = await axios.post('/api/employee/payWage', employeeIds, {
+      headers: {
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
+      }
+    });
 
     if (response.status === 200) {
       alert('工资发放成功');
-      // 更新职工信息或界面
-      fetchEmployees(); // 或者根据你的逻辑进行更新
+      fetchEmployees(); // 更新职工信息或界面
       closeBatchModal();
     } else {
       console.error('工资发放失败:', response.data.message);
     }
+    fetchEmployees();
   } catch (error) {
-    console.error('Error in batch pay salary:', error);
+    console.error('批量发工资失败:', error.message);
+    if (error.response) {
+      console.error('响应数据:', error.response.data);
+    }
   }
 };
+
 
 
     const resetForm = () => {
