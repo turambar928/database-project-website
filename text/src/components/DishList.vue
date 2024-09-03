@@ -344,7 +344,15 @@ const saveDish = async () => {
         return; // 如果上传失败，退出函数
       }
     }
-
+// 根据选中的 cateName 找到对应的 cateId
+   const selectedCategory = categories.value.find(category => category.cateName === form.value.category);
+    if (selectedCategory) {
+      form.value.cateId = selectedCategory.cateId; // 更新表单中的 cateId
+    } else {
+      alert('所选类别无效，请重新选择。');
+      return; // 如果未找到匹配的类别，退出函数
+    }
+    
     const updateData = {
       dishId: form.value.dishId, // 使用已有的 dishId
       Name: form.value.dishName,
@@ -354,19 +362,19 @@ const saveDish = async () => {
       formula: form.value.formula.map(item => ({
         ingredientId: item.ingredientId,
         ingredientName: item.ingredientName,
-        amount: parseFloat(parseFloat(item.amount).toFixed(2))
+        amount: item.amount
       }))
     };
-
+    console.log('更新后的数据：',updateData);
     const response = await axios.put('/api/dish/updateDish', updateData);
-
+    console.log('返回的数据：',response.data.dish);
     if (response.data.success) {
       const index = dishes.value.findIndex(d => d.dishId === form.value.dishId);
       if (index !== -1) {
         dishes.value.splice(index, 1, { ...form.value });
         filteredDishes.value = dishes.value;
       }
-
+      alert("更新菜品成功");
       cancelForm();
       goToPage(currentPage.value);
     } else {
@@ -409,7 +417,11 @@ const saveDish = async () => {
     console.log('即将删除的菜品ID:', id);
 
     // 发送删除请求
-    const response = await axios.delete(`/api/dishes/${id}`);
+    const response = await axios.delete(`/api/dishes/${id}`,{
+      headers: {
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw' // 添加Authorization头部
+      }
+    });
     
     // 在收到响应后，打印服务器返回的响应数据
     console.log('删除请求成功，服务器响应:', response.data);
