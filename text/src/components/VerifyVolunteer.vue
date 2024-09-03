@@ -15,9 +15,9 @@
         <tr v-for="application in applications" :key="application.applicationId">
           <td>{{ application.applicationId }}</td>
           <td>{{ application.accountId }}</td>
-          <td>{{ application.applicationTime }}</td>
+          <td>{{ application.applicationDate }}</td>
           <td>
-            <button @click="viewApplication(application)">查看详情</button>
+            <button @click="viewApplication(application.applicationId)">查看详情</button>
           </td>
           <td>
             <button @click="openApproveDialog(application)">审核</button>
@@ -30,10 +30,10 @@
       <h2>申请详情</h2>
       <p>姓名: {{ selectedApplication.name }}</p>
       <p>性别: {{ selectedApplication.gender }}</p>
-      <p>出生日期: {{ selectedApplication.birthdate }}</p>
-      <p>手机号: {{ selectedApplication.phone }}</p>
-      <p>身份证号: {{ selectedApplication.idNumber }}</p>
-      <p>申请理由: {{ selectedApplication.reason }}</p>
+      <p>出生日期: {{ selectedApplication.birthDate }}</p>
+      <p>手机号: {{ selectedApplication.phoneNum }}</p>
+      <p>身份证号: {{ selectedApplication.idCard }}</p>
+      <p>申请理由: {{ selectedApplication.selfStatement }}</p>
       <button @click="closeDetails">关闭</button>
     </div>
 
@@ -54,60 +54,92 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
-      applications: [
-        {
-          applicationId: '2024010100002',
-          accountId: '12345',
-          applicationTime: '2024-01-01 13:30:31',
-          name: '张三',
-          gender: '男',
-          birthdate: '1999-03-13',
-          phone: '12345678901',
-          idNumber: 'XXXXXXXXXXXXXXXXXXXXXXX',
-          reason: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-        },
-        {
-          applicationId: '2024010100003',
-          accountId: '22345',
-          applicationTime: '2024-01-01 13:32:31',
-          name: '李四',
-          gender: '女',
-          birthdate: '1995-05-20',
-          phone: '09876543210',
-          idNumber: 'XXXXXXXXXXXXXXXXXXXXXXX',
-          reason: 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-        }
-      ],
+      applications: [],
       selectedApplication: null,
       showApproveDialog: false,
       approvalReason: '',
     };
   },
+  created() {
+    console.log('组件已创建，正在获取申请列表...');
+    this.fetchApplications();
+    console.log('当前申请数据:', this.applications);
+  },
   methods: {
-    viewApplication(application) {
-      this.selectedApplication = application;
+    async fetchApplications() {
+  try {
+    console.log('正在从API获取所有申请数据...');
+    const response = await axios.get('http://8.136.125.61/api/Volunteer/getAllApply',{
+      headers: {
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
+      }
+    });
+    console.log('API响应数据:', response); // 输出完整的响应
+    this.applications = response.data.response;
+    console.log('成功获取到申请数据:', this.applications);
+  } catch (error) {
+    console.error('获取申请数据时出错:', error);
+  }
+},
+    async viewApplication(applicationId) {
+      try {
+        console.log(`正在获取申请ID为 ${applicationId} 的详情...`);
+        const response = await axios.get(`http://8.136.125.61/api/Volunteer/applyInfo/${applicationId}`,{
+          headers: {
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
+      }
+        });
+        this.selectedApplication = response.data.response;
+        console.log('成功获取到申请详情:', this.selectedApplication);
+      } catch (error) {
+        console.error('获取申请详情时出错:', error);
+      }
     },
     openApproveDialog(application) {
+      console.log('打开审核对话框，当前申请:', application);
       this.selectedApplication = application;
       this.showApproveDialog = true;
     },
     closeDetails() {
+      console.log('关闭详情视图');
       this.selectedApplication = null;
     },
     closeApproveDialog() {
+      console.log('关闭审核对话框');
       this.showApproveDialog = false;
       this.approvalReason = '';
     },
     approveApplication(status) {
+      console.log(`审核操作: 申请ID: ${this.selectedApplication.applicationId} 状态: ${status} 理由: ${this.approvalReason}`);
       alert(`申请ID: ${this.selectedApplication.applicationId} 审核状态: ${status} 理由: ${this.approvalReason}`);
       this.closeApproveDialog();
+    },
+    async reviewApplication(applicationId, status, reason) {
+      try {
+        console.log(`正在审核申请ID为 ${applicationId} 的数据...`);
+        const response = await axios.post(`http://8.136.125.61/api/Volunteer/review/${applicationId}`, {
+          reason: reason,
+          status: status
+        });
+        console.log('审核请求成功:', response.data);
+
+        // 根据需要，可以在审核成功后刷新申请列表或做其他处理
+        alert(`审核成功: 申请ID: ${applicationId} 状态: ${status}`);
+        this.closeApproveDialog();
+      } catch (error) {
+        console.error('审核请求时出错:', error);
+        alert('审核失败，请重试。');
+      }
     }
   }
 };
 </script>
+
 
 <style scoped>
 table {
