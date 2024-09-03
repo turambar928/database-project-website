@@ -4,11 +4,10 @@
     <div class="search-bar">
       <input type="text" placeholder="昵称" v-model="searchName" />
       <select v-model="searchIdentity">
-        <option value="">identity</option>
-        <option value="user">user</option>
-        <option value="volunteer">volunteer</option>
-        <option value="elder">elder</option>
-        <option value="admin">admin</option>
+        <option value="">身份</option>
+        <option value="user">普通用户</option>
+        <option value="volunteer">志愿者</option>
+        <option value="senior">老人</option>
       </select>
       <button @click="search" class="btn blue">搜索</button>
     </div>
@@ -26,17 +25,15 @@
         </tr>
         </thead>
         <tbody>
-        <!-- 使用 v-if 检查是否有用户数据 -->
         <tr v-if="filteredUsers.length === 0">
           <td colspan="7" class="no-data">没有找到匹配的用户</td>
         </tr>
-        <!-- 循环用户数据 -->
-        <tr v-for="(user, index) in paginatedUsers" :key="index" class="table-row">
+        <tr v-for="(user, index) in translatedUsers" :key="index" class="table-row">
           <td>{{ user.accountId }}</td>
           <td>{{ user.accountName }}</td>
           <td>{{ user.phoneNum }}</td>
-          <td>{{ user.identity }}</td>
-          <td>{{ user.gender }}</td>
+          <td>{{ user.identityDisplay }}</td>
+          <td>{{ user.genderDisplay }}</td>
           <td>
             <button class="btn small blue" @click="viewDetail(user)">查看</button>
           </td>
@@ -116,8 +113,9 @@
           <div class="form-group">
             <label for="editIdentity">身份</label>
             <select id="editIdentity" v-model="selectedUser.identity">
-              <option value="admin">管理员</option>
               <option value="user">普通用户</option>
+              <option value="volunteer">志愿者</option>
+              <option value="senior">老人</option>
             </select>
           </div>
           <button type="submit" class="btn green">确认</button>
@@ -139,7 +137,7 @@ export default {
       users: [],
       filteredUsers: [],
       currentPage: 1,
-      itemsPerPage: 10, // 每页10条记录
+      itemsPerPage: 10,
       showDetail: false,
       showResetPasswordConfirm: false,
       showResetPassword: false,
@@ -156,6 +154,13 @@ export default {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
       return this.filteredUsers.slice(start, end);
+    },
+    translatedUsers() {
+      return this.paginatedUsers.map(user => ({
+        ...user,
+        genderDisplay: user.gender === 'male' ? '男' : user.gender === 'female' ? '女' : '未知',
+        identityDisplay: user.identity === 'user' ? '普通用户' : user.identity === 'volunteer' ? '志愿者' : '老人'
+      }));
     }
   },
   mounted() {
@@ -174,7 +179,6 @@ export default {
           });
     },
     search() {
-
       axios
           .get('http://8.136.125.61/api/users/search', {
             params: {
@@ -186,7 +190,7 @@ export default {
             if (response.data.success) {
               this.filteredUsers = response.data.response.map(user => ({
                 ...user,
-                gender: user.gender || '未知', // 处理 gender 可能为 null 的情况
+                gender: user.gender || '未知'
               }));
               this.currentPage = 1;
             } else {
@@ -199,7 +203,7 @@ export default {
           });
     },
     viewDetail(user) {
-      if (!user) return; // 确保用户存在
+      if (!user) return;
       axios.get(`http://8.136.125.61/api/users/${user.accountId}`)
           .then(response => {
             if (response.data.success) {
@@ -229,7 +233,7 @@ export default {
     resetPassword(user) {
       axios.post(`http://8.136.125.61/api/users/resetpsd/${user.accountId}`)
           .then(response => {
-            this.newPassword = response.data.password || '';  // 确认 'password' 是返回的新密码字段
+            this.newPassword = response.data.password || '';
             this.selectedUser = { ...user, password: this.newPassword };
             this.showResetPasswordConfirm = false;
             this.showResetPassword = true;
@@ -258,7 +262,19 @@ export default {
       this.showEditUser = false;
     },
     confirmEditUser() {
-      axios.put(`http://8.136.125.61/api/users/${this.selectedUser.accountId}`, this.selectedUser)
+      // 验证手机号长度
+      if (this.selectedUser.phoneNum.length !== 11) {
+        alert('手机号必须为11位，请重新输入');
+        return;
+      }
+
+      const updatedUser = {
+        ...this.selectedUser,
+        gender: this.selectedUser.gender === '男' ? 'male' : 'female',
+        identity: this.selectedUser.identity === '普通用户' ? 'user' : this.selectedUser.identity === '志愿者' ? 'volunteer' : 'senior'
+      };
+
+      axios.put(`http://8.136.125.61/api/users/${this.selectedUser.accountId}`, updatedUser)
           .then(() => {
             const index = this.users.findIndex(u => u.accountId === this.selectedUser.accountId);
             if (index !== -1) {
@@ -297,6 +313,7 @@ export default {
   }
 };
 </script>
+
 
 <style scoped>
 .user-list {

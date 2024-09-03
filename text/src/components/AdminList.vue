@@ -1,6 +1,7 @@
 <template>
   <div class="admin-list">
     <h2>管理员列表</h2>
+
     <div class="search-bar">
       <input type="text" placeholder="昵称" v-model="searchName" />
       <select v-model="searchPosition">
@@ -28,18 +29,28 @@
       </thead>
       <tbody>
       <tr v-for="i in itemsPerPage" :key="i" class="table-row">
-        <td>{{ paginatedAdmins[i - 1] ? paginatedAdmins[i - 1].id : '' }}</td>
-        <td>{{ paginatedAdmins[i - 1] ? paginatedAdmins[i - 1].name : '' }}</td>
-        <td>{{ paginatedAdmins[i - 1] ? paginatedAdmins[i - 1].phone : '' }}</td>
-        <td>{{ paginatedAdmins[i - 1] ? paginatedAdmins[i - 1].position : '' }}</td>
-        <td>{{ paginatedAdmins[i - 1] ? paginatedAdmins[i - 1].gender : '' }}</td>
+        <td v-if="translatedAdmins[i - 1]">{{ translatedAdmins[i - 1].accountId || '暂无' }}</td>
+        <td v-else-if="translatedAdmins[i - 1] === undefined"></td>
+
+        <td v-if="translatedAdmins[i - 1]">{{ translatedAdmins[i - 1].name || '暂无' }}</td>
+        <td v-else-if="translatedAdmins[i - 1] === undefined"></td>
+
+        <td v-if="translatedAdmins[i - 1]">{{ translatedAdmins[i - 1].phoneNum || '暂无' }}</td>
+        <td v-else-if="translatedAdmins[i - 1] === undefined"></td>
+
+        <td v-if="translatedAdmins[i - 1]">{{ translatedAdmins[i - 1].position || '暂无' }}</td>
+        <td v-else-if="translatedAdmins[i - 1] === undefined"></td>
+
+        <td v-if="translatedAdmins[i - 1]">{{ translatedAdmins[i - 1].genderDisplay || '暂无' }}</td>
+        <td v-else-if="translatedAdmins[i - 1] === undefined"></td>
+
         <td>
-          <button v-if="paginatedAdmins[i - 1]" class="btn blue" @click="viewDetails(paginatedAdmins[i - 1])">查看</button>
+          <button v-if="translatedAdmins[i - 1]" class="btn blue" @click="viewDetails(translatedAdmins[i - 1])">查看</button>
         </td>
         <td>
-          <button v-if="paginatedAdmins[i - 1]" class="btn yellow" @click="confirmResetPassword(paginatedAdmins[i - 1])">重置密码</button>
-          <button v-if="paginatedAdmins[i - 1]" class="btn blue" @click="editAdmin(paginatedAdmins[i - 1])">修改</button>
-          <button v-if="paginatedAdmins[i - 1]" class="btn red" @click="deleteAdmin(paginatedAdmins[i - 1].id)">删除</button>
+          <button v-if="translatedAdmins[i - 1]" class="btn yellow" @click="confirmResetPassword(translatedAdmins[i - 1])">重置密码</button>
+          <button v-if="translatedAdmins[i - 1]" class="btn blue" @click="editAdmin(translatedAdmins[i - 1])">修改</button>
+          <button v-if="translatedAdmins[i - 1]" class="btn red" @click="deleteAdmin(translatedAdmins[i - 1].accountId)">删除</button>
         </td>
       </tr>
       </tbody>
@@ -55,13 +66,11 @@
       <div class="modal-content">
         <span class="close" @click="closeDetail">&times;</span>
         <h3>详细信息</h3>
-        <p><strong>ID：</strong> {{ selectedAdmin.id }}</p>
-        <p><strong>姓名：</strong> {{ selectedAdmin.name }}</p>
-        <p><strong>手机号：</strong> {{ selectedAdmin.phone }}</p>
-        <p><strong>职位：</strong> {{ selectedAdmin.position }}</p>
-        <p><strong>性别：</strong> {{ selectedAdmin.gender }}</p>
-        <p><strong>邮箱：</strong> {{ selectedAdmin.email }}</p>
-        <p><strong>身份证：</strong> {{ selectedAdmin.idCard }}</p>
+        <p><strong>姓名：</strong> {{ selectedAdmin.name || '暂无' }}</p>
+        <p><strong>身份证：</strong> {{ selectedAdmin.idCard || '暂无' }}</p>
+        <p><strong>生日：</strong> {{ selectedAdmin.birthDate || '暂无' }}</p>
+        <p><strong>地址：</strong> {{ selectedAdmin.address || '暂无' }}</p>
+        <p><strong>邮箱：</strong> {{ selectedAdmin.email || '暂无' }}</p>
       </div>
     </div>
 
@@ -73,22 +82,22 @@
         <form @submit.prevent="confirmAddAdmin">
           <div class="form-group">
             <label for="newName">姓名</label>
-            <input type="text" id="newName" v-model="newAdmin.name" class="input-field" />
+            <input type="text" id="newName" v-model="newAdmin.name" class="input-field" required />
           </div>
           <div class="form-group">
             <label for="newPhone">手机号</label>
-            <input type="text" id="newPhone" v-model="newAdmin.phone" class="input-field" />
+            <input type="text" id="newPhone" v-model="newAdmin.phoneNum" class="input-field" required />
           </div>
           <div class="form-group">
             <label for="newGender">性别</label>
-            <select id="newGender" v-model="newAdmin.gender" class="input-field">
-              <option value="男">男</option>
-              <option value="女">女</option>
+            <select id="newGender" v-model="newAdmin.gender" class="input-field" required>
+              <option value="male">男</option>
+              <option value="female">女</option>
             </select>
           </div>
           <div class="form-group">
             <label for="newPosition">职位</label>
-            <select id="newPosition" v-model="newAdmin.position" class="input-field">
+            <select id="newPosition" v-model="newAdmin.position" class="input-field" required>
               <option value="财务">财务</option>
               <option value="职工">职工</option>
               <option value="仓库">仓库</option>
@@ -97,12 +106,20 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="newEmail">邮箱</label>
-            <input type="email" id="newEmail" v-model="newAdmin.email" class="input-field" />
+            <label for="newIdCard">身份证</label>
+            <input type="text" id="newIdCard" v-model="newAdmin.idCard" class="input-field" required />
           </div>
           <div class="form-group">
-            <label for="newIdCard">身份证</label>
-            <input type="text" id="newIdCard" v-model="newAdmin.idCard" class="input-field" />
+            <label for="newBirthDate">生日</label>
+            <input type="date" id="newBirthDate" v-model="newAdmin.birthDate" class="input-field" />
+          </div>
+          <div class="form-group">
+            <label for="newAddress">地址</label>
+            <input type="text" id="newAddress" v-model="newAdmin.address" class="input-field" />
+          </div>
+          <div class="form-group">
+            <label for="newEmail">邮箱</label>
+            <input type="email" id="newEmail" v-model="newAdmin.email" class="input-field" />
           </div>
           <div class="button-group">
             <button type="submit" class="btn green">确认</button>
@@ -111,19 +128,18 @@
       </div>
     </div>
 
+
+
     <!-- 修改管理员信息弹出框 -->
     <div v-if="showEditAdmin" class="modal">
       <div class="modal-content form-container">
         <span class="close" @click="closeEditAdmin">&times;</span>
         <h3>修改管理员信息</h3>
         <form @submit.prevent="confirmEditAdmin">
-          <div class="form-group">
-            <label for="editName">姓名</label>
-            <input type="text" id="editName" v-model="selectedAdmin.name" class="input-field" />
-          </div>
+          <!-- 仅保留手机号、职位和性别 -->
           <div class="form-group">
             <label for="editPhone">手机号</label>
-            <input type="text" id="editPhone" v-model="selectedAdmin.phone" class="input-field" />
+            <input type="text" id="editPhone" v-model="selectedAdmin.phoneNum" class="input-field" />
           </div>
           <div class="form-group">
             <label for="editGender">性别</label>
@@ -142,14 +158,6 @@
               <option value="总管理">总管理</option>
             </select>
           </div>
-          <div class="form-group">
-            <label for="editEmail">邮箱</label>
-            <input type="email" id="editEmail" v-model="selectedAdmin.email" class="input-field" />
-          </div>
-          <div class="form-group">
-            <label for="editIdCard">身份证</label>
-            <input type="text" id="editIdCard" v-model="selectedAdmin.idCard" class="input-field" />
-          </div>
           <div class="button-group">
             <button type="submit" class="btn green">确认</button>
           </div>
@@ -158,51 +166,63 @@
     </div>
 
     <!-- 确认重置密码弹出框 -->
-    <div v-if="showResetPassword" class="modal">
+    <div v-if="showResetPasswordConfirm" class="modal">
       <div class="modal-content">
-        <span class="close" @click="closeResetPassword">&times;</span>
+        <span class="close" @click="closeResetPasswordConfirm">&times;</span>
         <h3>确认重置密码</h3>
-        <p>确定要重置此管理员的密码吗？</p>
-        <button @click="resetPassword(selectedAdmin)" class="btn green">确认重置</button>
+        <p>确定要重置密码吗？</p>
+        <button @click="resetPassword(selectedAdmin)" class="btn green">确认</button>
+        <button @click="closeResetPasswordConfirm" class="btn red">取消</button>
       </div>
     </div>
 
+
     <!-- 重置密码显示弹出框 -->
-    <div v-if="showResetPasswordConfirmed" class="modal">
+    <div v-if="showResetPassword" class="modal">
       <div class="modal-content">
-        <span class="close" @click="closeResetPasswordConfirmed">&times;</span>
+        <span class="close" @click="closeResetPassword">&times;</span>
         <h3>重置密码</h3>
-        <p>密码已重置！</p>
+        <p>已重置密码！</p>
         <div class="reset-password-container">
           <input type="text" v-model="newPassword" readonly />
-          <button @click="copyPassword">点击复制</button>
+          <button @click="copyPassword" class="btn blue">点击复制</button>
         </div>
+        <button @click="closeResetPassword" class="btn green">确认</button>
       </div>
     </div>
+
   </div>
 </template>
 
 <script>
+import axios from 'axios'; // 引入Axios
+
 export default {
   name: 'AdminList',
   data() {
     return {
       searchName: '',
       searchPosition: '',
-      admins: [
-        { id: 1, name: 'a', phone: '500', position: '职工', gender: '男', email: 'a@example.com', idCard: '123456' },
-        { id: 2, name: 'b', phone: '600', position: '仓库', gender: '女', email: 'b@example.com', idCard: '654321' },
-      ],
+      admins: [],
       filteredAdmins: [],
       currentPage: 1,
-      itemsPerPage: 8,
+      itemsPerPage: 10,
       showDetail: false,
       showAddAdmin: false,
       showEditAdmin: false,
       showResetPassword: false,
-      showResetPasswordConfirmed: false,
+      showResetPasswordConfirm: false,  // 添加这个属性
       selectedAdmin: {},
-      newAdmin: { name: '', phone: '', gender: '男', position: '财务', email: '', idCard: '' },
+      newAdmin: {
+        name: '',
+        phoneNum: '',
+        gender: 'male', // 默认值改为 male 以与后端一致
+        position: '财务',
+        idCard: '',
+        birthDate: '',
+        address: '',
+        email: ''
+      },
       newPassword: ''
     };
   },
@@ -214,20 +234,41 @@ export default {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
       return this.filteredAdmins.slice(start, end);
+    },
+    translatedAdmins() {
+      return this.paginatedAdmins.map(admin => {
+        return {
+          ...admin,
+          genderDisplay: admin.gender === 'male' ? '男' : admin.gender === 'female' ? '女' : '暂无'
+        };
+      });
     }
   },
   mounted() {
-    this.filteredAdmins = this.admins;
+    this.fetchAdmins(); // 组件挂载时获取管理员列表
   },
   methods: {
+    fetchAdmins() {
+      const params = {};
+      if (this.searchName) params.name = this.searchName;
+      if (this.searchPosition) params.position = this.searchPosition;
+
+      axios.get('http://8.136.125.61/api/admin/search', { params })
+          .then(response => {
+            if (response.data && response.data.success) {
+              this.admins = response.data.response || [];
+              this.filteredAdmins = this.admins;
+              this.currentPage = 1; // 重置到第一页
+            } else {
+              console.error('API返回错误:', response.data.msg);
+            }
+          })
+          .catch(error => {
+            console.error('获取管理员列表时出错:', error);
+          });
+    },
     search() {
-      this.filteredAdmins = this.admins.filter(admin => {
-        return (
-            (!this.searchName || admin.name.includes(this.searchName)) &&
-            (!this.searchPosition || admin.position === this.searchPosition)
-        );
-      });
-      this.currentPage = 1;
+      this.fetchAdmins(); // 根据搜索条件获取管理员
     },
     prevPage() {
       if (this.currentPage > 1) {
@@ -243,8 +284,21 @@ export default {
       this.currentPage = page;
     },
     viewDetails(admin) {
-      this.selectedAdmin = { ...admin };
-      this.showDetail = true;
+      const adminId = admin.accountId;
+      axios.get(`http://8.136.125.61/api/admin/${adminId}`)
+          .then(response => {
+            if (response.data && response.data.success) {
+              this.selectedAdmin = response.data.response[0];
+              this.showDetail = true;
+            } else {
+              console.error('获取管理员详细信息失败:', response.data.msg);
+              alert('获取管理员详细信息失败: ' + response.data.msg);
+            }
+          })
+          .catch(error => {
+            console.error('获取管理员详细信息时出错:', error);
+            alert('获取管理员详细信息时出错，请稍后重试');
+          });
     },
     closeDetail() {
       this.showDetail = false;
@@ -256,32 +310,82 @@ export default {
       this.showAddAdmin = false;
     },
     confirmAddAdmin() {
-      const newId = this.admins.length ? this.admins[this.admins.length - 1].id + 1 : 1;
-      const newAdmin = { ...this.newAdmin, id: newId, nickname: '管理员', password: '默认密码' };
-      this.admins.push(newAdmin);
-      this.filteredAdmins = [...this.admins];
-      this.closeAddAdmin();
-      this.resetNewAdmin();
+      // 验证手机号和身份证号
+      if (this.newAdmin.phoneNum.length !== 11) {
+        alert('手机号必须为11位，请重新输入');
+        return;
+      }
+      if (this.newAdmin.idCard.length !== 18) {
+        alert('身份证号必须为18位，请重新输入');
+        return;
+      }
+
+      axios.post('http://8.136.125.61/api/admin/add', this.newAdmin)
+          .then(response => {
+            if (response.data && response.data.success) {
+              alert('管理员添加成功');
+              this.fetchAdmins();
+              this.closeAddAdmin();
+              this.resetNewAdmin();
+            } else {
+              console.error('添加管理员失败:', response.data.msg);
+              alert('添加管理员失败: ' + response.data.msg);
+            }
+          })
+          .catch(error => {
+            if (error.response && error.response.data && error.response.data.msg) {
+              console.error('添加管理员时出错:', error.response.data.msg);
+              alert('添加管理员时出错: ' + error.response.data.msg);
+            } else {
+              console.error('添加管理员时出错:', error.message);
+              alert('添加管理员时出错，请稍后重试');
+            }
+          });
     },
+
     resetNewAdmin() {
-      this.newAdmin = { name: '', phone: '', gender: '男', position: '财务', email: '', idCard: '' };
+      this.newAdmin = {
+        name: '',
+        phoneNum: '',
+        gender: 'male',
+        position: '财务',
+        idCard: '',
+        birthDate: '',
+        address: '',
+        email: ''
+      };
     },
+    // 确认重置密码
     confirmResetPassword(admin) {
       this.selectedAdmin = admin;
-      this.showResetPassword = true;
+      this.showResetPasswordConfirm = true; // 显示确认重置密码弹出框
     },
+    // 重置密码
     resetPassword(admin) {
-      this.newPassword = Math.random().toString(36).slice(-8);
-      this.selectedAdmin = { ...admin, password: this.newPassword };
-      this.showResetPassword = false;
-      this.showResetPasswordConfirmed = true;
+      axios.post(`http://8.136.125.61/api/users/resetpsd/${admin.accountId}`)
+          .then(response => {
+            if (response.data && response.data.success) {
+              this.newPassword = response.data.password || ''; // 获取新的密码
+              this.selectedAdmin = { ...admin, password: this.newPassword };
+              this.showResetPasswordConfirm = false;
+              this.showResetPassword = true; // 显示重置密码结果弹出框
+            } else {
+              console.error('重置密码失败:', response.data.msg);
+            }
+          })
+          .catch(error => {
+            console.error('重置密码失败', error);
+          });
     },
+    // 关闭确认重置密码弹出框
+    closeResetPasswordConfirm() {
+      this.showResetPasswordConfirm = false;
+    },
+    // 关闭重置密码结果弹出框
     closeResetPassword() {
       this.showResetPassword = false;
     },
-    closeResetPasswordConfirmed() {
-      this.showResetPasswordConfirmed = false;
-    },
+    // 复制新密码
     copyPassword() {
       const copyText = this.newPassword;
       navigator.clipboard.writeText(copyText).then(() => {
@@ -296,22 +400,58 @@ export default {
       this.showEditAdmin = false;
     },
     confirmEditAdmin() {
-      const index = this.admins.findIndex(a => a.id === this.selectedAdmin.id);
-      if (index !== -1) {
-        this.admins.splice(index, 1, this.selectedAdmin);
-        this.filteredAdmins = [...this.admins];
+      // 验证手机号
+      if (this.selectedAdmin.phoneNum.length !== 11) {
+        alert('手机号必须为11位，请重新输入');
+        return;
       }
-      this.showEditAdmin = false;
+
+      const adminId = this.selectedAdmin.accountId;
+      const genderValue = this.selectedAdmin.gender === '男' ? 'male' : 'female';
+      const updateData = {
+        phoneNum: this.selectedAdmin.phoneNum,
+        position: this.selectedAdmin.position,
+        gender: genderValue
+      };
+
+      axios.put(`http://8.136.125.61/api/admin/${adminId}`, updateData)
+          .then(response => {
+            if (response.data && response.data.success) {
+              alert('管理员信息更新成功');
+              this.fetchAdmins();
+              this.closeEditAdmin();
+            } else {
+              console.error('更新管理员信息失败:', response.data.msg);
+              alert('更新管理员信息失败: ' + response.data.msg);
+            }
+          })
+          .catch(error => {
+            console.error('更新管理员信息时出错:', error);
+            alert('更新管理员信息时出错，请稍后重试');
+          });
     },
     deleteAdmin(adminId) {
-      this.admins = this.admins.filter(a => a.id !== adminId);
-      this.filteredAdmins = this.admins;
+      axios.delete(`http://8.136.125.61/api/admin/${adminId}`)
+          .then(response => {
+            if (response.data && response.data.success) {
+              alert(response.data.msg || '删除成功');
+              this.fetchAdmins(); // 刷新管理员列表
+            } else {
+              console.error('删除管理员失败:', response.data.msg);
+              alert('删除管理员失败: ' + response.data.msg);
+            }
+          })
+          .catch(error => {
+            console.error('删除管理员时出错:', error);
+            alert('删除管理员时出错，请稍后重试');
+          });
     }
   }
 };
 </script>
 
 <style scoped>
+/* 样式代码保持不变 */
 .admin-list {
   width: 100%;
   padding: 20px;
@@ -419,8 +559,6 @@ th {
   border-radius: 5px;
   position: relative;
   width: 400px;
-  display: flex;
-  flex-direction: column;
 }
 
 .form-container {
@@ -447,7 +585,7 @@ th {
 
 .button-group {
   display: flex;
-  justify-content: flex-end; /* 将按钮对齐到右边 */
+  justify-content: flex-end;
   margin-top: 20px;
 }
 
