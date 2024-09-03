@@ -309,7 +309,7 @@ const updateIngredientName = (index) => {
   }
 };
 
-const saveDish = async () => {
+    const saveDish = async () => {
   try {
     // 检查所有必需的字段是否已填写
     if (!form.value.dishName || !form.value.category || !form.value.price || form.value.formula.length === 0) {
