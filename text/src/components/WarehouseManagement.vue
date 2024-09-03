@@ -62,27 +62,13 @@
         <form @submit.prevent="confirmAddItem">
           <div class="form-group">
             <label for="newName">食材名</label>
-            <input type="text" id="newName" v-model="newItem.name" />
-          </div>
-          <div class="form-group">
-            <label for="newQuantity">数量</label>
-            <input type="number" id="newQuantity" v-model="newItem.quantity" />
-          </div>
-          <div class="form-group">
-            <label for="newGrade">高耗品等级</label>
-            <select id="newGrade" v-model="newItem.grade">
-              <option value="1">1</option>
-              <option value="2">2</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="newExpiry">保质期</label>
-            <input type="date" id="newExpiry" v-model="newItem.expiry" />
+            <input type="text" id="newName" v-model="newItem.name" required />
           </div>
           <button type="submit" class="btn green">确认</button>
         </form>
       </div>
     </div>
+
 
     <!-- 搜索食材弹出框 -->
     <div v-if="showSearchItem" class="modal">
