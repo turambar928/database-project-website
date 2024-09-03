@@ -24,11 +24,12 @@
           <h3>{{ isEditing ? '编辑菜品' : '添加菜品' }}</h3>
 
           <!-- 图片预览和上传 -->
-          <div class="image-preview">
+         <div class="image-preview">
             <img :src="imagePreviewUrl" alt="预览图片" v-if="imagePreviewUrl" />
-            <button @click="triggerFileInput">修改图片</button>
+            <!-- 仅在编辑模式下显示“修改图片”按钮 -->
+            <button v-if="isEditing" @click="triggerFileInput">修改图片</button>
             <input type="file" ref="fileInput" @change="handleFileChange" style="display: none;" />
-          </div>
+        </div>
 
           <label for="dish-form-name">菜品名称</label>
           <input v-model="form.dishName" id="dish-form-name" placeholder="输入菜品名称" />
@@ -242,9 +243,10 @@ const updateIngredientName = (index) => {
       }
     };
 
-    const openAddDishForm = () => {
+    const openAddDishForm = async() => {
       isEditing.value = false;
       resetForm();
+      await fetchRecipes(); // 获取配方数据
       showForm.value = true;
     };
 
@@ -309,30 +311,50 @@ const updateIngredientName = (index) => {
 
 const saveDish = async () => {
   try {
+    // 检查所有必需的字段是否已填写
     if (!form.value.dishName || !form.value.category || !form.value.price || form.value.formula.length === 0) {
       alert('请填写所有必需的字段，包括菜品名称、类别、价格和至少一个配方。');
       return;
     }
 
-    // 使用已有的 dishId
-    if (fileInput.value.files[0]) {
-      const uploadedImageUrl = await uploadImage(fileInput.value.files[0], form.value.dishId);
-      if (uploadedImageUrl) {
-        form.value.image = uploadedImageUrl;
-      } else {
-        return;
-      }
+    // 根据选中的类别名称获取对应的 cateId
+    const selectedCategory = categories.value.find(category => category.cateName === form.value.category);
+    if (!selectedCategory) {
+      alert('所选类别无效，请重新选择。');
+      return;
     }
 
-    const response = await axios.post('/api/dish/add', form.value);
-    dishes.value.push(response.data);
-    filteredDishes.value = dishes.value;
-    cancelForm();
-    goToPage(currentPage.value);
+    // 构建请求数据
+    const requestData = {
+      dishId: form.value.dishId,  // 如果需要生成新的ID，请移除这行
+      Name: form.value.dishName,
+      cateId: selectedCategory.cateId,
+      category: form.value.category,
+      price: parseFloat(parseFloat(form.value.price).toFixed(2)), // 保留两位小数的价格
+      formula: form.value.formula.map(item => ({
+        ingredientId: item.ingredientId,
+        ingredientName: item.ingredientName,
+        amount: item.amount
+      }))
+    };
+
+    // 发送POST请求以保存菜品数据
+    const response = await axios.post('/api/dish/addDish', requestData);
+
+    if (response.data.success) {
+      dishes.value.push(response.data.dish);
+      filteredDishes.value = dishes.value;
+      cancelForm();
+      goToPage(currentPage.value);
+    } else {
+      console.error('服务器返回错误信息:', response.data.message);
+      alert('保存菜品失败：' + response.data.message);
+    }
   } catch (error) {
     console.error('保存菜品失败:', error);
   }
 };
+
 
     const updateDish = async () => {
   try {
@@ -417,7 +439,7 @@ const saveDish = async () => {
     console.log('即将删除的菜品ID:', id);
 
     // 发送删除请求
-    const response = await axios.delete(`/api/dishes/${id}`,{
+    const response = await axios.delete(`/api/dish/delete/${id}`,{
       headers: {
         'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw' // 添加Authorization头部
       }
@@ -898,4 +920,7 @@ const saveDish = async () => {
   border: 1px solid #007bff;
   border-radius: 5px;
 }
+/* 添加背景容器样式 */
+
+
 </style>
