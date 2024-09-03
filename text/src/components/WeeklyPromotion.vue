@@ -25,9 +25,9 @@
           </div>
         </div>
         <div class="discount-section">
-          <label for="discount">折扣: </label>
-          <input type="number" v-model="discount" min="0" max="10" step="0.1" />
-          <span>折</span>
+          <label for="discount">折扣率: </label>
+          <input type="number" v-model="discount" min="0" max="100" step="1" />
+          <span>%</span>
         </div>
         <button class="confirm-button" @click="applyDiscount">确认</button>
       </div>
@@ -35,35 +35,39 @@
 
     <table class="promotion-table">
       <thead>
-        <tr>
-          <th>菜品</th>
-          <th>类别</th>
-          <th>原价</th>
-          <th>现价</th>
-          <th>操作</th>
-        </tr>
+      <tr>
+        <th>菜品</th>
+        <th>类别</th>
+        <th>原价</th>
+        <th>现价</th>
+        <th>折扣率</th>
+        <th>操作</th>
+      </tr>
       </thead>
       <tbody>
-        <tr v-for="(dish, index) in dishes" :key="dish.id">
-          <td>{{ dish.name }}</td>
-          <td>{{ dish.category }}</td>
-          <td>{{ dish.originalPrice.toFixed(2) }} 元</td>
-          <td>
-            <div v-if="editingIndex === index">
-              <input type="number" v-model="dish.currentPrice" min="0" class="edit-input" />
-              <div class="edit-buttons">
-                <button @click="confirmEdit(dish.id)" class="confirm-button small">确认</button>
-                <button @click="cancelEdit" class="cancel-button small">取消</button>
-              </div>
+      <tr v-for="(dish, index) in dishes" :key="dish.id">
+        <td>{{ dish.name }}</td>
+        <td>{{ dish.category }}</td>
+        <td>{{ dish.originalPrice !== undefined ? dish.originalPrice.toFixed(2) : 'N/A' }} 元</td>
+        <td>
+          {{ dish.currentPrice !== undefined ? dish.currentPrice.toFixed(2) : 'N/A' }} 元
+        </td>
+        <td>
+          <div v-if="editingIndex === index">
+            <input type="number" v-model="dish.discountRate" min="0" max="100" class="edit-input" />
+            <div class="edit-buttons">
+              <button @click="confirmEdit(dish.id)" class="confirm-button small">确认</button>
+              <button @click="cancelEdit" class="cancel-button small">取消</button>
             </div>
-            <div v-else>
-              {{ dish.currentPrice.toFixed(2) }} 元
-            </div>
-          </td>
-          <td>
-            <button v-if="editingIndex !== index" @click="editPrice(index)" class="edit-button">修改</button>
-          </td>
-        </tr>
+          </div>
+          <div v-else>
+            {{ dish.discountRate ? dish.discountRate + '' : 'N/A' }}
+          </div>
+        </td>
+        <td>
+          <button v-if="editingIndex !== index" @click="editPrice(index)" class="edit-button">修改</button>
+        </td>
+      </tr>
       </tbody>
     </table>
   </div>
@@ -92,13 +96,19 @@ export default {
       return `${year}-${month}-${day}`;
     },
     fetchDishes() {
-      axios.get('/api/weeklymenu', {
-        params: {
-          date: this.promotionDate
+      const url = `http://8.136.125.61/api/menu/getDiscount?week=${this.promotionDate}`;
+
+      axios.get(url, {
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAwMiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTEyMjMxNywiZXhwIjoyMDg1MTIyMzE3LCJpYXQiOjE3MjUxMjIzMTcsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.iuxCr68lU34uW5KsZj2c15bwTFsdiguorpWyo_6quP0'
         }
       }).then(response => {
         console.log('API response:', response.data);
-        this.dishes = response.data.dishes;
+        this.dishes = response.data.dishes.map(dish => ({
+          ...dish,
+          discountRate: 0,
+          currentPrice: dish.originalPrice // 初始现价等于原价
+        }));
       }).catch(error => {
         console.error('Error fetching dishes:', error);
       });
@@ -107,20 +117,36 @@ export default {
       this.editingIndex = index;
     },
     confirmEdit(dishId) {
-      axios.put(`/api/weeklymenu/${dishId}`, {
-        currentPrice: this.dishes[this.editingIndex].currentPrice
+      const dish = this.dishes[this.editingIndex];
+      const discount = dish.discountRate / 100; // 将折扣率转换为小数
+
+      // 计算折扣后的价格
+      const discountedPrice = dish.originalPrice * (1 - discount);
+      dish.currentPrice = discountedPrice; // 更新现价
+
+      // 调用 API 更新折扣信息
+      axios.put('http://8.136.125.61/api/menu/uploadDiscount', {
+        date: this.promotionDate,
+        dishId: dishId,
+        discount: dish.discountRate // 传递折扣率给后端
       })
-        .then(response => {
-          this.editingIndex = null;
-          this.dishes = this.dishes.map(dish => 
-            dish.id === dishId 
-            ? { ...dish, currentPrice: response.data.updatedPrice }
-            : dish
-          );
-        })
-        .catch(error => {
-          console.error('Error updating price:', error);
-        });
+          .then(response => {
+            // 假设后端返回的是更新后的价格
+            const updatedDish = response.data;
+            const updatedPrice = updatedDish.updatedPrice; // 假设返回的字段名是 'updatedPrice'
+
+            // 更新本地的 dishes 数组
+            this.dishes = this.dishes.map(d =>
+                d.id === dishId
+                    ? { ...d, currentPrice: updatedPrice, discountRate: dish.discountRate }
+                    : d
+            );
+            this.editingIndex = null; // 清除编辑状态
+            console.log('折扣率:', dish.discountRate, '现价:', updatedPrice); // 打印折扣率和现价
+          })
+          .catch(error => {
+            console.error('Error updating price:', error);
+          });
     },
     cancelEdit() {
       this.editingIndex = null;
@@ -128,22 +154,22 @@ export default {
     },
     openBatchManage() {
       this.showBatchManageDialog = true;
-      this.fetchDishes(); 
+      this.fetchDishes();
     },
     closeBatchManageDialog() {
       this.showBatchManageDialog = false;
     },
     applyDiscount() {
-      if (this.selectedDishes.length === 0 || this.discount <= 0 || this.discount > 10) {
+      if (this.selectedDishes.length === 0 || this.discount <= 0 || this.discount > 100) {
         alert("请正确选择菜品并设置有效的折扣！");
         return;
       }
       axios.post('/api/weeklymenu/batch-discount', {
         dishIds: this.selectedDishes,
         discount: this.discount
-      }).then(() => {  
+      }).then(() => {
         this.closeBatchManageDialog();
-        this.fetchDishes(); 
+        this.fetchDishes();
         alert("折扣已成功应用！");
       }).catch(error => {
         console.error('Error applying discount:', error);
@@ -185,7 +211,7 @@ export default {
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
-  border: none; /* 去掉边框 */
+  border: none;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s ease;
 }
@@ -203,7 +229,6 @@ export default {
 }
 .promotion-table th,
 .promotion-table td {
-  border: none;
   padding: 12px 15px;
   text-align: center;
 }
@@ -234,35 +259,29 @@ export default {
 }
 .confirm-button.small,
 .cancel-button.small {
-  width: 60px; /* 设置相同的宽度 */
-  padding: 6px; /* 设置相同的内边距 */
-  font-size: 14px; /* 设置相同的字体大小 */
+  width: 60px;
+  padding: 6px;
+  font-size: 14px;
   text-align: center;
   display: inline-block;
-  border-radius: 4px; /* 保持圆角一致 */
+  border-radius: 4px;
 }
 .confirm-button {
   background-color: #28a745;
 }
-
 .confirm-button:hover {
   background-color: #218838;
 }
-
 .cancel-button {
   background-color: #dc3545;
 }
-
 .cancel-button:hover {
   background-color: #c82333;
 }
-
 .edit-buttons {
-  display:block;
+  display: block;
   justify-content: center;
 }
-
-/* 批量管理对话框样式 */
 .batch-manage-dialog {
   position: fixed;
   top: 50%;
