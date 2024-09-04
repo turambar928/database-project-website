@@ -31,7 +31,7 @@
         <th>数量</th>
         <th>高耗品等级</th>
         <th>保质期</th>
-        <th>操作</th>
+
       </tr>
       </thead>
       <tbody>
@@ -41,10 +41,7 @@
         <td>{{ item.amount }}</td>
         <td>{{ item.grade }}</td>
         <td>{{ item.expiry }}</td>
-        <td>
-          <button class="btn yellow" @click="editItem(item)">修改</button>
-          <button class="btn red" @click="deleteItem(item.ingredientId)">删除</button>
-        </td>
+
       </tr>
       </tbody>
     </table>
@@ -69,40 +66,6 @@
       </div>
     </div>
 
-
-    <!-- 搜索食材弹出框 -->
-    <div v-if="showSearchItem" class="modal">
-      <div class="modal-content">
-        <span class="close" @click="closeSearchItem">&times;</span>
-        <h3>搜索食材</h3>
-        <form @submit.prevent="searchWarehouse">
-          <div class="form-group">
-            <label for="searchName">食材名</label>
-            <input type="text" id="searchName" v-model="searchName" />
-          </div>
-          <div class="form-group">
-            <label for="searchID">食材ID</label>
-            <input type="text" id="searchID" v-model="searchID" />
-          </div>
-          <div class="form-group">
-            <label for="searchGrade">高耗品等级</label>
-            <select id="searchGrade" v-model="searchGrade">
-              <option value="1">1</option>
-              <option value="2">2</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="searchExpiry">保质期</label>
-            <select id="searchExpiry" v-model="searchExpiry">
-              <option value="2024-09-11">2024-09-11</option>
-              <option value="2024-08-30">2024-08-30</option>
-            </select>
-          </div>
-          <button type="submit" class="btn green">确认</button>
-        </form>
-      </div>
-    </div>
-
     <!-- 进货食材弹出框 -->
     <div v-if="showRestockItem" class="modal">
       <div class="modal-content">
@@ -110,19 +73,21 @@
         <h3>进货食材</h3>
         <form @submit.prevent="confirmRestockItem">
           <div class="form-group">
-            <label for="restockName">食材名</label>
-            <input type="text" id="restockName" v-model="restockItem.name" />
-          </div>
-          <div class="form-group">
-            <label for="restockQuantity">数量</label>
-            <input type="number" id="restockQuantity" v-model="restockItem.quantity" />
-          </div>
-          <div class="form-group">
-            <label for="restockGrade">高耗品等级</label>
-            <select id="restockGrade" v-model="restockItem.grade">
-              <option value="1">1</option>
-              <option value="2">2</option>
+            <label for="restockIngredient">选择食材</label>
+            <!-- 使用下拉框选择现有食材 -->
+            <select id="restockIngredient" v-model="restockItem.ingredientId">
+              <option v-for="ingredient in availableIngredients" :key="ingredient.ingredientId" :value="ingredient.ingredientId">
+                {{ ingredient.ingredientName }}
+              </option>
             </select>
+          </div>
+          <div class="form-group">
+            <label for="restockAmount">数量</label>
+            <input type="number" id="restockAmount" v-model="restockItem.amount" />
+          </div>
+          <div class="form-group">
+            <label for="restockPrice">价格</label>
+            <input type="number" id="restockPrice" v-model="restockItem.price" />
           </div>
           <div class="form-group">
             <label for="restockExpiry">保质期</label>
@@ -143,7 +108,6 @@
             <label for="editName">食材名</label>
             <input type="text" id="editName" v-model="selectedItem.ingredientName" />
           </div>
-
           <button type="submit" class="btn green">确认</button>
         </form>
       </div>
@@ -165,13 +129,14 @@ export default {
       searchGrade: '',
       searchExpiry: '',
       restockItem: {
-        name: '',
-        quantity: 0,
-        grade: '',
+        ingredientId: '',
+        amount: 0,
+        price: 0,
         expiry: ''
       },
-      items: [], // 初始化为一个空数组
-      filteredItems: [], // 初始化为一个空数组
+      availableIngredients: [],
+      items: [],
+      filteredItems: [],
       currentPage: 1,
       itemsPerPage: 8,
       showAddItem: false,
@@ -195,11 +160,13 @@ export default {
   },
   mounted() {
     this.fetchWarehouseData(); // 初始化时从后端加载数据
+    this.fetchAvailableIngredients(); // 获取可选的食材
   },
   methods: {
+
     async fetchWarehouseData() {
       try {
-        const response = await axios.get('http://8.136.125.61/api/ingredients/search', {
+        const response = await axios.get('http://8.136.125.61/api/repo/search', {
           headers: {
             'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAwMiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTEyMjMxNywiZXhwIjoyMDg1MTIyMzE3LCJpYXQiOjE3MjUxMjIzMTcsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.iuxCr68lU34uW5KsZj2c15bwTFsdiguorpWyo_6quP0'
           }
@@ -215,6 +182,72 @@ export default {
         console.error('请求失败', error.response ? error.response.data : error.message);
       }
     },
+
+    async fetchAvailableIngredients() {
+      try {
+        console.log('正在获取可选的食材列表...'); // 日志：请求开始
+
+        const response = await axios.get('http://8.136.125.61/api/ingredients/search', {
+          headers: {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAwMiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTEyMjMxNywiZXhwIjoyMDg1MTIyMzE3LCJpYXQiOjE3MjUxMjIzMTcsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.iuxCr68lU34uW5KsZj2c15bwTFsdiguorpWyo_6quP0'
+          }
+        });
+
+        console.log('API响应:', response.data); // 日志：打印API响应数据
+
+        if (response.data && response.data.success && Array.isArray(response.data.ingredients)) {
+          this.availableIngredients = response.data.ingredients;
+          console.log('成功获取到的食材列表:', this.availableIngredients); // 日志：打印成功获取的食材列表
+        } else {
+          console.warn('API返回的数据格式不正确或没有成功:', response.data);
+          this.availableIngredients = []; // 设置为空数组，防止数据错误时出错
+        }
+      } catch (error) {
+        console.error('获取可选食材列表时出错:', error);
+      }
+    },
+
+    async restock() {
+      try {
+        // 确保所有必需的字段都存在
+        if (!this.restockItem.ingredientId || !this.restockItem.amount || !this.restockItem.expiry || !this.restockItem.price) {
+          console.error('进货信息不完整，请检查所有字段是否已填写');
+          return;
+        }
+
+        // 克隆 restockItem 对象，确保它是普通对象而不是Vue的代理对象
+        const requestPayload = JSON.parse(JSON.stringify(this.restockItem));
+
+        console.log('正在发送进货请求，发送的请求体:', requestPayload);
+
+        const response = await axios.post('http://8.136.125.61/api/repo/restock', requestPayload, {
+          headers: {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTQ1NDYxMSwiZXhwIjoxNzI1NTQxMDExLCJpYXQiOjE3MjU0NTQ2MTEsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.r9SFdp9ChD9jVDX4qmp97pyWr7uF81ct6yXgORksdbw',
+            'Content-Type': 'application/json'
+          }
+        });
+
+        if (response.status === 200 && response.data.success) {
+          console.log('进货成功，当前食材列表将刷新');
+
+          // 进货成功后重新调用 fetchWarehouseData 方法以刷新界面
+          await this.fetchWarehouseData();
+
+          // 关闭进货对话框
+          this.closeRestockItem();
+        } else {
+          console.error('进货失败', response.data.message || response);
+        }
+      } catch (error) {
+        console.error('请求失败', error.response ? error.response.data : error.message);
+      }
+    },
+
+
+
+
+
+
 
     async searchWarehouse() {
       try {
@@ -310,58 +343,52 @@ export default {
       }
     },
 
-    async deleteItem(itemId) {
+    async deleteItem(itemId, expiry) {
+      // 日志：检查传入的 itemId 和 expiry 参数
+      console.log('正在尝试删除项目，传入的 itemId:', itemId);
+      console.log('正在尝试删除项目，传入的 expiry:', expiry);
 
+      // 检查 itemId 和 expiry 是否有效
       if (!itemId) {
         console.error('ID无效');
         return;
       }
 
+      if (!expiry) {
+        console.error('expiry无效');
+        return;
+      }
+
       try {
-        const response = await axios.delete(`http://8.136.125.61/api/ingredients/delete/${itemId}`, {
+        // 构建新的 API URL，插入 itemId 和 expiry
+        const url = `http://8.136.125.61/api/repo/delete/${itemId}/${expiry}`;
+        console.log('发送的 DELETE 请求 URL:', url);
+
+        const response = await axios.delete(url, {
           headers: {
             'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAwMiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTEyMjMxNywiZXhwIjoyMDg1MTIyMzE3LCJpYXQiOjE3MjUxMjIzMTcsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.iuxCr68lU34uW5KsZj2c15bwTFsdiguorpWyo_6quP0'
           }
         });
 
+        console.log('收到的响应:', response);
+
         if (response.status === 200 && response.data.success) {
+          console.log('删除成功，响应数据:', response.data);
           this.items = this.items.filter(i => i.ingredientId !== itemId);
           this.filteredItems = this.items;
-          console.log('删除成功');
         } else {
-          console.error('删除失败', response.data.message || response);
+          console.error('删除失败，响应数据:', response.data.message || response);
         }
       } catch (error) {
-        console.error('请求失败', error.response ? error.response.data : error.message);
+        console.error('请求失败，错误信息:', error.response ? error.response.data : error.message);
+        console.error('请求失败的配置信息:', error.config); // 输出请求的配置信息
       }
     },
 
-    async restock() {
-      try {
-        const response = await axios.post('http://8.136.125.61/api/ingredients/restock', this.restockItem, {
-          headers: {
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAwMiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTEyMjMxNywiZXhwIjoyMDg1MTIyMzE3LCJpYXQiOjE3MjUxMjIzMTcsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.iuxCr68lU34uW5KsZj2c15bwTFsdiguorpWyo_6quP0',
-            'Content-Type': 'application/json'
-          }
-        });
 
-        if (response.status === 200 && response.data.success) {
-          const restockedItem = response.data;
-          const index = this.items.findIndex(i => i.id === restockedItem.id);
-          if (index !== -1) {
-            this.items[index].quantity += restockedItem.restockedQuantity;
-          } else {
-            this.items.push(restockedItem);
-          }
-          this.filteredItems = [...this.items];
-          console.log('进货成功');
-        } else {
-          console.error('进货失败', response.data.message || response);
-        }
-      } catch (error) {
-        console.error('请求失败', error.response ? error.response.data : error.message);
-      }
-    },
+
+
+
 
     prevPage() {
       if (this.currentPage > 1) {
@@ -383,7 +410,7 @@ export default {
       this.showAddItem = true;
     },
 
-    
+
 
     closeAddItem() {
       this.showAddItem = false;
