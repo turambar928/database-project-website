@@ -20,17 +20,18 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="i in itemsPerPage" :key="i" class="table-row">
-        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].id : '' }}</td>
-        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].source : '' }}</td>
-        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].applicant : '' }}</td>
-        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].voucher : '' }}</td>
-        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].amount : '' }}</td>
-        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].date : '' }}</td>
-        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].type : '' }}</td>
+      <!-- 直接遍历 paginatedItems -->
+      <tr v-for="item in paginatedItems" :key="item.financeId" class="table-row">
+        <td>{{ item.financeId }}</td>
+        <td>{{ item.financeType }}</td>
+        <td>{{ item.accountId }}</td>
+        <td>{{ item.proof }}</td>
+        <td>{{ item.price }}</td>
+        <td>{{ item.financeDate }}</td>
+        <td>{{ item.inOrOut }}</td>
         <td>
-          <button v-if="paginatedItems[i - 1]" class="btn approve" @click="approve(paginatedItems[i - 1].id)">通过</button>
-          <button v-if="paginatedItems[i - 1]" class="btn reject" @click="reject(paginatedItems[i - 1].id)">不通过</button>
+          <button class="btn approve" @click="updateStatus(item.financeId, '通过')">通过</button>
+          <button class="btn reject" @click="updateStatus(item.financeId, '不通过')">不通过</button>
         </td>
       </tr>
       </tbody>
@@ -50,12 +51,7 @@ export default {
     return {
       searchID: '',
       searchApplicant: '',
-      items: [
-        // 示例数据
-        { id: 1, source: '来源A', applicant: '申请人A', voucher: '文件A', amount: 100, date: '2024-01-01', type: '收入' },
-        { id: 2, source: '来源B', applicant: '申请人B', voucher: '文件B', amount: 200, date: '2024-01-02', type: '支出' },
-        // 添加更多数据
-      ],
+      items: [], // 初始化为空数组
       filteredItems: [],
       currentPage: 1,
       itemsPerPage: 8,
@@ -72,27 +68,71 @@ export default {
     }
   },
   mounted() {
-    this.filteredItems = this.items; // 初始化时显示所有数据
+    this.fetchFinancialRecords(); // 组件挂载时获取数据
   },
   methods: {
+    fetchFinancialRecords() {
+      fetch('http://8.136.125.61/api/Finance/financial-records')
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              this.items = data.response || [];
+              this.filteredItems = this.items; // 初始化时显示所有数据
+            } else {
+              alert('获取数据失败: ' + data.msg);
+            }
+          })
+          .catch(error => {
+            console.error('获取数据时发生错误:', error);
+            alert('获取数据时发生错误。');
+          });
+    },
     search() {
-      // 过滤列表
       this.filteredItems = this.items.filter(item => {
         return (
-            (!this.searchID || item.id.toString().includes(this.searchID)) &&
-            (!this.searchApplicant || item.applicant.includes(this.searchApplicant))
+            (!this.searchID || item.financeId.toString().includes(this.searchID)) &&
+            (!this.searchApplicant || item.accountId.includes(this.searchApplicant))
         );
       });
       this.currentPage = 1; // 搜索后重置到第一页
     },
-    approve(id) {
-      // 通过逻辑
-      alert(`审批通过: ${id}`);
+    updateStatus(id, status) {
+      const url = `http://8.136.125.61/api/Finance/financial-records/${id}/status`;
+      const data = { Status: status };
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
+
+        },
+        body: JSON.stringify(data)
+      })
+          .then(response => {
+            // 处理响应对象，确保在捕获错误时能够解析JSON
+            if (!response.ok) {
+              // 如果响应状态不是ok（如4xx或5xx），抛出一个错误
+              return response.json().then(errData => {
+                throw new Error(errData.msg || '未知错误');
+              });
+            }
+            return response.json();
+          })
+          .then(data => {
+            if (data.success) {
+              alert(`状态更新成功: ${status}`);
+              this.fetchFinancialRecords(); // 更新数据后重新获取记录
+            } else {
+              alert('状态更新失败: ' + data.msg);
+            }
+          })
+          .catch(error => {
+            console.error('更新状态时发生错误:', error.message);
+            alert('更新状态时发生错误：' + error.message);
+          });
     },
-    reject(id) {
-      // 不通过逻辑
-      alert(`审批不通过: ${id}`);
-    },
+
     prevPage() {
       if (this.currentPage > 1) {
         this.currentPage--;
