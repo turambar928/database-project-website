@@ -203,25 +203,25 @@ export default {
 
         console.log('正在添加的菜品:', selectedDish, '选择的日期:', englishDay);
 
-        // 发送添加请求
+        // 确保传递正确的日期和星期几字段
         axios.post('http://8.136.125.61/api/menu/add', {
           date: this.menuDate, // 用户选择的日期
-          //day: englishDay, // 转换后的星期几（英文缩写）
-          Day: englishDay, // 字段名需要与后端一致
+          Day: englishDay, // 转换后的星期几（英文缩写）
           DishId: selectedDish.dishId, // DishId 在请求体的顶层
           dish: {
             category: selectedDish.category,
             name: selectedDish.dishName,
-            //id: selectedDish.dishId // 添加 id 字段，确保与后端结构匹配
           },
-          success: true, // 后端可能需要这个字段，你可以先尝试硬编码它
-          message: "" // 如果需要，你可以初始化一个空字符串或根据需要传递实际的消息
+          success: true,
+          message: ""
         })
             .then(response => {
               console.log('后端响应:', response.data); // 打印完整的响应数据
 
               if (response.data.success) {
                 console.log('菜品添加成功:', response.data);
+                console.log('用户选择的日期:', this.menuDate);
+                console.log('选择的星期几（英文缩写）:', englishDay);
 
                 // 刷新菜单
                 this.fetchWeeklyMenu();
@@ -245,6 +245,7 @@ export default {
 
 
 
+
     convertDayToAbbreviation(day) {
       const dayMap = {
         "星期一": "Mon",
@@ -257,32 +258,67 @@ export default {
       };
       return dayMap[day];
     },
+
+
+
     removeDish(day, id) {
       if (this.status === '可编辑') {
+        // 将中文的星期几转换为英文缩写
+        const dayMap = {
+          "星期一": "Mon",
+          "星期二": "Tue",
+          "星期三": "Wed",
+          "星期四": "Thu",
+          "星期五": "Fri",
+          "星期六": "Sat",
+          "星期日": "Sun"
+        };
+        const englishDay = dayMap[day];
+
+        // 创建请求体
         const requestPayload = {
           date: this.menuDate,
-          day: day,
+          day: englishDay,
           dishId: id
         };
 
-        axios.delete('http://8.136.125.61/api/menu/delete', {
+        // 打印请求体信息以调试
+        console.log('准备删除菜品，发送的请求体:', requestPayload);
+
+        // 使用DELETE方法发送请求
+        axios.delete('http://8.136.125.61/api/menu/remove', {
           headers: {
             'Authorization': axios.defaults.headers.common['Authorization'],
             'Content-Type': 'application/json'
           },
-          data: requestPayload
+          data: requestPayload // 将请求体传递给后端
         }).then(response => {
+          console.log('删除请求响应:', response.data); // 打印后端的响应数据
+
           if (response.data.success) {
             console.log('菜品删除成功');
-            this.fetchWeeklyMenu();
+            this.fetchWeeklyMenu(); // 刷新菜单
           } else {
             console.error('删除菜品失败:', response.data.message);
           }
         }).catch(error => {
           console.error('Error removing dish:', error);
+
+          // 打印详细的错误信息
+          if (error.response) {
+            console.error('后端返回错误状态:', error.response.status);
+            console.error('后端返回错误数据:', error.response.data);
+            console.error('请求失败的配置信息:', error.config);
+          } else {
+            console.error('请求失败的原因:', error.message);
+          }
         });
       }
     }
+
+
+
+
   },
   mounted() {
     this.fetchWeeklyMenu();
