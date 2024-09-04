@@ -143,21 +143,7 @@
             <label for="editName">食材名</label>
             <input type="text" id="editName" v-model="selectedItem.ingredientName" />
           </div>
-          <div class="form-group">
-            <label for="editQuantity">数量</label>
-            <input type="number" id="editQuantity" v-model="selectedItem.amount" />
-          </div>
-          <div class="form-group">
-            <label for="editGrade">高耗品等级</label>
-            <select id="editGrade" v-model="selectedItem.grade">
-              <option value="1">1</option>
-              <option value="2">2</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="editExpiry">保质期</label>
-            <input type="date" id="editExpiry" v-model="selectedItem.expiry" />
-          </div>
+
           <button type="submit" class="btn green">确认</button>
         </form>
       </div>
