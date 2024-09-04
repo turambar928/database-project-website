@@ -1,15 +1,15 @@
 <template>
-  <div>
+  <div class="ManageVol">
     <h1>上任志愿者管理</h1>
     <div class="search-bar">
       <input v-model="searchName" placeholder="姓名" />
       <select v-model="searchCriteria">
         <option value="score">得分</option>
       </select>
-      <button @click="search" class="buttonsearch">搜索</button>
+      <button @click="search" class="buttonSearch">搜索</button>
 
     </div>
-    <table>
+    <table class="table">
       <thead>
       <tr>
         <th>账号ID</th>
@@ -144,12 +144,29 @@ export default {
 
 
 <style scoped>
+.ManageVol{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f5f7fa; /* 添加背景色 */
+  border-radius: 8px; /* 圆角 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
+}
 .search-bar {
   display: flex;
   align-items: center;
   margin-bottom: 20px;
 }
-
+.buttonSearch{
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: white;
+  background-color: #0275d8; /* 蓝色 */
+}
 .search-bar input,
 .search-bar select {
   margin-right: 10px;
@@ -163,21 +180,36 @@ export default {
   background-color: #0056b3;
   transform: translateY(-1px); /* 缩小悬停时的上移效果 */
 }
-table {
+.table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
+  background-color: #fff; /* 白色背景 */
+  border-radius: 8px; /* 圆角 */
+  overflow: hidden; /* 隐藏溢出 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
 
-th,
-td {
+.table th,
+.table td {
+  padding: 15px;
   border: 1px solid #ddd;
-  padding: 8px;
-  text-align: center;
+  text-align: left;
+  font-size: 14px;
 }
 
-th {
-  background-color: #f2f2f2;
+.table th {
+  background-color: #007bff;
+  color: white;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* 斑马条纹效果 */
+}
+
+.table tbody tr:hover {
+  background-color: #f1f1f1; /* 鼠标悬停时的背景颜色 */
 }
 
 .button-group {

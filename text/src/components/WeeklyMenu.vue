@@ -328,6 +328,12 @@ export default {
 
 <style scoped>
 .weekly-menu {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f5f7fa; /* 添加背景色 */
+  border-radius: 8px; /* 圆角 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
   font-family: Arial, Helvetica, sans-serif;
   padding: 20px;
 }

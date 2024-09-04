@@ -12,37 +12,37 @@
       <button @click="search" class="btn blue">搜索</button>
     </div>
     <div class="table-container">
-      <table>
+      <table class="table">
         <thead>
-        <tr>
-          <th>ID</th>
-          <th>昵称</th>
-          <th>手机号</th>
-          <th>身份</th>
-          <th>性别</th>
-          <th>详细信息</th>
-          <th>操作</th>
-        </tr>
+          <tr>
+            <th>ID</th>
+            <th>昵称</th>
+            <th>手机号</th>
+            <th>身份</th>
+            <th>性别</th>
+            <th>详细信息</th>
+            <th>操作</th>
+          </tr>
         </thead>
         <tbody>
-        <tr v-if="filteredUsers.length === 0">
-          <td colspan="7" class="no-data">没有找到匹配的用户</td>
-        </tr>
-        <tr v-for="(user, index) in translatedUsers" :key="index" class="table-row">
-          <td>{{ user.accountId }}</td>
-          <td>{{ user.accountName }}</td>
-          <td>{{ user.phoneNum }}</td>
-          <td>{{ user.identityDisplay }}</td>
-          <td>{{ user.genderDisplay }}</td>
-          <td>
-            <button class="btn small blue" @click="viewDetail(user)">查看</button>
-          </td>
-          <td class="action-buttons">
-            <button class="btn small yellow" @click="confirmResetPassword(user)">重置密码</button>
-            <button class="btn small blue" @click="editUser(user)">修改</button>
-            <button class="btn small red" @click="deleteUser(user.accountId)">删除</button>
-          </td>
-        </tr>
+          <tr v-if="filteredUsers.length === 0">
+            <td colspan="7" class="no-data">没有找到匹配的用户</td>
+          </tr>
+          <tr v-for="(user, index) in translatedUsers" :key="index" class="table-row">
+            <td>{{ user.accountId }}</td>
+            <td>{{ user.accountName }}</td>
+            <td>{{ user.phoneNum }}</td>
+            <td>{{ user.identityDisplay }}</td>
+            <td>{{ user.genderDisplay }}</td>
+            <td>
+              <button class="btn small blue" @click="viewDetail(user)">查看</button>
+            </td>
+            <td class="action-buttons">
+              <button class="btn small yellow" @click="confirmResetPassword(user)">重置密码</button>
+              <button class="btn small blue" @click="editUser(user)">修改</button>
+              <button class="btn small red" @click="deleteUser(user.accountId)">删除</button>
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -317,8 +317,12 @@ export default {
 
 <style scoped>
 .user-list {
-  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 20px;
+  background-color: #f5f7fa; /* 添加背景色 */
+  border-radius: 8px; /* 圆角 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
 
 .table-container {
@@ -328,25 +332,36 @@ export default {
   padding: 0;
   min-height: 500px;  /* 根据需要调整，确保即使数据少时也有足够的空间 */
 }
-table {
+.table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
-  min-width: 600px; /* 设置表格最小宽度 */
-  table-layout: fixed; /* 固定表格布局 */
+  background-color: #fff; /* 白色背景 */
+  border-radius: 8px; /* 圆角 */
+  overflow: hidden; /* 隐藏溢出 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
 
-th,
-td {
+.table th,
+.table td {
+  padding: 15px;
   border: 1px solid #ddd;
-  padding: 8px;
   text-align: left;
-  box-sizing: border-box; /* 确保内边距不影响总宽度 */
+  font-size: 14px;
 }
 
-.table-row {
-  height: 50px;
-  box-sizing: border-box; /* 确保行的内边距不影响布局 */
+.table th {
+  background-color: #007bff;
+  color: white;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* 斑马条纹效果 */
+}
+
+.table tbody tr:hover {
+  background-color: #f1f1f1; /* 鼠标悬停时的背景颜色 */
 }
 
 .no-data {
@@ -373,6 +388,12 @@ td {
 .btn.blue {
   background-color: #007bff;
   color: white;
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
 }
 
 .btn.yellow {

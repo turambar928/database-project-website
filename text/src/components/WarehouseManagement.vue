@@ -23,7 +23,7 @@
       <button @click="openRestockItem" class="btn green">进货</button>
       <button class="btn add" @click="addItem">添加</button>
     </div>
-    <table>
+    <table class="table">
       <thead>
       <tr>
         <th>食材ID</th>
@@ -457,24 +457,36 @@ export default {
   margin-right: 10px;
 }
 
-table {
+.table {
   width: 100%;
   border-collapse: collapse;
+  background-color: #fff; /* 白色背景 */
+  border-radius: 8px; /* 圆角 */
+  overflow: hidden; /* 隐藏溢出 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
 
-th,
-td {
+.table th,
+.table td {
+  padding: 15px;
   border: 1px solid #ddd;
-  padding: 8px;
   text-align: left;
+  font-size: 14px;
 }
 
-th {
-  background-color: #f2f2f2;
+.table th {
+  background-color: #007bff;
+  color: white;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
-.table-row {
-  height: 50px;
+.table tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* 斑马条纹效果 */
+}
+
+.table tbody tr:hover {
+  background-color: #f1f1f1; /* 鼠标悬停时的背景颜色 */
 }
 
 .btn {
@@ -495,6 +507,14 @@ th {
 .btn.add {
   background-color: #f0ad4e;
   color: white;
+  padding: 10px 20px;
+  margin: 2px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100px;
+  text-align: center;
+  font-size:14px;
 }
 
 .btn.restock {

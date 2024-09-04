@@ -221,20 +221,30 @@ export default {
 .promotion-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 20px;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fff; /* 白色背景 */
+  border-radius: 8px; /* 圆角 */
+  overflow: hidden; /* 隐藏溢出 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
 .promotion-table th,
 .promotion-table td {
-  padding: 12px 15px;
-  text-align: center;
+  padding: 15px;
+  border: 1px solid #ddd;
+  text-align: left;
+  font-size: 14px;
 }
 .promotion-table th {
-  background-color: #f2f2f2;
-  color: #333;
+  background-color: #007bff;
+  color: white;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+.promotion-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* 斑马条纹效果 */
+}
+
+.promotion-table tbody tr:hover {
+  background-color: #f1f1f1; /* 鼠标悬停时的背景颜色 */
 }
 .promotion-table td button {
   background-color: #007bff;
