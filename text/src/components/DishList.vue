@@ -105,7 +105,7 @@
         </div>
         <div class="dish-actions">
           <span class="dish-price">价格: {{ dish.price }}</span>
-          <div class="action-buttons">
+          <div class="Action-buttons">
             <button @click.stop="deleteDish(dish.dishId)">删除</button>
             <button @click.stop="openEditDishForm(dish)">修改</button>
           </div>
@@ -873,7 +873,7 @@ const updateIngredientName = (index) => {
   margin-bottom: 10px;
 }
 
-.action-buttons button {
+.Action-buttons button {
   margin-top: 5px;
   padding: 5px 10px;
   border: none;
@@ -882,11 +882,17 @@ const updateIngredientName = (index) => {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  margin-right: 10px; /* 添加右侧间距，使两个按钮之间有间距 */
 }
 
-.action-buttons button:hover {
+.Action-buttons button:last-child {
+  margin-right: 0; /* 确保最后一个按钮没有额外的右侧间距 */
+}
+
+.Action-buttons button:hover {
   background-color: #0056b3;
 }
+
 
 .pagination {
   margin-top: 20px;

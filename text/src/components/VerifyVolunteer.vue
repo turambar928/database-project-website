@@ -72,27 +72,27 @@ export default {
   },
   methods: {
     async fetchApplications() {
-  try {
-    console.log('正在从API获取所有申请数据...');
-    const response = await axios.get('http://8.136.125.61/api/Volunteer/getAllApply',{
-      headers: {
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
+      try {
+        console.log('正在从API获取所有申请数据...');
+        const response = await axios.get('http://8.136.125.61/api/Volunteer/getAllApply', {
+          headers: {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
+          }
+        });
+        console.log('API响应数据:', response);
+        this.applications = response.data.response;
+        console.log('成功获取到申请数据:', this.applications);
+      } catch (error) {
+        console.error('获取申请数据时出错:', error);
       }
-    });
-    console.log('API响应数据:', response); // 输出完整的响应
-    this.applications = response.data.response;
-    console.log('成功获取到申请数据:', this.applications);
-  } catch (error) {
-    console.error('获取申请数据时出错:', error);
-  }
-},
+    },
     async viewApplication(applicationId) {
       try {
         console.log(`正在获取申请ID为 ${applicationId} 的详情...`);
-        const response = await axios.get(`http://8.136.125.61/api/Volunteer/applyInfo/${applicationId}`,{
+        const response = await axios.get(`http://8.136.125.61/api/Volunteer/applyInfo/${applicationId}`, {
           headers: {
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
-      }
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
+          }
         });
         this.selectedApplication = response.data.response;
         console.log('成功获取到申请详情:', this.selectedApplication);
@@ -116,21 +116,23 @@ export default {
     },
     approveApplication(status) {
       console.log(`审核操作: 申请ID: ${this.selectedApplication.applicationId} 状态: ${status} 理由: ${this.approvalReason}`);
-      alert(`申请ID: ${this.selectedApplication.applicationId} 审核状态: ${status} 理由: ${this.approvalReason}`);
-      this.closeApproveDialog();
+      // 调用 reviewApplication 函数进行审核
+      this.reviewApplication(this.selectedApplication.applicationId, status, this.approvalReason);
     },
     async reviewApplication(applicationId, status, reason) {
       try {
         console.log(`正在审核申请ID为 ${applicationId} 的数据...`);
         const response = await axios.post(`http://8.136.125.61/api/Volunteer/review/${applicationId}`, {
+          headers: {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
+          },
           reason: reason,
           status: status
         });
         console.log('审核请求成功:', response.data);
-
-        // 根据需要，可以在审核成功后刷新申请列表或做其他处理
         alert(`审核成功: 申请ID: ${applicationId} 状态: ${status}`);
         this.closeApproveDialog();
+        this.fetchApplications(); // 刷新申请列表
       } catch (error) {
         console.error('审核请求时出错:', error);
         alert('审核失败，请重试。');

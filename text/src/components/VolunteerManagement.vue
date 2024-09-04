@@ -40,21 +40,6 @@
       </tbody>
     </table>
     <!-- 编辑对话框 -->
-    <div v-if="showEditDialog" class="edit-dialog">
-      <div class="dialog-content">
-        <h2>{{ editMode ? '修改志愿者' : '添加志愿者' }}</h2>
-        <label>姓名: <input v-model="editVolunteerData.name" /></label>
-        <label>身份证号: <input v-model="editVolunteerData.idCard" /></label>
-        <label>电话: <input v-model="editVolunteerData.phoneNum" /></label>
-        <label>接单次数: <input type="number" v-model="editVolunteerData.deliverCount" /></label>
-        <label>得分: <input type="number" step="0.1" v-model="editVolunteerData.score" /></label>
-        <div class="dialog-actions">
-          <button @click="saveVolunteer">{{ editMode ? '保存' : '添加' }}</button>
-          <button @click="closeEditDialog">取消</button>
-        </div>
-        <button class="close-dialog" @click="closeEditDialog">X</button>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -150,37 +135,6 @@ export default {
 
       console.log('筛选后的志愿者列表:', this.filteredVolunteers);
     },
-
-
-
-
-
-    addVolunteer() {
-      this.editMode = false;
-      this.editVolunteerData = { accountId: null, name: '', idCard: '', phoneNum: '', deliverCount: 0, score: 0 };
-      this.showEditDialog = true;
-    },
-    editVolunteer(volunteer) {
-      this.editMode = true;
-      this.editVolunteerData = { ...volunteer };
-      this.showEditDialog = true;
-    },
-    saveVolunteer() {
-      if (this.editMode) {
-        const index = this.volunteers.findIndex(v => v.accountId === this.editVolunteerData.accountId);
-        if (index !== -1) {
-          this.volunteers.splice(index, 1, this.editVolunteerData);
-        }
-      } else {
-        this.editVolunteerData.accountId = this.volunteers.length + 1;
-        this.volunteers.push({ ...this.editVolunteerData });
-      }
-      this.closeEditDialog();
-      this.search();
-    },
-    closeEditDialog() {
-      this.showEditDialog = false;
-    }
   },
   mounted() {
     this.fetchVolunteers();
@@ -209,14 +163,6 @@ export default {
   background-color: #0056b3;
   transform: translateY(-1px); /* 缩小悬停时的上移效果 */
 }
-.search-bar .buttonadd {
-  background-color: #4CAF50; /* 设置添加按钮的背景色 */
-}
-.search-bar .buttonadd:hover {
-  background-color: #218838;
-  transform: translateY(-1px);
-}
-
 table {
   width: 100%;
   border-collapse: collapse;
@@ -237,38 +183,6 @@ th {
 .button-group {
   display: flex;
   justify-content:center;
-}
-
-.edit-button,
-.delete-button {
-  padding: 15px 8px;
-  border: none;
-  cursor: pointer;
-  width: 60px;
-  border-radius: 12%;
-}
-.edit-button {
-  background-color: #4CAF50;
-  color: white;
-  margin-right: 20px; /* 设置按钮之间的间距 */
-}
-
-.delete-button {
-  background-color: #f44336;
-  color: white;
-  
-}
-
-.edit-dialog {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: white;
-  border: 1px solid #ddd;
-  padding: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
 }
 
 .dialog-content {
