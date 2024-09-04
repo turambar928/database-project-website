@@ -7,37 +7,39 @@
         <option value="score">得分</option>
       </select>
       <button @click="search" class="buttonsearch">搜索</button>
-      <button @click="addVolunteer" class="buttonadd">添加</button>
+
     </div>
     <table>
       <thead>
-        <tr>
-          <th>账号ID</th>
-          <th>姓名</th>
-          <th>身份证号</th>
-          <th>电话</th>
-          <th>接单次数</th>
-          <th>得分</th>
-          <th>操作</th>
-        </tr>
+      <tr>
+        <th>账号ID</th>
+        <th>姓名</th>
+        <th>身份证号</th>
+        <th>电话</th>
+        <th>接单次数</th>
+        <th>得分</th>
+        <th>操作</th>
+      </tr>
       </thead>
       <tbody>
-        <tr v-for="volunteer in filteredVolunteers" :key="volunteer.accountId">
-          <td>{{ volunteer.accountId }}</td>
-          <td>{{ volunteer.name }}</td>
-          <td>{{ volunteer.idCard }}</td>
-          <td>{{ volunteer.phoneNum }}</td>
-          <td>{{ volunteer.deliverCount }}</td>
-          <td>{{ volunteer.score }}</td>
-          <td>
-            <div class="button-group">
-              <button class="edit-button" @click="editVolunteer(volunteer)">修改</button>
-              <button class="delete-button" @click="deleteVolunteer(volunteer.accountId)">删除</button>
-            </div>
-          </td>
-        </tr>
+      <!-- 确保使用正确的数据源渲染表格 -->
+      <tr v-for="volunteer in filteredVolunteers" :key="volunteer.accountId">
+        <td>{{ volunteer.accountId }}</td>
+        <td>{{ volunteer.name }}</td>
+        <td>{{ volunteer.idCard }}</td>
+        <td>{{ volunteer.phoneNum }}</td>
+        <td>{{ volunteer.deliverCount }}</td>
+        <td>{{ volunteer.score }}</td>
+        <td>
+          <div class="button-group">
+            <button class="edit-button" @click="editVolunteer(volunteer)">修改</button>
+            <button class="delete-button" @click="deleteVolunteer(volunteer.accountId)">删除</button>
+          </div>
+        </td>
+      </tr>
       </tbody>
     </table>
+    <!-- 编辑对话框 -->
     <div v-if="showEditDialog" class="edit-dialog">
       <div class="dialog-content">
         <h2>{{ editMode ? '修改志愿者' : '添加志愿者' }}</h2>
@@ -55,6 +57,7 @@
     </div>
   </div>
 </template>
+
 
 <script>
 import axios from 'axios';
@@ -82,54 +85,76 @@ export default {
     async fetchVolunteers() {
       try {
         console.log('正在获取所有志愿者信息...');
-        const response = await axios.get('http://8.136.125.61/api/Volunteer/getAll',{
-      headers: {
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
-      }
-    });
+        const response = await axios.get('http://8.136.125.61/api/Volunteer/getAll', {
+          headers: {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
+          }
+        });
         console.log('获取的志愿者信息:', response.data);
 
         // 检查API返回的数据结构是否正确
         if (response.data && response.data.success && Array.isArray(response.data.response)) {
-          this.volunteers = response.data.response; // 获取嵌套的数组
+          this.volunteers = response.data.response;
           console.log('成功获取志愿者数据:', this.volunteers);
+          this.search(); // 更新筛选后的志愿者列表
         } else {
           this.volunteers = []; // 如果数据格式不正确，设置为空数组
           console.warn('API返回的数据格式不正确:', response.data);
         }
-
-        //this.search(); // 更新筛选后的志愿者列表
       } catch (error) {
         console.error('获取志愿者信息时出错:', error);
       }
     },
+
+
+
+
     async deleteVolunteer(accountId) {
       try {
         console.log(`正在删除账号ID为 ${accountId} 的志愿者...`);
-        await axios.delete(`http://8.136.125.61/api/Volunteer/del/${accountId}`,{
-      headers: {
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
-      }
-    });
+        await axios.delete(`http://8.136.125.61/api/Volunteer/del/${accountId}`, {
+          headers: {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
+          }
+        });
+
         console.log('志愿者删除成功');
-        
-        // 删除成功后刷新志愿者列表
-        this.fetchVolunteers();
+
+        // 从前端列表中移除被删除的志愿者
+        this.volunteers = this.volunteers.filter(v => v.accountId !== accountId);
+        this.filteredVolunteers = this.filteredVolunteers.filter(v => v.accountId !== accountId);
+        console.log('删除后剩余的志愿者:', this.filteredVolunteers);
+
       } catch (error) {
         console.error('删除志愿者时出错:', error);
         alert('删除志愿者失败，请重试。');
       }
     },
+
+
+
     search() {
       console.log('筛选前的志愿者数据:', this.volunteers);
 
-      this.filteredVolunteers = this.volunteers.filter(v =>
-        v.name.includes(this.searchName) &&
-        (this.searchCriteria === 'score' ? v.score : true)
-      );
+      // 对搜索条件进行检查和筛选
+      this.filteredVolunteers = this.volunteers.filter(v => {
+        // 检查志愿者的姓名是否包含在搜索名称中，如果搜索名称为空，则匹配所有志愿者
+        const matchesName = this.searchName === '' || v.name.includes(this.searchName);
+
+        // 检查得分是否符合筛选条件，如果搜索条件是得分并且v.score存在
+        const matchesScore = this.searchCriteria !== 'score' || (v.score !== undefined && v.score !== null);
+
+        // 返回符合条件的志愿者
+        return matchesName && matchesScore;
+      });
 
       console.log('筛选后的志愿者列表:', this.filteredVolunteers);
     },
+
+
+
+
+
     addVolunteer() {
       this.editMode = false;
       this.editVolunteerData = { accountId: null, name: '', idCard: '', phoneNum: '', deliverCount: 0, score: 0 };
@@ -158,10 +183,11 @@ export default {
     }
   },
   mounted() {
-    this.fetchVolunteers(); // 页面加载时获取所有志愿者信息
+    this.fetchVolunteers();
   }
 };
 </script>
+
 
 <style scoped>
 .search-bar {
