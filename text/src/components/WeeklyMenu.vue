@@ -174,6 +174,31 @@ export default {
     },
 
 
+    calculateDateForDay(baseDate, targetDay) {
+      const dayMap = {
+        "星期一": 1,
+        "星期二": 2,
+        "星期三": 3,
+        "星期四": 4,
+        "星期五": 5,
+        "星期六": 6,
+        "星期日": 0 // 在JavaScript中，0表示星期日
+      };
+
+      const base = new Date(baseDate);
+      const baseDay = base.getDay(); // 获取用户输入日期的星期几（0 表示星期日，1 表示星期一，等等）
+
+      const targetDayIndex = dayMap[targetDay]; // 用户点击的星期几的数字表示
+
+      // 计算出用户点击的那一天的具体日期
+      const diff = targetDayIndex - baseDay;
+      const targetDate = new Date(base);
+      targetDate.setDate(base.getDate() + diff);
+
+      return targetDate.toISOString().split('T')[0]; // 返回 yyyy-mm-dd 格式的日期字符串
+    },
+
+
 
     addDish() {
       if (this.selectedDishId && this.currentDay) {
@@ -201,13 +226,16 @@ export default {
           return;
         }
 
-        console.log('正在添加的菜品:', selectedDish, '选择的日期:', englishDay);
+        // 计算用户选择的日期对应的具体星期几的日期
+        const targetDate = this.calculateDateForDay(this.menuDate, this.currentDay);
 
-        // 确保传递正确的日期和星期几字段
+        console.log('正在添加的菜品:', selectedDish, '选择的日期:', targetDate);
+
+        // 发送添加请求
         axios.post('http://8.136.125.61/api/menu/add', {
-          date: this.menuDate, // 用户选择的日期
-          Day: englishDay, // 转换后的星期几（英文缩写）
-          DishId: selectedDish.dishId, // DishId 在请求体的顶层
+          date: targetDate, // 使用计算得到的日期
+          Day: englishDay, // 字段名需要与后端一致
+          DishId: selectedDish.dishId,
           dish: {
             category: selectedDish.category,
             name: selectedDish.dishName,
@@ -220,8 +248,6 @@ export default {
 
               if (response.data.success) {
                 console.log('菜品添加成功:', response.data);
-                console.log('用户选择的日期:', this.menuDate);
-                console.log('选择的星期几（英文缩写）:', englishDay);
 
                 // 刷新菜单
                 this.fetchWeeklyMenu();
@@ -242,6 +268,7 @@ export default {
         alert("请选择一个菜品和日期以添加。");
       }
     },
+
 
 
 
