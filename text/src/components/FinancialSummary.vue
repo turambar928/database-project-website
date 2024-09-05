@@ -4,25 +4,33 @@
     <div class="search-bar">
       <select v-model="searchSource">
         <option value="">来源</option>
-        <!-- Add other sources as needed -->
-        <option value="来源A">来源A</option>
-        <option value="来源B">来源B</option>
+        <option value="捐赠">捐赠</option>
+        <option value="进货">进货</option>
+        <option value="工资">工资</option>
+        <option value="点单">点单</option>
+        <option value="订单">订单</option>
       </select>
       <select v-model="searchType">
         <option value="">收支</option>
-        <option value="收入">收入</option>
-        <option value="支出">支出</option>
+        <option value="1">收入</option>
+        <option value="0">支出</option>
       </select>
-      <select v-model="searchDate">
-        <option value="">时间</option>
-        <option value="2024-01-01">2024-01-01</option>
-        <option value="2024-01-02">2024-01-02</option>
-      </select>
+      <input type="date" v-model="searchDate" />
       <button class="btn search" @click="search">搜索</button>
     </div>
     <div class="summary">
-      <label>合计收支：</label>
-      <input type="text" v-model="totalAmount" readonly />
+      <div class="summary-item">
+        <label>净收入：</label>
+        <input type="text" v-model="netIncome" readonly />
+      </div>
+      <div class="summary-item">
+        <label>总收入：</label>
+        <input type="text" v-model="totalIncome" readonly />
+      </div>
+      <div class="summary-item">
+        <label>总支出：</label>
+        <input type="text" v-model="totalExpense" readonly />
+      </div>
     </div>
     <table class="table">
       <thead>
@@ -38,15 +46,15 @@
       </tr>
       </thead>
       <tbody>
-      <tr v-for="i in itemsPerPage" :key="i" class="table-row">
-        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].id : '' }}</td>
-        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].source : '' }}</td>
-        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].applicant : '' }}</td>
-        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].auditor : '' }}</td>
-        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].amount : '' }}</td>
-        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].date : '' }}</td>
-        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].type : '' }}</td>
-        <td>{{ paginatedItems[i - 1] ? paginatedItems[i - 1].status : '' }}</td>
+      <tr v-for="item in paginatedItems" :key="item.financeId" class="table-row">
+        <td>{{ item.financeId }}</td>
+        <td>{{ item.financeType }}</td>
+        <td>{{ item.accountId }}</td>
+        <td>{{ item.administratorId }}</td>
+        <td>{{ item.price }}</td>
+        <td>{{ item.financeDate }}</td>
+        <td>{{ item.inOrOut === '1' ? '收入' : '支出' }}</td>
+        <td>{{ item.status }}</td>
       </tr>
       </tbody>
     </table>
@@ -59,6 +67,8 @@
 </template>
 
 <script>
+
+
 export default {
   name: 'FinancialSummary',
   data() {
@@ -66,13 +76,10 @@ export default {
       searchSource: '',
       searchType: '',
       searchDate: '',
-      totalAmount: 0,
-      items: [
-        // 示例数据
-        { id: 1, source: '来源A', applicant: '申请人A', auditor: '审核人A', amount: 100, date: '2024-01-01', type: '收入', status: '通过' },
-        { id: 2, source: '来源B', applicant: '申请人B', auditor: '审核人B', amount: 200, date: '2024-01-02', type: '支出', status: '不通过' },
-        // 添加更多数据
-      ],
+      netIncome: 0,   // 新增净收入字段
+      totalIncome: 0, // 新增总收入字段
+      totalExpense: 0, // 新增总支出字段
+      items: [],
       filteredItems: [],
       currentPage: 1,
       itemsPerPage: 8,
@@ -86,29 +93,38 @@ export default {
       const start = (this.currentPage - 1) * this.itemsPerPage;
       const end = start + this.itemsPerPage;
       return this.filteredItems.slice(start, end);
-    }
+    },
   },
   mounted() {
-    this.filteredItems = this.items; // 初始化时显示所有数据
-    this.calculateTotalAmount();
+    this.fetchData(); // 初始化时获取数据
+    this.fetchTotal(); // 初始化时获取总收入、总支出和净收入
   },
   methods: {
-    search() {
-      // 过滤列表
-      this.filteredItems = this.items.filter(item => {
-        return (
-            (!this.searchSource || item.source === this.searchSource) &&
-            (!this.searchType || item.type === this.searchType) &&
-            (!this.searchDate || item.date === this.searchDate)
-        );
-      });
-      this.currentPage = 1; // 搜索后重置到第一页
-      this.calculateTotalAmount(); // 重新计算合计收支
+    async fetchData() {
+      try {
+        const formattedDate = this.searchDate ? this.searchDate : '';
+        const response = await fetch(`http://8.136.125.61/api/Finance/financial-records?financeType=${this.searchSource}&inOrOut=${this.searchType}&financeDate=${formattedDate}`);
+        const data = await response.json();
+        this.items = data.response || [];
+        this.filteredItems = this.items;
+      } catch (error) {
+        console.error('数据获取错误:', error);
+      }
     },
-    calculateTotalAmount() {
-      this.totalAmount = this.filteredItems.reduce((total, item) => {
-        return total + (item.type === '收入' ? item.amount : -item.amount);
-      }, 0);
+    async fetchTotal() {
+      try {
+        const response = await fetch(`http://8.136.125.61/api/Finance/getTotal`);
+        const data = await response.json();
+        this.netIncome = data.response.netIn; // 设置净收入
+        this.totalIncome = data.response.totalIn; // 设置总收入
+        this.totalExpense = data.response.totalOut; // 设置总支出
+      } catch (error) {
+        console.error('获取总收入、总支出和净收入时发生错误:', error);
+      }
+    },
+    search() {
+      this.fetchData(); // 通过API获取过滤后的数据
+      this.fetchTotal(); // 同时获取最新的总收入、总支出和净收入
     },
     prevPage() {
       if (this.currentPage > 1) {
@@ -122,8 +138,8 @@ export default {
     },
     goToPage(page) {
       this.currentPage = page;
-    }
-  }
+    },
+  },
 };
 </script>
 
@@ -149,12 +165,17 @@ export default {
 
 .summary {
   display: flex;
-  align-items: center;
+  justify-content: space-around; /* 均匀分布 */
   margin-bottom: 10px;
 }
 
+.summary-item {
+  display: flex;
+  align-items: center;
+}
+
 .summary label {
-  margin-right: 10px;
+  margin-right: 5px;
 }
 
 .table {
