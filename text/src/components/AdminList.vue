@@ -6,11 +6,10 @@
       <input type="text" placeholder="昵称" v-model="searchName" />
       <select v-model="searchPosition">
         <option value="">职位</option>
-        <option value="财务">财务</option>
-        <option value="职工">职工</option>
-        <option value="仓库">仓库</option>
-        <option value="用户">用户</option>
         <option value="总管理">总管理</option>
+        <option value="菜品">菜品</option>
+        <option value="HR">HR</option>
+        <option value="财务">财务</option>
       </select>
       <button @click="search">搜索</button>
       <button @click="openAddAdmin" class="add_Admin">添加管理员</button>

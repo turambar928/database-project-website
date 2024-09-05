@@ -1,25 +1,61 @@
 <template>
-  <div class="user-profile">
+  <div class="user-profile" v-if="userInfo"> <!-- 确保整个块在数据准备好之后才渲染 -->
     <div class="profile-card">
       <div class="profile-section">
         <div class="profile-header">关于我</div>
-        <img src="/xian.png" alt="Divider" class="divider-image"/>
+        <img src="/xian.png" alt="Divider" class="divider-image" />
       </div>
-      <img src="/avatar.jpg" alt="User" class="user-image"/>
-      <h2>人名</h2>
-      <p>管理员</p>
+      <img :src="userInfo.portrait || '/avatar.jpg'" alt="User" class="user-image" />
+      <h2>{{ userInfo.name }}</h2>
+      <p>管理员</p> <!-- 职位固定为管理员 -->
       <div class="profile-section">
         <div class="profile-privilege">权限</div>
-        <img src="/xian.png" alt="Divider" class="divider-image"/>
-        <button class="finance-button">财务</button>
+        <img src="/xian.png" alt="Divider" class="divider-image" />
+        <button class="finance-button">{{ userInfo.position }}</button>
       </div>
     </div>
+  </div>
+  <!-- 如果数据尚未加载，可以显示一个加载指示器 -->
+  <div v-else>
+    <p>加载中...</p>
   </div>
 </template>
 
 <script>
 export default {
   name: 'UserProfile',
+  data() {
+    return {
+      userInfo: null, // 初始值为 null
+    };
+  },
+  methods: {
+    fetchUserInfo() {
+      fetch('http://8.136.125.61/api/Admin/getAdminInfo', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTQ1NDYxMSwiZXhwIjoxNzI1NTQxMDExLCJpYXQiOjE3MjU0NTQ2MTEsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.r9SFdp9ChD9jVDX4qmp97pyWr7uF81ct6yXgORksdbw',
+          'Content-Type': 'application/json',
+        },
+      })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.success) {
+              this.userInfo = {
+                portrait: data.response.portrait || '/avatar.jpg', // 如果头像不存在，使用默认头像
+                name: data.response.accountName,
+                position: data.response.position,
+              };
+            } else {
+              console.error(data.msg);
+            }
+          })
+          .catch((error) => console.error('获取用户数据时出错:', error));
+    },
+  },
+  mounted() {
+    this.fetchUserInfo();
+  },
 };
 </script>
 
