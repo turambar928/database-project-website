@@ -1,7 +1,12 @@
 <template>
   <div class="sidebar">
+    <!-- Logo 区域 -->
+    <div class="logo-container">
+      <img src="@/assets/logo.png" alt="Logo" class="logo">
+    </div>
+
     <ul>
-      <li v-for="menu in menus" :key="menu.name">
+      <li v-for="menu in menus" :key="menu.name" :class="{ 'active': menu.active }">
         <div class="menu-item" @click="handleClick(menu, $event)" @mouseover="hoverMenu(menu)" @mouseleave="leaveMenu(menu)">
           <span :class="{'hover': menu.hover, 'active': menu.active}" class="menu-text">
             <img :src="menu.icon" class="menu-icon" alt="" />
@@ -9,8 +14,8 @@
           </span>
           <span v-if="menu.submenus" :class="{'open': isOpen(menu)}" class="arrow">&#x276F;</span>
         </div>
-        <ul v-if="menu.submenus && isOpen(menu)" class="submenu">
-          <li v-for="submenu in menu.submenus" :key="submenu.name" @click="handleClick(submenu, $event)" @mouseover="hoverMenu(submenu)" @mouseleave="leaveMenu(submenu)">
+        <ul v-if="menu.submenus" :class="{'submenu-open': isOpen(menu)}" class="submenu">
+          <li v-for="submenu in menu.submenus" :key="submenu.name" :class="{ 'active': submenu.active }" @click="handleClick(submenu, $event)" @mouseover="hoverMenu(submenu)" @mouseleave="leaveMenu(submenu)">
             <span :class="{'hover': submenu.hover, 'active': submenu.active}" class="submenu-text">
               <img :src="submenu.icon" class="menu-icon" alt="" />
               {{ submenu.name }}
@@ -21,6 +26,7 @@
     </ul>
   </div>
 </template>
+
 
 <script>
 export default {
@@ -87,7 +93,7 @@ export default {
 <style scoped>
 .sidebar {
   width: 200px;
-  background-color: #ffbd59;
+  background-color: rgb(255,196,114);
   padding: 0;
   height: 100vh;
   box-sizing: border-box;
@@ -103,6 +109,19 @@ export default {
   width: 0;
   height: 0;
 }
+/* Logo 区域样式 */
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100px; /* 可以根据需要调整 */
+}
+
+.logo {
+  width: 80px; /* 控制 logo 尺寸 */
+  height: auto;
+}
+
 .sidebar ul {
   list-style: none;
   padding: 0;
@@ -111,13 +130,43 @@ export default {
 .sidebar li {
   display: block;
 }
-.menu-item, .submenu li {
+.sidebar li.active {
+  background-color: #fbdc74;  /* 为 li 设置 active 样式的背景色 */
+}
+.menu-item{
   display: flex;
   align-items: center;
   padding: 10px;
   cursor: pointer;
   background-color: inherit; /* 继承背景色 */
+  transition: background-color 0.3s;
 }
+
+.submenu {
+  max-height: 0; /* 初始高度为 0 */
+  overflow: hidden; /* 隐藏超出内容 */
+  transition: max-height 0.3s ease-in-out;
+  background-color: rgb(255,182,98);
+}
+
+.submenu-open {
+  max-height: 500px; /* 设置为足够大的值以容纳所有内容 */
+}
+
+.submenu li {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  padding-left: 30px;
+  cursor: pointer;
+}
+.menu-item:hover {
+  background-color: #fff0bf;
+}
+.submenu li:hover {
+  background-color: #fff0bf;
+}
+
 .menu-icon {
   width: 20px;
   height: 20px;
@@ -127,20 +176,14 @@ export default {
   color: white; /* 默认字体颜色 */
   flex-grow: 1;
 }
-.menu-text.hover, .submenu-text.hover {
-  color: #663300; /* 悬停字体颜色 */
-}
-.menu-text.active, .submenu-text.active {
-  color: #663300; /* 选中字体颜色 */
-}
+
 .arrow {
   transition: transform 0.3s ease;
   margin-left: auto;
+  color: #f6dea0;
 }
 .arrow.open {
   transform: rotate(90deg);
 }
-.submenu li {
-  background-color: #cc8400; /* 二级目录背景色 */
-}
+
 </style>

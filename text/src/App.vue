@@ -100,6 +100,13 @@ export default {
 </script>
 
 <style>
+/* 设置整个页面的背景颜色 */
+html, body {
+  background-color: #f5f5f5; /* 浅灰色 */
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
 .app {
   display: flex;
   height: 100vh;
