@@ -302,9 +302,12 @@ export default {
         };
         const englishDay = dayMap[day];
 
+        // 计算用户选择的日期对应的具体星期几的日期
+        const targetDate = this.calculateDateForDay(this.menuDate, day);
+
         // 创建请求体
         const requestPayload = {
-          date: this.menuDate,
+          date: targetDate, // 使用计算得到的日期
           day: englishDay,
           dishId: id
         };
@@ -342,6 +345,7 @@ export default {
         });
       }
     }
+
 
 
 
