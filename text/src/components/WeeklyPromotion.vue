@@ -11,6 +11,8 @@
       <button class="status" @click="openBatchManage">批量管理</button>
     </div>
 
+
+
     <!-- 批量管理对话框 -->
     <div v-if="showBatchManageDialog" class="batch-manage-dialog">
       <div class="dialog-content">
@@ -106,8 +108,8 @@ export default {
         console.log('API response:', response.data);
         this.dishes = response.data.dishes.map(dish => ({
           ...dish,
-          discountRate: 0,
-          currentPrice: dish.originalPrice // 初始现价等于原价
+          discountRate: dish.currentPrice/dish.originalPrice,
+          currentPrice: dish.currentPrice // 初始现价等于原价
         }));
       }).catch(error => {
         console.error('Error fetching dishes:', error);
@@ -118,23 +120,20 @@ export default {
     },
     confirmEdit(dishId) {
       const dish = this.dishes[this.editingIndex];
-      const discount = dish.discountRate / 100; // 将折扣率转换为小数
+      const discount = dish.discountRate / 100;
 
-      // 计算折扣后的价格
       const discountedPrice = dish.originalPrice * (1 - discount);
-      dish.currentPrice = discountedPrice; // 更新现价
+      dish.currentPrice = discountedPrice;
 
-      // 调用 API 更新折扣信息
       axios.put('http://8.136.125.61/api/menu/uploadDiscount', {
         date: this.promotionDate,
         dishId: dishId,
-        discount: dish.discountRate // 传递折扣率给后端
+        discount: dish.discountRate
       })
           .then(response => {
             const updatedDish = response.data;
             const updatedPrice = updatedDish.updatedPrice;
 
-            // 更新本地的 dishes 数组
             this.dishes = this.dishes.map(d =>
                 d.id === dishId
                     ? { ...d, currentPrice: updatedPrice, discountRate: dish.discountRate }
@@ -158,32 +157,44 @@ export default {
     closeBatchManageDialog() {
       this.showBatchManageDialog = false;
     },
+
+
+
+
+
     applyDiscount() {
       if (this.selectedDishes.length === 0 || this.discount <= 0 || this.discount > 100) {
         alert("请正确选择菜品并设置有效的折扣！");
         return;
       }
 
-      // 更新选中的菜品折扣率和现价
-      this.selectedDishes.forEach(dishId => {
+      // 逐个调用API设置折扣率
+      const promises = this.selectedDishes.map(dishId => {
         const dish = this.dishes.find(d => d.id === dishId);
         if (dish) {
-          dish.discountRate = this.discount; // 设置折扣率
-          dish.currentPrice = dish.originalPrice * (1 - this.discount / 100); // 计算折扣后的价格
+          dish.discountRate = this.discount;
+          dish.currentPrice = dish.originalPrice * (1 - this.discount / 100);
+
+          // 调用API
+          return axios.put('http://8.136.125.61/api/menu/uploadDiscount', {
+            date: this.promotionDate,
+            dishId: dishId,
+            discount: this.discount
+          });
         }
+        return Promise.resolve();
       });
 
-      // 调用 API 批量应用折扣
-      axios.post('http://8.136.125.61/api/menu/batch-discount', {
-        dishIds: this.selectedDishes,
-        discount: this.discount
-      }).then(() => {
-        this.closeBatchManageDialog();
-        this.fetchDishes(); // 重新加载数据以更新前端显示
-        alert("折扣已成功应用！");
-      }).catch(error => {
-        console.error('Error applying discount:', error);
-      });
+      // 等待所有请求完成后刷新数据
+      Promise.all(promises)
+          .then(() => {
+            this.closeBatchManageDialog();
+            this.fetchDishes();
+            alert("折扣已成功应用！");
+          })
+          .catch(error => {
+            console.error('Error applying discount:', error);
+          });
     },
   },
   mounted() {
