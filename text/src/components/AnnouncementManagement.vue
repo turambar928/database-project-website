@@ -15,10 +15,10 @@
     <table class="table">
       <thead>
       <tr>
-        <th>标题</th>
-        <th>发布人</th>
-        <th>时间</th>
-        <th>操作</th>
+        <th style="width: 25%">标题</th>
+        <th style="width: 25%">发布人</th>
+        <th style="width: 25%">时间</th>
+        <th style="width: 25%">操作</th>
       </tr>
       </thead>
       <tbody>
@@ -26,7 +26,7 @@
         <td><img src="bell-icon.png" alt="icon">{{ announcement.title }}</td>
         <td>{{ announcement.author }}</td>
         <td>{{ announcement.date }}</td>
-        <td><button class="am view" @click="viewAnnouncement(announcement)">查看内容</button></td>
+        <td style="text-align:center;"><button class="am view" @click="viewAnnouncement(announcement)">查看内容</button></td>
       </tr>
       </tbody>
     </table>
