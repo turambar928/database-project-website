@@ -61,7 +61,7 @@
             </div>
           </div>
           <div v-else>
-            {{ dish.discountRate ? dish.discountRate + '' : 'N/A' }}
+            {{ dish.discountRate ? dish.discountRate + '%' : 'N/A' }}
           </div>
         </td>
         <td>
@@ -131,9 +131,8 @@ export default {
         discount: dish.discountRate // 传递折扣率给后端
       })
           .then(response => {
-            // 假设后端返回的是更新后的价格
             const updatedDish = response.data;
-            const updatedPrice = updatedDish.updatedPrice; // 假设返回的字段名是 'updatedPrice'
+            const updatedPrice = updatedDish.updatedPrice;
 
             // 更新本地的 dishes 数组
             this.dishes = this.dishes.map(d =>
@@ -141,8 +140,8 @@ export default {
                     ? { ...d, currentPrice: updatedPrice, discountRate: dish.discountRate }
                     : d
             );
-            this.editingIndex = null; // 清除编辑状态
-            console.log('折扣率:', dish.discountRate, '现价:', updatedPrice); // 打印折扣率和现价
+            this.editingIndex = null;
+            console.log('折扣率:', dish.discountRate, '现价:', updatedPrice);
           })
           .catch(error => {
             console.error('Error updating price:', error);
@@ -164,12 +163,23 @@ export default {
         alert("请正确选择菜品并设置有效的折扣！");
         return;
       }
-      axios.post('/api/weeklymenu/batch-discount', {
+
+      // 更新选中的菜品折扣率和现价
+      this.selectedDishes.forEach(dishId => {
+        const dish = this.dishes.find(d => d.id === dishId);
+        if (dish) {
+          dish.discountRate = this.discount; // 设置折扣率
+          dish.currentPrice = dish.originalPrice * (1 - this.discount / 100); // 计算折扣后的价格
+        }
+      });
+
+      // 调用 API 批量应用折扣
+      axios.post('http://8.136.125.61/api/menu/batch-discount', {
         dishIds: this.selectedDishes,
         discount: this.discount
       }).then(() => {
         this.closeBatchManageDialog();
-        this.fetchDishes();
+        this.fetchDishes(); // 重新加载数据以更新前端显示
         alert("折扣已成功应用！");
       }).catch(error => {
         console.error('Error applying discount:', error);
