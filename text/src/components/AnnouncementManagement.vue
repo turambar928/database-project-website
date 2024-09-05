@@ -8,11 +8,11 @@
         <option value="2024-01-01">2024-01-01</option>
         <option value="2024-01-02">2024-01-02</option>
       </select>
-      <button class="btn search" @click="search">搜索</button>
-      <button class="btn add" @click="showAddAnnouncementModal">添加</button>
-      <button class="btn draft" @click="showDraftModal">草稿</button>
+      <button class="am search" @click="search">搜索</button>
+      <button class="am add" @click="showAddAnnouncementModal">添加</button>
+      <button class="am draft1" @click="showDraftModal">草稿</button>
     </div>
-    <table>
+    <table class="table">
       <thead>
       <tr>
         <th>标题</th>
@@ -26,7 +26,7 @@
         <td><img src="bell-icon.png" alt="icon">{{ announcement.title }}</td>
         <td>{{ announcement.author }}</td>
         <td>{{ announcement.date }}</td>
-        <td><button class="btn view" @click="viewAnnouncement(announcement)">查看内容</button></td>
+        <td><button class="am view" @click="viewAnnouncement(announcement)">查看内容</button></td>
       </tr>
       </tbody>
     </table>
@@ -165,22 +165,15 @@ export default {
 
 <style scoped>
 .announcement-management {
-  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 20px;
+  background-color: #f5f7fa; /* 添加背景色 */
+  border-radius: 8px; /* 圆角 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
 
-.search-bar {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.search-bar input,
-.search-bar select {
-  margin-right: 10px;
-}
-
-.btn {
+.am {
   padding: 10px 15px;
   margin: 5px;
   border: none;
@@ -189,45 +182,64 @@ export default {
   font-size: 14px;
 }
 
-.btn.search {
+.am.search {
   background-color: #0275d8;
   color: white;
 }
 
-.btn.add {
+.am.add {
   background-color: #5cb85c;
   color: white;
 }
 
-.btn.draft {
+.am.draft1 {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
   background-color: #f0ad4e;
   color: white;
 }
 
-.btn.view {
+.am.view {
   background-color: #ffa500;
   color: white;
 }
 
-table {
+.table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  background-color: #fff; /* 白色背景 */
+  border-radius: 8px; /* 圆角 */
+  overflow: hidden; /* 隐藏溢出 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
 
-th,
-td {
+.table th,
+.table td {
+  padding: 15px;
   border: 1px solid #ddd;
-  padding: 8px;
   text-align: left;
+  font-size: 14px;
 }
 
-th {
-  background-color: #f2f2f2;
-  color: #FFA500;
+.table th {
+  background-color: #007bff;
+  color: white;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
-td img {
+.table tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* 斑马条纹效果 */
+}
+
+.table tbody tr:hover {
+  background-color: #f1f1f1; /* 鼠标悬停时的背景颜色 */
+}
+.table td img {
   width: 20px;
   margin-right: 10px;
 }

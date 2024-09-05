@@ -32,7 +32,7 @@
         <input type="text" v-model="totalExpense" readonly />
       </div>
     </div>
-    <table>
+    <table class="table">
       <thead>
       <tr>
         <th>流水号</th>
@@ -145,8 +145,12 @@ export default {
 
 <style scoped>
 .financial-summary {
-  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 20px;
+  background-color: #f5f7fa; /* 添加背景色 */
+  border-radius: 8px; /* 圆角 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
 
 .search-bar {
@@ -174,26 +178,38 @@ export default {
   margin-right: 5px;
 }
 
-table {
+.table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 10px;
+  background-color: #fff; /* 白色背景 */
+  border-radius: 8px; /* 圆角 */
+  overflow: hidden; /* 隐藏溢出 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
 
-th,
-td {
+.table th,
+.table td {
+  padding: 15px;
   border: 1px solid #ddd;
-  padding: 8px;
   text-align: left;
+  font-size: 14px;
 }
 
-th {
-  background-color: #f2f2f2;
+.table th {
+  background-color: #007bff;
+  color: white;
+  text-transform: uppercase;
+  font-weight: bold;
 }
 
-.table-row {
-  height: 50px; /* 固定行高 */
+.table tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* 斑马条纹效果 */
 }
+
+.table tbody tr:hover {
+  background-color: #f1f1f1; /* 鼠标悬停时的背景颜色 */
+}
+
 
 .btn {
   padding: 5px 10px;
@@ -206,6 +222,14 @@ th {
 .btn.search {
   background-color: #0275d8; /* 蓝色 */
   color: white;
+  padding: 10px 20px;
+  margin: 2px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100px;
+  text-align: center;
+  font-size:14px;
 }
 
 .pagination {

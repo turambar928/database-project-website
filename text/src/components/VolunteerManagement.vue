@@ -1,15 +1,15 @@
 <template>
-  <div>
+  <div class="ManageVol">
     <h1>上任志愿者管理</h1>
     <div class="search-bar">
       <input v-model="searchName" placeholder="姓名" />
       <select v-model="searchCriteria">
         <option value="score">得分</option>
       </select>
-      <button @click="search" class="buttonsearch">搜索</button>
+      <button @click="search" class="buttonSearch">搜索</button>
 
     </div>
-    <table>
+    <table class="table">
       <thead>
       <tr>
         <th>账号ID</th>
@@ -40,21 +40,6 @@
       </tbody>
     </table>
     <!-- 编辑对话框 -->
-    <div v-if="showEditDialog" class="edit-dialog">
-      <div class="dialog-content">
-        <h2>{{ editMode ? '修改志愿者' : '添加志愿者' }}</h2>
-        <label>姓名: <input v-model="editVolunteerData.name" /></label>
-        <label>身份证号: <input v-model="editVolunteerData.idCard" /></label>
-        <label>电话: <input v-model="editVolunteerData.phoneNum" /></label>
-        <label>接单次数: <input type="number" v-model="editVolunteerData.deliverCount" /></label>
-        <label>得分: <input type="number" step="0.1" v-model="editVolunteerData.score" /></label>
-        <div class="dialog-actions">
-          <button @click="saveVolunteer">{{ editMode ? '保存' : '添加' }}</button>
-          <button @click="closeEditDialog">取消</button>
-        </div>
-        <button class="close-dialog" @click="closeEditDialog">X</button>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -150,37 +135,6 @@ export default {
 
       console.log('筛选后的志愿者列表:', this.filteredVolunteers);
     },
-
-
-
-
-
-    addVolunteer() {
-      this.editMode = false;
-      this.editVolunteerData = { accountId: null, name: '', idCard: '', phoneNum: '', deliverCount: 0, score: 0 };
-      this.showEditDialog = true;
-    },
-    editVolunteer(volunteer) {
-      this.editMode = true;
-      this.editVolunteerData = { ...volunteer };
-      this.showEditDialog = true;
-    },
-    saveVolunteer() {
-      if (this.editMode) {
-        const index = this.volunteers.findIndex(v => v.accountId === this.editVolunteerData.accountId);
-        if (index !== -1) {
-          this.volunteers.splice(index, 1, this.editVolunteerData);
-        }
-      } else {
-        this.editVolunteerData.accountId = this.volunteers.length + 1;
-        this.volunteers.push({ ...this.editVolunteerData });
-      }
-      this.closeEditDialog();
-      this.search();
-    },
-    closeEditDialog() {
-      this.showEditDialog = false;
-    }
   },
   mounted() {
     this.fetchVolunteers();
@@ -190,12 +144,29 @@ export default {
 
 
 <style scoped>
+.ManageVol{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f5f7fa; /* 添加背景色 */
+  border-radius: 8px; /* 圆角 */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
+}
 .search-bar {
   display: flex;
   align-items: center;
   margin-bottom: 20px;
 }
-
+.buttonSearch{
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: white;
+  background-color: #0275d8; /* 蓝色 */
+}
 .search-bar input,
 .search-bar select {
   margin-right: 10px;
@@ -209,66 +180,41 @@ export default {
   background-color: #0056b3;
   transform: translateY(-1px); /* 缩小悬停时的上移效果 */
 }
-.search-bar .buttonadd {
-  background-color: #4CAF50; /* 设置添加按钮的背景色 */
-}
-.search-bar .buttonadd:hover {
-  background-color: #218838;
-  transform: translateY(-1px);
-}
-
-table {
+.table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
+  background-color: #fff; /* 白色背景 */
+  border-radius: 8px; /* 圆角 */
+  overflow: hidden; /* 隐藏溢出 */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
 
-th,
-td {
+.table th,
+.table td {
+  padding: 15px;
   border: 1px solid #ddd;
-  padding: 8px;
-  text-align: center;
+  text-align: left;
+  font-size: 14px;
 }
 
-th {
-  background-color: #f2f2f2;
+.table th {
+  background-color: #007bff;
+  color: white;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* 斑马条纹效果 */
+}
+
+.table tbody tr:hover {
+  background-color: #f1f1f1; /* 鼠标悬停时的背景颜色 */
 }
 
 .button-group {
   display: flex;
   justify-content:center;
-}
-
-.edit-button,
-.delete-button {
-  padding: 15px 8px;
-  border: none;
-  cursor: pointer;
-  width: 60px;
-  border-radius: 12%;
-}
-.edit-button {
-  background-color: #4CAF50;
-  color: white;
-  margin-right: 20px; /* 设置按钮之间的间距 */
-}
-
-.delete-button {
-  background-color: #f44336;
-  color: white;
-  
-}
-
-.edit-dialog {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: white;
-  border: 1px solid #ddd;
-  padding: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
 }
 
 .dialog-content {
