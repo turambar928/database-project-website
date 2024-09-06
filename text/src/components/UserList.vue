@@ -74,8 +74,8 @@
         <span class="close" @click="closeDetail">&times;</span>
         <h3>用户信息</h3>
         <p><strong>姓名：</strong> {{ selectedUser.name || "空" }}</p>
-        <p><strong>身份证号：</strong> {{ selectedUser.idNumber || "空" }}</p>
-        <p><strong>生日：</strong> {{ selectedUser.birthday || "空" }}</p>
+        <p><strong>身份证号：</strong> {{ selectedUser.idCard || "空" }}</p>
+        <p><strong>生日：</strong> {{ selectedUser.birthDate || "空" }}</p>
         <p><strong>地址：</strong> {{ selectedUser.address || "空" }}</p>
       </div>
     </div>
@@ -244,8 +244,8 @@ export default {
               const userData = response.data.response[0];
               this.selectedUser = {
                 name: userData.name || '空',
-                idNumber: userData.idNumber || '空',
-                birthday: userData.birthday || '空',
+                idCard: userData.idCard || '空',
+                birthDate: userData.birthDate || '空',
                 address: userData.address || '空'
               };
               this.showDetail = true;

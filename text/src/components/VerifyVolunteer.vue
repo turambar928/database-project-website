@@ -55,7 +55,6 @@
 
 <script>
 import axios from 'axios';
-
 export default {
   data() {
     return {
@@ -88,8 +87,8 @@ export default {
         console.log('正在从API获取所有申请数据...');
         const response = await axios.get('http://8.136.125.61/api/Volunteer/getAllApply', {
           headers: {
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
-          }
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTU5NDg5NSwiZXhwIjoxNzM0MjM0ODk1LCJpYXQiOjE3MjU1OTQ4OTUsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.OkgMONlYa5cx6Cm91j_Vts-DYzbUgfRrqSl5f3bWxBE',
+        }
         });
         console.log('API响应数据:', response);
         this.applications = response.data.response;
@@ -135,12 +134,13 @@ export default {
       try {
         console.log(`正在审核申请ID为 ${applicationId} 的数据...`);
         const response = await axios.post(`http://8.136.125.61/api/Volunteer/review/${applicationId}`, {
-          headers: {
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
-          },
           reason: reason,
           status: status
-        });
+        },
+        {
+          headers: {
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTU5NDg5NSwiZXhwIjoxNzM0MjM0ODk1LCJpYXQiOjE3MjU1OTQ4OTUsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.OkgMONlYa5cx6Cm91j_Vts-DYzbUgfRrqSl5f3bWxBE',
+        }});
         console.log('审核请求成功:', response.data);
         alert(`审核成功: 申请ID: ${applicationId} 状态: ${status}`);
         this.closeApproveDialog();
