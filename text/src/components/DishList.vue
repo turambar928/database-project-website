@@ -14,8 +14,8 @@
         </option>
       </select>
 
-      <button @click="searchDishes">搜索</button>
-      <button @click="openAddDishForm">+</button>
+      <button @click="searchDishes" class="btn blue">搜索</button>
+      <button @click="openAddDishForm" class="btn green">+</button>
     </div>
 
     <div v-if="showForm" class="dish-form-overlay">
@@ -540,7 +540,28 @@ const updateIngredientName = (index) => {
 .dish-list {
   padding: 20px;
 }
-
+.btn.blue {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #97cfff;
+  color: #0275d8;
+  font-weight: bold;
+}
+.btn.green {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #81fa9d;
+  color: #006b29;
+  font-weight: bold;
+}
 .search-bar {
   display: flex;
   align-items: center;
@@ -583,10 +604,6 @@ const updateIngredientName = (index) => {
   margin-left: 10px;
 }
 
-.search-bar button:hover {
-  background-color: #0056b3;
-  transform: translateY(-2px);
-}
 
 .search-bar button:last-child {
   background-color: #28a745;
@@ -594,9 +611,7 @@ const updateIngredientName = (index) => {
   padding: 5px 10px;
 }
 
-.search-bar button:last-child:hover {
-  background-color: #218838;
-}
+
 
 .dish-form-overlay {
   position: fixed;
@@ -764,9 +779,6 @@ const updateIngredientName = (index) => {
   transition: background-color 0.3s ease;
 }
 
-.delete-button:hover {
-  background-color: #c82333;
-}
 
 
 .button-group {
@@ -877,8 +889,9 @@ const updateIngredientName = (index) => {
   margin-top: 5px;
   padding: 5px 10px;
   border: none;
-  background-color: #007bff;
-  color: white;
+  background-color: #97cfff;
+  color: #0275d8;
+  font-weight: bold;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -887,10 +900,6 @@ const updateIngredientName = (index) => {
 
 .Action-buttons button:last-child {
   margin-right: 0; /* 确保最后一个按钮没有额外的右侧间距 */
-}
-
-.Action-buttons button:hover {
-  background-color: #0056b3;
 }
 
 

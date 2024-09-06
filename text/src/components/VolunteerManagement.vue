@@ -6,7 +6,7 @@
       <select v-model="searchCriteria">
         <option value="score">得分</option>
       </select>
-      <button @click="search" class="buttonSearch">搜索</button>
+      <button @click="search" class="btn blue">搜索</button>
 
     </div>
     <table class="table">
@@ -31,10 +31,8 @@
         <td>{{ volunteer.deliverCount }}</td>
         <td>{{ volunteer.score }}</td>
         <td>
-          <div class="button-group">
-            <button class="edit-button" @click="editVolunteer(volunteer)">修改</button>
-            <button class="delete-button" @click="deleteVolunteer(volunteer.accountId)">删除</button>
-          </div>
+            <button class="btn blue" @click="editVolunteer(volunteer)">修改</button>
+            <button class="btn red" @click="deleteVolunteer(volunteer.accountId)">删除</button>
         </td>
       </tr>
       </tbody>
@@ -148,7 +146,7 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f5f7fa; /* 添加背景色 */
+  background-color: #ffffff; /* 添加背景色 */
   border-radius: 8px; /* 圆角 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
@@ -173,18 +171,33 @@ export default {
   padding: 5px;
 }
 
-.search-bar .buttonsearch {
-  background-color: #007bff; /* 设置搜索按钮的背景色 */
+.btn.blue {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #97cfff;
+  color: #0275d8;
+  font-weight: bold;
 }
-.search-bar .buttonsearch:hover {
-  background-color: #0056b3;
-  transform: translateY(-1px); /* 缩小悬停时的上移效果 */
+
+.btn.red {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #f98691;
+  color: rgb(247, 10, 10);
+  font-weight: bold;
 }
 .table {
   width: 100%;
   border-collapse: collapse;
   background-color: #fff; /* 白色背景 */
-  border-radius: 8px; /* 圆角 */
   overflow: hidden; /* 隐藏溢出 */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
@@ -192,14 +205,14 @@ export default {
 .table th,
 .table td {
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid rgba(225, 217, 208, 0.5);
   text-align: left;
   font-size: 14px;
 }
 
 .table th {
-  background-color: #007bff;
-  color: white;
+  background-color: rgba(225, 217, 208, 0.5);
+  color: rgb(0, 0, 0);
   text-transform: uppercase;
   font-weight: bold;
 }
@@ -211,7 +224,6 @@ export default {
 .table tbody tr:hover {
   background-color: #f1f1f1; /* 鼠标悬停时的背景颜色 */
 }
-
 .button-group {
   display: flex;
   justify-content:center;

@@ -4,7 +4,7 @@
     <div class="search-bar">
       <input type="text" placeholder="流水号" v-model="searchID" />
       <input type="text" placeholder="申请人" v-model="searchApplicant" />
-      <button class="btn search" @click="search">搜索</button>
+      <button class="btn blue" @click="search">搜索</button>
     </div>
     <table class="table">
       <thead>
@@ -30,8 +30,8 @@
         <td>{{ item.financeDate }}</td>
         <td>{{ item.inOrOut }}</td>
         <td>
-          <button class="btn approve" @click="updateStatus(item.financeId, '通过')">通过</button>
-          <button class="btn reject" @click="updateStatus(item.financeId, '不通过')">不通过</button>
+          <button class="btn green" @click="updateStatus(item.financeId, '通过')">通过</button>
+          <button class="btn red" @click="updateStatus(item.financeId, '不通过')">不通过</button>
         </td>
       </tr>
       </tbody>
@@ -155,7 +155,7 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f5f7fa; /* 添加背景色 */
+  background-color: #ffffff; /* 添加背景色 */
   border-radius: 8px; /* 圆角 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
@@ -174,7 +174,6 @@ export default {
   width: 100%;
   border-collapse: collapse;
   background-color: #fff; /* 白色背景 */
-  border-radius: 8px; /* 圆角 */
   overflow: hidden; /* 隐藏溢出 */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
@@ -182,14 +181,14 @@ export default {
 .table th,
 .table td {
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid rgba(225, 217, 208, 0.5);
   text-align: left;
   font-size: 14px;
 }
 
 .table th {
-  background-color: #007bff;
-  color: white;
+  background-color: rgba(225, 217, 208, 0.5);
+  color: rgb(0, 0, 0);
   text-transform: uppercase;
   font-weight: bold;
 }
@@ -202,13 +201,6 @@ export default {
   background-color: #f1f1f1; /* 鼠标悬停时的背景颜色 */
 }
 .btn {
-  padding: 5px 10px;
-  margin: 2px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.btn.search{
   padding: 10px 20px;
   margin: 2px;
   border: none;
@@ -216,18 +208,42 @@ export default {
   cursor: pointer;
   width: 100px;
   text-align: center;
-  font-size:14px;
-  background-color: #0275d8; /* 蓝色 */
 }
-.btn.approve {
-  background-color: #4CAF50; /* 绿色 */
-  color: white;
+.btn.blue {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #97cfff;
+  color: #0275d8;
+  font-weight: bold;
+}
+.btn.red {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #f98691;
+  color: rgb(247, 10, 10);
+  font-weight: bold;
 }
 
-.btn.reject {
-  background-color: #f44336; /* 红色 */
-  color: white;
+.btn.green {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #81fa9d;
+  color: #006b29;
+  font-weight: bold;
 }
+
 
 .pagination {
   display: flex;

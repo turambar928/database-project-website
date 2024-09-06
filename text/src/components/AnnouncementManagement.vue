@@ -15,25 +15,28 @@
     <table class="table">
       <thead>
       <tr>
-        <th>标题</th>
-        <th>发布人</th>
-        <th>时间</th>
-        <th>操作</th>
+        <th style="width: 25%">标题</th>
+        <th style="width: 25%">发布人</th>
+        <th style="width: 25%">时间</th>
+        <th style="width: 25%">操作</th>
       </tr>
       </thead>
       <tbody>
-      <tr v-for="announcement in announcements" :key="announcement.id">
+      <tr v-for="announcement in paginatedAnnouncements" :key="announcement.id">
         <td><img src="bell-icon.png" alt="icon">{{ announcement.title }}</td>
         <td>{{ announcement.author }}</td>
         <td>{{ announcement.date }}</td>
-        <td><button class="am view" @click="viewAnnouncement(announcement)">查看内容</button></td>
+        <td style="text-align:center;"><button class="am view" @click="viewAnnouncement(announcement)">查看内容</button></td>
       </tr>
       </tbody>
     </table>
+    <!-- 分页 -->
     <div class="pagination">
-      <button @click="prevPage">«</button>
-      <span v-for="page in totalPages" :key="page" @click="goToPage(page)">{{ page }}</span>
-      <button @click="nextPage">»</button>
+      <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="button orange">上一页</button>
+      <span>{{ currentPage }} / {{ totalPages }}</span>
+      <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="button orange">下一页</button>
+      <input v-model="pageInput" type="number" min="1" :max="totalPages" placeholder="跳转" class="input-field" />
+      <button @click="changePage(pageInput)" :disabled="!pageInput || pageInput < 1 || pageInput > totalPages" class="button orange">跳转</button>
     </div>
 
     <!-- 添加公告的模态框 -->
@@ -86,6 +89,17 @@ export default {
       announcements: [
         { id: 1, title: '公告1', author: '发布人A', date: '2024-01-01', content: '这是公告1的内容。' },
         { id: 2, title: '公告2', author: '发布人B', date: '2024-01-02', content: '这是公告2的内容。' },
+        { id: 3, title: '公告1', author: '发布人A', date: '2024-01-01', content: '这是公告1的内容。' },
+        { id: 4, title: '公告2', author: '发布人B', date: '2024-01-02', content: '这是公告2的内容。' },
+        { id: 5, title: '公告1', author: '发布人A', date: '2024-01-01', content: '这是公告1的内容。' },
+        { id: 6, title: '公告2', author: '发布人B', date: '2024-01-02', content: '这是公告2的内容。' },
+        { id: 7, title: '公告1', author: '发布人A', date: '2024-01-01', content: '这是公告1的内容。' },
+        { id: 8, title: '公告2', author: '发布人B', date: '2024-01-02', content: '这是公告2的内容。' },
+        { id: 9, title: '公告1', author: '发布人A', date: '2024-01-01', content: '这是公告1的内容。' },
+        { id: 10, title: '公告2', author: '发布人B', date: '2024-01-02', content: '这是公告2的内容。' },
+        { id: 11, title: '公告1', author: '发布人A', date: '2024-01-01', content: '这是公告1的内容。' },
+        { id: 12, title: '公告2', author: '发布人B', date: '2024-01-02', content: '这是公告2的内容。' },
+        
       ],
       newAnnouncement: {
         title: '',
@@ -100,13 +114,37 @@ export default {
         content: '',
       },
       currentPage: 1,
-      totalPages: 5,
+      itemsPerPage: 5, 
       showAddModal: false,
       showDraftModalFlag: false,
       showViewModal: false,
+      pageInput: '', // 页码输入
     };
   },
+  computed: {
+    // 计算总页数
+    totalPages() {
+      return Math.ceil(this.announcements.length / this.itemsPerPage);
+    },
+    // 获取当前页的公告
+    paginatedAnnouncements() {
+      const start = (this.currentPage - 1) * this.itemsPerPage;
+      const end = start + this.itemsPerPage;
+      return this.announcements.slice(start, end);
+    }
+  },
+  
   methods: {
+    // 页码跳转逻辑
+    changePage(page) {
+      const pageNum = Number(page); // 将输入的页码转换为数字
+      if (pageNum >= 1 && pageNum <= this.totalPages) {
+        this.currentPage = pageNum; // 设置当前页码
+        this.pageInput = ''; // 清空输入框
+      } else {
+        alert('请输入有效的页码'); // 添加简单的页码验证
+      }
+    },
     search() {
       // 搜索逻辑
     },
@@ -125,7 +163,7 @@ export default {
         });
         this.closeAddAnnouncementModal();
       } else {
-        alert("请填写所有字段");
+        alert('请填写所有字段');
       }
     },
     showDraftModal() {
@@ -136,7 +174,7 @@ export default {
       this.newAnnouncement = { title: '', author: '', date: '', content: '' };
     },
     saveDraft() {
-      console.log("草稿保存成功: ", this.newAnnouncement);
+      console.log('草稿保存成功: ', this.newAnnouncement);
       this.closeDraftModal();
     },
     viewAnnouncement(announcement) {
@@ -145,19 +183,6 @@ export default {
     },
     closeViewModal() {
       this.showViewModal = false;
-    },
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
-    },
-    nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
-    },
-    goToPage(page) {
-      this.currentPage = page;
     }
   }
 };
@@ -168,9 +193,13 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f5f7fa; /* 添加背景色 */
+  background-color: #ffffff; /* 添加背景色 */
   border-radius: 8px; /* 圆角 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
+}
+
+.search-bar {
+  background-color: rgba(225, 217, 208, 0.5);
 }
 
 .am {
@@ -183,13 +212,15 @@ export default {
 }
 
 .am.search {
-  background-color: #0275d8;
-  color: white;
+  background-color: #97cfff;
+  color: #0275d8;
+  font-weight: bold;
 }
 
 .am.add {
-  background-color: #5cb85c;
-  color: white;
+  background-color: #98de98;
+  color: #3aa13a;
+  font-weight: bold;
 }
 
 .am.draft1 {
@@ -199,20 +230,21 @@ export default {
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  background-color: #f0ad4e;
-  color: white;
+  background-color: #ffca7f;
+  color: #cf8d31;
+  font-weight: bold;
 }
 
 .am.view {
-  background-color: #ffa500;
-  color: white;
+  background-color: #ffca7f;
+  color: #cf8d31;
+  font-weight: bold;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
   background-color: #fff; /* 白色背景 */
-  border-radius: 8px; /* 圆角 */
   overflow: hidden; /* 隐藏溢出 */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
@@ -220,14 +252,14 @@ export default {
 .table th,
 .table td {
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid rgba(225, 217, 208, 0.5);
   text-align: left;
   font-size: 14px;
 }
 
 .table th {
-  background-color: #007bff;
-  color: white;
+  background-color: rgba(225, 217, 208, 0.5);
+  color: rgb(0, 0, 0);
   text-transform: uppercase;
   font-weight: bold;
 }
@@ -244,17 +276,33 @@ export default {
   margin-right: 10px;
 }
 
-.pagination {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
+.pagination button {
+  margin: 0 5px;
+  padding: 3px;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  border: 2px solid rgb(103, 136, 246);
+  background-color: white;
+  color: rgb(103, 136, 246);
+  font-size: 10px;
+  font-weight: 400;
 }
 
-.pagination button,
-.pagination span {
-  margin: 0 5px;
-  cursor: pointer;
+.pagination button:disabled {
+  border: 2px solid rgb(223, 223, 223);
+  background-color: white;
+  color: rgb(223, 223, 223);
 }
+.pagination span {
+  color: rgb(223, 223, 223);
+}
+.input-field {
+  width: 50px;
+  padding: 5px;
+  font-size: 10px;
+}
+
 
 .modal {
   position: fixed;

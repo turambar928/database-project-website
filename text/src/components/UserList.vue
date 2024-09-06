@@ -320,7 +320,7 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f5f7fa; /* 添加背景色 */
+  background-color: #ffffff; /* 添加背景色 */
   border-radius: 8px; /* 圆角 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
@@ -336,7 +336,6 @@ export default {
   width: 100%;
   border-collapse: collapse;
   background-color: #fff; /* 白色背景 */
-  border-radius: 8px; /* 圆角 */
   overflow: hidden; /* 隐藏溢出 */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
@@ -344,14 +343,14 @@ export default {
 .table th,
 .table td {
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid rgba(225, 217, 208, 0.5);
   text-align: left;
   font-size: 14px;
 }
 
 .table th {
-  background-color: #007bff;
-  color: white;
+  background-color: rgba(225, 217, 208, 0.5);
+  color: rgb(0, 0, 0);
   text-transform: uppercase;
   font-weight: bold;
 }
@@ -371,23 +370,6 @@ export default {
 }
 
 .btn {
-  padding: 5px 10px;
-  margin: 2px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  cursor: pointer;
-  background-color: #f8f9fa;
-  color: black;
-}
-
-.btn.small {
-  padding: 5px;
-  width: auto;
-}
-
-.btn.blue {
-  background-color: #007bff;
-  color: white;
   padding: 10px 15px;
   margin: 5px;
   border: none;
@@ -396,14 +378,45 @@ export default {
   font-size: 14px;
 }
 
+.btn.small {
+  padding: 5px;
+  width: auto;
+}
+
+.btn.blue {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #97cfff;
+  color: #0275d8;
+  font-weight: bold;
+}
+
 .btn.yellow {
-  background-color: #ffc107;
-  color: white;
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #ffca7f;
+  color: #cf8d31;
+  font-weight: bold;
 }
 
 .btn.red {
-  background-color: #dc3545;
-  color: white;
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #f98691;
+  color: rgb(247, 10, 10);
+  font-weight: bold;
 }
 
 .btn.green {

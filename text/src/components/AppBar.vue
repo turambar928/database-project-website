@@ -29,7 +29,7 @@ export default {
   padding: 0 16px;
   padding-left: 230px;
   height: 56px;
-  background-color: #f5f5f5; /* 顶部栏背景颜色 */
+  background-color: #ffffff; /* 顶部栏背景颜色 */
   border-bottom: 1px solid #ddd;
   position: fixed;
   top: 0;
