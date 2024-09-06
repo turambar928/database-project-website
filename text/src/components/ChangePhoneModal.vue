@@ -12,17 +12,17 @@
         <div class="input-group">
           <p>新手机号：</p>
           <input
-            type="text"
-            v-model="phonenumber"
-            @input="validatePhoneNumber"
+              type="text"
+              v-model="phonenumber"
+              @input="validatePhoneNumber"
           />
           <button
-            :class="{
+              :class="{
               disabledButton: isButtonDisabled,
               enabledButton: !isButtonDisabled,
             }"
-            :disabled="isButtonDisabled"
-            @click="sendOTP"
+              :disabled="isButtonDisabled"
+              @click="sendOTP"
           >
             {{ buttonText }}
           </button>
@@ -70,10 +70,10 @@ export default {
 
       try {
         const response = await axios.post(
-          "http://8.136.125.61/api/Account/sendOTP",
-          {
-            PhoneNum: this.phonenumber,
-          }
+            "http://8.136.125.61/api/Account/sendOTP",
+            {
+              PhoneNum: this.phonenumber,
+            }
         );
         console.log(response);
         if (response.data.success) {
@@ -124,11 +124,11 @@ export default {
     async verifyOtp() {
       try {
         const response = await axios.post(
-          "http://8.136.125.61/api/Account/verifiationCodeWithoutUserCheck",
-          {
-            PhoneNum: this.phonenumber,
-            Code: this.otp,
-          }
+            "http://8.136.125.61/api/Account/verifiationCodeWithoutUserCheck",
+            {
+              PhoneNum: this.phonenumber,
+              Code: this.otp,
+            }
         );
         console.log(response);
         if (response.data.success) {
@@ -156,11 +156,11 @@ export default {
           Authorization: `Bearer ${token}`,
         };
         const response = await axios.post(
-          "http://8.136.125.61/api/Account/changePhone",
-          {
-            NewPhoneNum: this.phonenumber,
-          },
-          { headers }
+            "http://8.136.125.61/api/Account/changePhone",
+            {
+              NewPhoneNum: this.phonenumber,
+            },
+            { headers }
         );
         console.log(response);
         if (response.data.success) {

@@ -46,9 +46,11 @@
       </tbody>
     </table>
     <div class="pagination">
-      <button @click="prevPage" :disabled="currentPage === 1">«</button>
-      <span v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="{'active': currentPage === page}">{{ page }}</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages">»</button>
+      <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="button orange">上一页</button>
+      <span>{{ currentPage }} / {{ totalPages }}</span>
+      <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="button orange">下一页</button>
+      <input v-model="pageInput" type="number" min="1" :max="totalPages" placeholder="跳转" class="input-field" />
+      <button @click="changePage(pageInput)" :disabled="!pageInput || pageInput < 1 || pageInput > totalPages" class="button orange">跳转</button>
     </div>
 
     <!-- 添加食材弹出框 -->
@@ -222,7 +224,7 @@ export default {
 
         const response = await axios.post('http://8.136.125.61/api/repo/restock', requestPayload, {
           headers: {
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTQ1NDYxMSwiZXhwIjoxNzI1NTQxMDExLCJpYXQiOjE3MjU0NTQ2MTEsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.r9SFdp9ChD9jVDX4qmp97pyWr7uF81ct6yXgORksdbw',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTU5NDg5NSwiZXhwIjoxNzM0MjM0ODk1LCJpYXQiOjE3MjU1OTQ4OTUsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.OkgMONlYa5cx6Cm91j_Vts-DYzbUgfRrqSl5f3bWxBE',
             'Content-Type': 'application/json'
           }
         });
@@ -259,7 +261,7 @@ export default {
             expiry: this.searchExpiry || undefined
           },
           headers: {
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAwMiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTEyMjMxNywiZXhwIjoyMDg1MTIyMzE3LCJpYXQiOjE3MjUxMjIzMTcsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.iuxCr68lU34uW5KsZj2c15bwTFsdiguorpWyo_6quP0'
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTU5NDg5NSwiZXhwIjoxNzM0MjM0ODk1LCJpYXQiOjE3MjU1OTQ4OTUsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.OkgMONlYa5cx6Cm91j_Vts-DYzbUgfRrqSl5f3bWxBE'
           }
         });
 
@@ -286,7 +288,7 @@ export default {
       try {
         const response = await axios.post('http://8.136.125.61/api/ingredients/add', requestPayload, {
           headers: {
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAwMiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTEyMjMxNywiZXhwIjoyMDg1MTIyMzE3LCJpYXQiOjE3MjUxMjIzMTcsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.iuxCr68lU34uW5KsZj2c15bwTFsdiguorpWyo_6quP0',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTU5NDg5NSwiZXhwIjoxNzM0MjM0ODk1LCJpYXQiOjE3MjU1OTQ4OTUsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.OkgMONlYa5cx6Cm91j_Vts-DYzbUgfRrqSl5f3bWxBE',
             'Content-Type': 'application/json'
           }
         });

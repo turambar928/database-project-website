@@ -28,7 +28,7 @@ export default {
         'canteen3.jpg',
       ],
       canteenName: '长者食堂',
-      canteenAddress: '癫火教堂',
+      canteenAddress: '同济大学老年社区',
       canteenPhone: '123-456-7890',
       canteenHours: '每天 8:00 - 20:00'
     };

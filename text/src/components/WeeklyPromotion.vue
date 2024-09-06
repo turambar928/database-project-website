@@ -226,18 +226,20 @@ export default {
   font-size: 18px;
 }
 .status {
-  background-color: #007bff;
-  color: white;
+  border: 2px solid rgb(103, 136, 246);
+  background-color: white;
+  color: rgb(103, 136, 246);
   padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
   font-weight: bold;
-  border: none;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: background-color 0.3s ease;
 }
 .status:hover {
-  background-color: #0056b3;
+  border: 2px solid rgb(103, 136, 246);
+  background-color: white;
+  color: rgb(103, 136, 246);
 }
 .promotion-table {
   width: 100%;
@@ -267,9 +269,9 @@ export default {
   background-color: #f1f1f1; /* 鼠标悬停时的背景颜色 */
 }
 .promotion-table td button {
-  background-color: #97cfff;
-  color: #0275d8;
-  border: none;
+  border: 2px solid rgb(103, 136, 246);
+  background-color: white;
+  color: rgb(103, 136, 246);
   padding: 6px 12px;
   border-radius: 4px;
   cursor: pointer;

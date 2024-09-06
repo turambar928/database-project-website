@@ -31,7 +31,7 @@
         <td>{{ volunteer.deliverCount }}</td>
         <td>{{ volunteer.score }}</td>
         <td>
-            <button class="btn blue" @click="editVolunteer(volunteer)">修改</button>
+
             <button class="btn red" @click="deleteVolunteer(volunteer.accountId)">删除</button>
         </td>
       </tr>
@@ -172,8 +172,9 @@ export default {
 }
 
 .btn.blue {
+  display:block;
+  margin:0 auto;
   padding: 10px 15px;
-  margin: 5px;
   border: none;
   border-radius: 4px;
   cursor: pointer;

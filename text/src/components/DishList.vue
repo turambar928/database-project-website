@@ -888,9 +888,10 @@ const updateIngredientName = (index) => {
 .Action-buttons button {
   margin-top: 5px;
   padding: 5px 10px;
-  border: none;
-  background-color: #97cfff;
-  color: #0275d8;
+
+  border: 2px solid rgb(103, 136, 246);
+  background-color: white;
+  color: rgb(103, 136, 246);
   font-weight: bold;
   border-radius: 5px;
   cursor: pointer;
@@ -913,9 +914,9 @@ const updateIngredientName = (index) => {
 .pagination button {
   margin-right: 5px;
   padding: 5px 10px;
-  border: 1px solid #007bff;
-  background-color: #007bff;
-  color: white;
+  border: 2px solid rgb(103, 136, 246);
+  background-color: white;
+  color: rgb(103, 136, 246);
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -932,7 +933,9 @@ const updateIngredientName = (index) => {
   text-align: center;
   margin-right: 5px;
   padding: 5px;
-  border: 1px solid #007bff;
+  border: 2px solid rgb(103, 136, 246);
+  background-color: white;
+  color: rgb(103, 136, 246);
   border-radius: 5px;
 }
 /* 添加背景容器样式 */

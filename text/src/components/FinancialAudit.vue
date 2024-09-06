@@ -36,9 +36,11 @@
       </tbody>
     </table>
     <div class="pagination">
-      <button @click="prevPage" :disabled="currentPage === 1">«</button>
-      <span v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="{'active': currentPage === page}">{{ page }}</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages">»</button>
+      <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="button orange">上一页</button>
+      <span>{{ currentPage }} / {{ totalPages }}</span>
+      <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="button orange">下一页</button>
+      <input v-model="pageInput" type="number" min="1" :max="totalPages" placeholder="跳转" class="input-field" />
+      <button @click="changePage(pageInput)" :disabled="!pageInput || pageInput < 1 || pageInput > totalPages" class="button orange">跳转</button>
     </div>
 
     <!-- 提示信息弹出框 -->
@@ -167,15 +169,9 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-<<<<<<< HEAD
   background-color: #ffffff; /* 添加背景色 */
   border-radius: 8px; /* 圆角 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
-=======
-  background-color: #f5f7fa;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
->>>>>>> f7b000bb3f6d043b5d594299674d37180c608251
 }
 
 .search-bar {
@@ -191,16 +187,9 @@ export default {
 .table {
   width: 100%;
   border-collapse: collapse;
-<<<<<<< HEAD
   background-color: #fff; /* 白色背景 */
   overflow: hidden; /* 隐藏溢出 */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
-=======
-  background-color: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
->>>>>>> f7b000bb3f6d043b5d594299674d37180c608251
 }
 
 .table th,
@@ -227,17 +216,6 @@ export default {
 }
 
 .btn {
-<<<<<<< HEAD
-=======
-  padding: 5px 10px;
-  margin: 2px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn.search {
->>>>>>> f7b000bb3f6d043b5d594299674d37180c608251
   padding: 10px 20px;
   margin: 2px;
   border: none;
@@ -245,7 +223,6 @@ export default {
   cursor: pointer;
   width: 100px;
   text-align: center;
-<<<<<<< HEAD
 }
 .btn.blue {
   padding: 10px 15px;
@@ -280,20 +257,6 @@ export default {
   background-color: #81fa9d;
   color: #006b29;
   font-weight: bold;
-=======
-  font-size: 14px;
-  background-color: #0275d8;
-}
-
-.btn.approve {
-  background-color: #4CAF50;
-  color: white;
-}
-
-.btn.reject {
-  background-color: #f44336;
-  color: white;
->>>>>>> f7b000bb3f6d043b5d594299674d37180c608251
 }
 
 

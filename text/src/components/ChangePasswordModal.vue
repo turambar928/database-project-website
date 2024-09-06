@@ -65,17 +65,17 @@ export default {
       const token = localStorage.getItem("token");
       try {
         const response = await axios.post(
-          `http://8.136.125.61/api/Account/alterPassword`,
-          {
-            oldPassword: this.oldPassword,
-            newPassword: this.newPassword,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
+            `http://8.136.125.61/api/Account/alterPassword`,
+            {
+              oldPassword: this.oldPassword,
+              newPassword: this.newPassword,
             },
-          }
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
         );
 
         if (response.data.success) {

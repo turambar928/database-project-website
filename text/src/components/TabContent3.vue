@@ -16,7 +16,7 @@
         <!-- 显示可编辑的输入框 -->
         <template v-if="isEditing && editableFields.includes(field.name)">
           <input
-              v-if="field.name !== 'gender' && field.name !== 'birthDate' && field.name !== 'phoneNum'"
+              v-if="field.name !== 'gender' && field.name !== 'birthDate' && field.name !== 'phoneNum' && field.name !== 'password'"
               type="text"
               v-model="field.value"
               class="edit-input"
@@ -32,15 +32,22 @@
               class="edit-input"
           />
           <!-- 电话号码输入框 -->
-          <input
-              v-if="field.name === 'phoneNum'"
-              type="text"
-              v-model="field.value"
-              @blur="validatePhoneNumber"
-              class="edit-input"
-              maxlength="11"
-              placeholder="请输入11位电话号码"
-          />
+          <div v-if="field.name === 'phoneNum'" class="phone-edit-container">
+            <input
+                type="text"
+                v-model="field.value"
+                @blur="validatePhoneNumber"
+                class="edit-input"
+                maxlength="11"
+                placeholder="请输入11位电话号码"
+            />
+            <button class="small-button" @click="showChangePhoneModal">改绑手机号</button>
+          </div>
+          <!-- 密码修改选项 -->
+          <div v-if="field.name === 'password'" class="password-edit-container">
+            <span class="field-value">******</span>
+            <button class="small-button" @click="showChangePasswordModal">修改密码</button>
+          </div>
         </template>
       </template>
     </div>
@@ -51,18 +58,31 @@
       <button class="small-button confirm-button" @click="confirmUpdate">确认修改</button>
       <button class="small-button cancel-button" @click="cancelEditing">取消</button>
     </div>
+
+    <!-- 改绑手机号的模态框 -->
+    <change-phone-modal v-if="showChangePhone" @close="showChangePhone = false" />
+
+    <!-- 修改密码的模态框 -->
+    <change-password-modal v-if="showChangePassword" @close="showChangePassword = false" />
   </div>
 </template>
 
 <script>
+import ChangePhoneModal from './ChangePhoneModal.vue'; // 引入改绑手机号的组件
+import ChangePasswordModal from './ChangePasswordModal.vue'; // 引入修改密码的组件
+
 export default {
   name: 'TabContent3',
+  components: { ChangePhoneModal, ChangePasswordModal }, // 注册组件
   data() {
     return {
       isEditing: false, // 编辑模式标志
+      showChangePhone: false, // 控制手机号模态框的显示
+      showChangePassword: false, // 控制密码模态框的显示
       fields: [
         { label: '账户名称', name: 'accountName', type: 'text', value: '' },
         { label: '手机号', name: 'phoneNum', type: 'text', value: '' },
+        { label: '密码', name: 'password', type: 'text', value: '******' }, // 新增密码字段
         { label: '性别', name: 'gender', type: 'text', value: '' },
         { label: '生日', name: 'birthDate', type: 'text', value: '' },
         { label: '身份证', name: 'idCard', type: 'text', value: '' },
@@ -71,7 +91,7 @@ export default {
         { label: '剩余金额', name: 'money', type: 'text', value: '' },
         { label: '头像', name: 'portrait', type: 'text', value: '' }
       ],
-      editableFields: ['accountName', 'phoneNum', 'gender', 'birthDate', 'email', 'address'], // 可编辑字段
+      editableFields: ['accountName', 'phoneNum', 'gender', 'birthDate', 'email', 'address', 'password'], // 可编辑字段
       token: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTU5NDg5NSwiZXhwIjoxNzM0MjM0ODk1LCJpYXQiOjE3MjU1OTQ4OTUsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.OkgMONlYa5cx6Cm91j_Vts-DYzbUgfRrqSl5f3bWxBE'
     };
   },
@@ -90,6 +110,7 @@ export default {
               this.fields = [
                 { label: '账户名称', name: 'accountName', type: 'text', value: data.response.accountName },
                 { label: '手机号', name: 'phoneNum', type: 'text', value: data.response.phoneNum },
+                { label: '密码', name: 'password', type: 'text', value: '******' }, // 默认显示密码掩码
                 { label: '性别', name: 'gender', type: 'text', value: data.response.gender },
                 { label: '生日', name: 'birthDate', type: 'date', value: data.response.birthDate },
                 { label: '身份证', name: 'idCard', type: 'text', value: data.response.idCard },
@@ -145,6 +166,12 @@ export default {
         alert('电话号码必须为11位，请重新输入');
         phoneNumField.value = ''; // 清空错误输入
       }
+    },
+    showChangePhoneModal() {
+      this.showChangePhone = true; // 显示改绑手机号的模态框
+    },
+    showChangePasswordModal() {
+      this.showChangePassword = true; // 显示修改密码的模态框
     }
   },
   mounted() {
@@ -225,17 +252,22 @@ label {
 .small-button {
   background-color: #4CAF50;
   color: white;
-  padding: 5px 10px; /* 更短的按钮水平长度 */
+  padding: 5px 10px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
   font-weight: bold;
-  margin: 0 5px; /* 按钮之间的水平间距 */
-  width: 80px; /* 设置固定宽度，稍微长于文字 */
+  margin-left: 10px;
 }
 
 .cancel-button {
-  background-color: #f44336; /* 取消按钮颜色 */
+  background-color: #f44336;
+}
+
+.phone-edit-container,
+.password-edit-container {
+  display: flex;
+  align-items: center;
 }
 </style>

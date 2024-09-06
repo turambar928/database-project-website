@@ -42,11 +42,11 @@
         </tbody>
       </table>
       <div class="pagination">
-        <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="button">上一页</button>
+        <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1" class="button orange">上一页</button>
         <span>{{ currentPage }} / {{ totalPages }}</span>
-        <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="button">下一页</button>
-        <input v-model="pageInput" type="number" min="1" :max="totalPages" placeholder="跳转页码" class="input-field" />
-        <button @click="changePage(pageInput)" :disabled="!pageInput || pageInput < 1 || pageInput > totalPages" class="button">跳转</button>
+        <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages" class="button orange">下一页</button>
+        <input v-model="pageInput" type="number" min="1" :max="totalPages" placeholder="跳转" class="input-field" />
+        <button @click="changePage(pageInput)" :disabled="!pageInput || pageInput < 1 || pageInput > totalPages" class="button orange">跳转</button>
       </div>
 
       <div v-if="isModalVisible" class="modal-overlay" @click.self="closeModal">
