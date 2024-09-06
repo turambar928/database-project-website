@@ -26,7 +26,7 @@
         </tr>
         </thead>
         <tbody>
-<<<<<<< HEAD
+
         <tr v-for="employee in paginatedEmployees" :key="employee.employeeId">
           <td>{{ employee.employeeId }}</td>
           <td>{{ employee.employeeName }}</td>
@@ -40,7 +40,7 @@
             <button @click="deleteEmployee(employee.employeeId)" class="button danger">删除</button>
           </td>
         </tr>
-=======
+
           <tr v-for="employee in paginatedEmployees" :key="employee.employeeId">
             <td>{{ employee.employeeId }}</td>
             <td>{{ employee.employeeName }}</td>
@@ -54,7 +54,7 @@
               <button @click="deleteEmployee(employee.employeeId)" class="btn red">删除</button>
             </td>
           </tr>
->>>>>>> 65b118c00167701923b391d54e8458e9e103e78e
+
         </tbody>
       </table>
       <div class="pagination">

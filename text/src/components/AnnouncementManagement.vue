@@ -99,7 +99,7 @@ export default {
         { id: 10, title: '公告2', author: '发布人B', date: '2024-01-02', content: '这是公告2的内容。' },
         { id: 11, title: '公告1', author: '发布人A', date: '2024-01-01', content: '这是公告1的内容。' },
         { id: 12, title: '公告2', author: '发布人B', date: '2024-01-02', content: '这是公告2的内容。' },
-        
+
       ],
       newAnnouncement: {
         title: '',
@@ -114,7 +114,7 @@ export default {
         content: '',
       },
       currentPage: 1,
-      itemsPerPage: 5, 
+      itemsPerPage: 5,
       showAddModal: false,
       showDraftModalFlag: false,
       showViewModal: false,
@@ -133,7 +133,7 @@ export default {
       return this.announcements.slice(start, end);
     }
   },
-  
+
   methods: {
     // 页码跳转逻辑
     changePage(page) {
@@ -233,6 +233,10 @@ export default {
   background-color: #ffca7f;
   color: #cf8d31;
   font-weight: bold;
+}
+
+.am.draft1:hover{
+  background-color: #ffca7f;
 }
 
 .am.view {
