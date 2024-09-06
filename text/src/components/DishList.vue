@@ -24,12 +24,12 @@
           <h3>{{ isEditing ? '编辑菜品' : '添加菜品' }}</h3>
 
           <!-- 图片预览和上传 -->
-         <div class="image-preview">
+          <div class="image-preview">
             <img :src="imagePreviewUrl" alt="预览图片" v-if="imagePreviewUrl" />
             <!-- 仅在编辑模式下显示“修改图片”按钮 -->
             <button v-if="isEditing" @click="triggerFileInput">修改图片</button>
             <input type="file" ref="fileInput" @change="handleFileChange" style="display: none;" />
-        </div>
+          </div>
 
           <label for="dish-form-name">菜品名称</label>
           <input v-model="form.dishName" id="dish-form-name" placeholder="输入菜品名称" />
@@ -55,29 +55,29 @@
           <div id="recipe-table" class="recipe-table-container">
             <table class="recipe-table">
               <thead>
-                <tr>
-                  <th>食材</th>
-                  <th>份量</th>
-                  <th>操作</th>
-                </tr>
+              <tr>
+                <th>食材</th>
+                <th>份量</th>
+                <th>操作</th>
+              </tr>
               </thead>
               <tbody>
-                <tr v-for="(ingredient, index) in form.formula" :key="index">
-                  <td>
-                    <select v-model="ingredient.ingredientId" @change="updateIngredientName(index)">
-                      <option :value="ingredient.ingredientId">{{ ingredient.ingredientName }}</option>
-                      <option v-for="recipe in availableRecipes" :key="recipe.ingredientId" :value="recipe.ingredientId">
-                        {{ recipe.ingredientName }}
-                      </option>
-                    </select>
-                  </td>
-                  <td>
-                    <input v-model="ingredient.amount" placeholder="输入原料数量" />
-                  </td>
-                  <td>
-                    <button @click="removeIngredient(index)" class="delete-button">删除</button>
-                  </td>
-                </tr>
+              <tr v-for="(ingredient, index) in form.formula" :key="index">
+                <td>
+                  <select v-model="ingredient.ingredientId" @change="updateIngredientName(index)">
+                    <option :value="ingredient.ingredientId">{{ ingredient.ingredientName }}</option>
+                    <option v-for="recipe in availableRecipes" :key="recipe.ingredientId" :value="recipe.ingredientId">
+                      {{ recipe.ingredientName }}
+                    </option>
+                  </select>
+                </td>
+                <td>
+                  <input v-model="ingredient.amount" placeholder="输入原料数量" />
+                </td>
+                <td>
+                  <button @click="removeIngredient(index)" class="delete-button">删除</button>
+                </td>
+              </tr>
               </tbody>
             </table>
           </div>
@@ -119,6 +119,7 @@
       <button @click="goToPage(pageInput)" :disabled="!pageInput || pageInput < 1 || pageInput > totalPages">跳转</button>
       <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages">下一页</button>
     </div>
+    <div v-if="notification.message" class="notification" :class="notification.type">{{ notification.message }}</div>
   </div>
 </template>
 
@@ -126,7 +127,7 @@
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 
-axios.defaults.baseURL = 'http://8.136.125.61'; 
+axios.defaults.baseURL = 'http://8.136.125.61';
 
 // 设置 axios 默认的 Authorization 头
 axios.defaults.headers.common['Authorization'] = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw';
@@ -153,9 +154,15 @@ export default {
       image: ''
     });
     const pageInput = ref(1);
-    const fileInput = ref(null); // 使用 ref 来管理 file input 的引用
+    const fileInput = ref(null);
+    const notification = ref({ message: '', type: '' });
 
-
+    const showNotification = (message, type = 'info') => {
+      notification.value = { message, type };
+      setTimeout(() => {
+        notification.value = { message: '', type: '' };
+      }, 3000);
+    };
 
     const fetchCategories = async () => {
       try {
@@ -171,56 +178,53 @@ export default {
     };
 
     const fetchDishes = async () => {
-  try {
-    const response = await axios.get('/api/dish/search');
-    if (response.data.success) {
-      dishes.value = Array.isArray(response.data.dish) ? response.data.dish : [];
-      filteredDishes.value = dishes.value;
-      console.log(response.data);
-    } else {
-      console.error('API 请求成功，但返回的 success 为 false:', response.data.message);
-    }
-  } catch (error) {
-    console.error('获取菜品数据失败:', error.message);
-    if (error.response) {
-      console.error('请求配置:', error.config);
-      console.error('响应状态码:', error.response.status);
-      console.error('响应数据:', error.response.data);
-    } else {
-      console.error('请求失败:', error.message);
-    }
-  }
-};
-
-const fetchRecipes = async () => {
-  try {
-    const response = await axios.get('/api/ingredients/search');
-
-    // 检查 response 和 response.data 的有效性
-    if (response && response.data) {
-      if (response.data.success) {
-        // 检查 ingredients 是否为数组并且有内容
-        if (Array.isArray(response.data.ingredients) && response.data.ingredients.length > 0) {
-          availableRecipes.value = response.data.ingredients; // 更新配方数据
+      try {
+        const response = await axios.get('/api/dish/search');
+        if (response.data.success) {
+          dishes.value = Array.isArray(response.data.dish) ? response.data.dish : [];
+          filteredDishes.value = dishes.value;
+          console.log(response.data);
         } else {
-          console.error('API 返回的 ingredients 为空或不是数组:', response.data.ingredients);
-          alert('API 返回的数据格式不正确，请稍后重试。');
+          console.error('API 请求成功，但返回的 success 为 false:', response.data.message);
         }
-      } else {
-        console.error('API 请求成功，但返回的 success 为 false:', response.data.message);
-        alert('错误: ' + (response.data.message || '未知错误'));
+      } catch (error) {
+        console.error('获取菜品数据失败:', error.message);
+        if (error.response) {
+          console.error('请求配置:', error.config);
+          console.error('响应状态码:', error.response.status);
+          console.error('响应数据:', error.response.data);
+        } else {
+          console.error('请求失败:', error.message);
+        }
       }
-    } else {
-      console.error('API 响应无效或没有返回数据:', response);
-      alert('无法获取配方数据，请稍后重试。');
-    }
-  } catch (error) {
-    console.error('获取配方数据失败:', error);
-    alert('获取配方数据时发生错误，请检查您的网络连接或稍后重试。');
-  }
-};
+    };
 
-const updateIngredientName = (index) => {
+    const fetchRecipes = async () => {
+      try {
+        const response = await axios.get('/api/ingredients/search');
+        if (response && response.data) {
+          if (response.data.success) {
+            if (Array.isArray(response.data.ingredients) && response.data.ingredients.length > 0) {
+              availableRecipes.value = response.data.ingredients;
+            } else {
+              console.error('API 返回的 ingredients 为空或不是数组:', response.data.ingredients);
+              showNotification('API 返回的数据格式不正确，请稍后重试。', 'error');
+            }
+          } else {
+            console.error('API 请求成功，但返回的 success 为 false:', response.data.message);
+            showNotification('错误: ' + (response.data.message || '未知错误'), 'error');
+          }
+        } else {
+          console.error('API 响应无效或没有返回数据:', response);
+          showNotification('无法获取配方数据，请稍后重试。', 'error');
+        }
+      } catch (error) {
+        console.error('获取配方数据失败:', error);
+        showNotification('获取配方数据时发生错误，请检查您的网络连接或稍后重试。', 'error');
+      }
+    };
+
+    const updateIngredientName = (index) => {
       const selectedRecipe = availableRecipes.value.find(recipe => recipe.ingredientId === form.value.formula[index].ingredientId);
       if (selectedRecipe) {
         form.value.formula[index].ingredientName = selectedRecipe.ingredientName;
@@ -230,7 +234,7 @@ const updateIngredientName = (index) => {
     const searchDishes = () => {
       filteredDishes.value = dishes.value.filter(dish => {
         return (searchName.value === '' || dish.dishName.includes(searchName.value)) &&
-               (searchCategory.value === '' || dish.category === searchCategory.value);
+            (searchCategory.value === '' || dish.category === searchCategory.value);
       });
       currentPage.value = 1;
     };
@@ -243,10 +247,10 @@ const updateIngredientName = (index) => {
       }
     };
 
-    const openAddDishForm = async() => {
+    const openAddDishForm = async () => {
       isEditing.value = false;
       resetForm();
-      await fetchRecipes(); // 获取配方数据
+      await fetchRecipes();
       showForm.value = true;
     };
 
@@ -267,146 +271,137 @@ const updateIngredientName = (index) => {
       }
     };
 
-    const uploadImage = async (file,dishId) => {
-  if (!file || !(file instanceof File)) {
-    alert('请选择一个有效的图片文件。');
-    return null;
-  }
+    const uploadImage = async (file, dishId) => {
+      if (!file || !(file instanceof File)) {
+        showNotification('请选择一个有效的图片文件。', 'error');
+        return null;
+      }
 
-  const formData = new FormData();
-  formData.append('image', file);
-  formData.append('DishId', dishId);
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('DishId', dishId);
 
-  for (let pair of formData.entries()) {
-    console.log(`${pair[0]}: ${pair[1]}`);
-  }
+      for (let pair of formData.entries()) {
+        console.log(`${pair[0]}: ${pair[1]}`);
+      }
 
-  try {
-    const response = await fetch(`http://8.136.125.61/api/Dish/uploadImage?DishId=${dishId}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw' // 添加Authorization头部
-      },
-      body: formData,
-    });
+      try {
+        const response = await fetch(`http://8.136.125.61/api/Dish/uploadImage?DishId=${dishId}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
+          },
+          body: formData,
+        });
 
-    if (!response.ok) {
-      throw new Error(`HTTP 错误！状态码: ${response.status}，响应文本: ${response.statusText}`);
-    }
+        if (!response.ok) {
+          throw new Error(`HTTP 错误！状态码: ${response.status}，响应文本: ${response.statusText}`);
+        }
 
-    const responseData = await response.json();
-    // 提示上传成功
-    alert('图片上传成功！');
+        const responseData = await response.json();
+        showNotification('图片上传成功！', 'success');
+        fetchDishes();
 
-    fetchDishes();
-
-    return responseData.url;
-  } catch (error) {
-    console.error('上传图片失败:', error.message);
-
-    alert('上传图片失败，请检查请求路径和服务器配置，然后重试。');
-    return null;
-  }
-};
+        return responseData.url;
+      } catch (error) {
+        console.error('上传图片失败:', error.message);
+        showNotification('上传图片失败，请检查请求路径和服务器配置，然后重试。', 'error');
+        return null;
+      }
+    };
 
     const saveDish = async () => {
-  try {
-    // 检查所有必需的字段是否已填写
-    if (!form.value.dishName || !form.value.category || !form.value.price || form.value.formula.length === 0) {
-      alert('请填写所有必需的字段，包括菜品名称、类别、价格和至少一个配方。');
-      return;
-    }
+      try {
+        if (!form.value.dishName || !form.value.category || !form.value.price || form.value.formula.length === 0) {
+          showNotification('请填写所有必需的字段，包括菜品名称、类别、价格和至少一个配方。', 'error');
+          return;
+        }
 
-    // 根据选中的类别名称获取对应的 cateId
-    const selectedCategory = categories.value.find(category => category.cateName === form.value.category);
-    if (!selectedCategory) {
-      alert('所选类别无效，请重新选择。');
-      return;
-    }
+        const selectedCategory = categories.value.find(category => category.cateName === form.value.category);
+        if (!selectedCategory) {
+          showNotification('所选类别无效，请重新选择。', 'error');
+          return;
+        }
 
-    // 构建请求数据
-    const requestData = {
-      dishId: form.value.dishId,  // 如果需要生成新的ID，请移除这行
-      Name: form.value.dishName,
-      cateId: selectedCategory.cateId,
-      category: form.value.category,
-      price: parseFloat(parseFloat(form.value.price).toFixed(2)), // 保留两位小数的价格
-      formula: form.value.formula.map(item => ({
-        ingredientId: item.ingredientId,
-        ingredientName: item.ingredientName,
-        amount: item.amount
-      }))
+        const requestData = {
+          dishId: form.value.dishId,
+          Name: form.value.dishName,
+          cateId: selectedCategory.cateId,
+          category: form.value.category,
+          price: parseFloat(parseFloat(form.value.price).toFixed(2)),
+          formula: form.value.formula.map(item => ({
+            ingredientId: item.ingredientId,
+            ingredientName: item.ingredientName,
+            amount: item.amount
+          }))
+        };
+
+        const response = await axios.post('/api/dish/addDish', requestData);
+
+        if (response.data.success) {
+          dishes.value.push(response.data.dish);
+          filteredDishes.value = dishes.value;
+          cancelForm();
+          goToPage(currentPage.value);
+        } else {
+          console.error('服务器返回错误信息:', response.data.message);
+          showNotification('保存菜品失败：' + response.data.message, 'error');
+        }
+      } catch (error) {
+        console.error('保存菜品失败:', error);
+      }
     };
-
-    // 发送POST请求以保存菜品数据
-    const response = await axios.post('/api/dish/addDish', requestData);
-
-    if (response.data.success) {
-      dishes.value.push(response.data.dish);
-      filteredDishes.value = dishes.value;
-      cancelForm();
-      goToPage(currentPage.value);
-    } else {
-      console.error('服务器返回错误信息:', response.data.message);
-      alert('保存菜品失败：' + response.data.message);
-    }
-  } catch (error) {
-    console.error('保存菜品失败:', error);
-  }
-};
-
 
     const updateDish = async () => {
-  try {
-    if (fileInput.value.files[0]) {
-      const updatedImageUrl = await uploadImage(fileInput.value.files[0], form.value.dishId);
-      if (updatedImageUrl) {
-        form.value.image = updatedImageUrl; // 如果有新的图片URL，更新表单中的 image 字段
-      } else {
-        return; // 如果上传失败，退出函数
-      }
-    }
-// 根据选中的 cateName 找到对应的 cateId
-   const selectedCategory = categories.value.find(category => category.cateName === form.value.category);
-    if (selectedCategory) {
-      form.value.cateId = selectedCategory.cateId; // 更新表单中的 cateId
-    } else {
-      alert('所选类别无效，请重新选择。');
-      return; // 如果未找到匹配的类别，退出函数
-    }
-    
-    const updateData = {
-      dishId: form.value.dishId, // 使用已有的 dishId
-      Name: form.value.dishName,
-      cateId: form.value.cateId,
-      category: form.value.category,
-      price: parseFloat(parseFloat(form.value.price).toFixed(2)),
-      formula: form.value.formula.map(item => ({
-        ingredientId: item.ingredientId,
-        ingredientName: item.ingredientName,
-        amount: item.amount
-      }))
-    };
-    console.log('更新后的数据：',updateData);
-    const response = await axios.put('/api/dish/updateDish', updateData);
-    console.log('返回的数据：',response.data.dish);
-    if (response.data.success) {
-      const index = dishes.value.findIndex(d => d.dishId === form.value.dishId);
-      if (index !== -1) {
-        dishes.value.splice(index, 1, { ...form.value });
-        filteredDishes.value = dishes.value;
-      }
-      alert("更新菜品成功");
-      cancelForm();
-      goToPage(currentPage.value);
-    } else {
-      console.error('更新请求成功，但服务器返回失败信息:', response.data.msg);
-    }
-  } catch (error) {
-    console.error('更新菜品失败:', error);
-  }
-};
+      try {
+        if (fileInput.value.files[0]) {
+          const updatedImageUrl = await uploadImage(fileInput.value.files[0], form.value.dishId);
+          if (updatedImageUrl) {
+            form.value.image = updatedImageUrl;
+          } else {
+            return;
+          }
+        }
 
+        const selectedCategory = categories.value.find(category => category.cateName === form.value.category);
+        if (selectedCategory) {
+          form.value.cateId = selectedCategory.cateId;
+        } else {
+          showNotification('所选类别无效，请重新选择。', 'error');
+          return;
+        }
+
+        const updateData = {
+          dishId: form.value.dishId,
+          Name: form.value.dishName,
+          cateId: form.value.cateId,
+          category: form.value.category,
+          price: parseFloat(parseFloat(form.value.price).toFixed(2)),
+          formula: form.value.formula.map(item => ({
+            ingredientId: item.ingredientId,
+            ingredientName: item.ingredientName,
+            amount: item.amount
+          }))
+        };
+        console.log('更新后的数据：', updateData);
+        const response = await axios.put('/api/dish/updateDish', updateData);
+        console.log('返回的数据：', response.data.dish);
+        if (response.data.success) {
+          const index = dishes.value.findIndex(d => d.dishId === form.value.dishId);
+          if (index !== -1) {
+            dishes.value.splice(index, 1, { ...form.value });
+            filteredDishes.value = dishes.value;
+          }
+          showNotification("更新菜品成功", 'success');
+          cancelForm();
+          goToPage(currentPage.value);
+        } else {
+          console.error('更新请求成功，但服务器返回失败信息:', response.data.msg);
+        }
+      } catch (error) {
+        console.error('更新菜品失败:', error);
+      }
+    };
 
     const cancelForm = () => {
       showForm.value = false;
@@ -434,43 +429,37 @@ const updateIngredientName = (index) => {
     };
 
     const deleteDish = async (id) => {
-  try {
-    // 在删除请求之前，打印要删除的菜品ID
-    console.log('即将删除的菜品ID:', id);
+      try {
+        console.log('即将删除的菜品ID:', id);
 
-    // 发送删除请求
-    const response = await axios.delete(`/api/dish/delete/${id}`,{
-      headers: {
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw' // 添加Authorization头部
+        const response = await axios.delete(`/api/dish/delete/${id}`, {
+          headers: {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
+          }
+        });
+
+        console.log('删除请求成功，服务器响应:', response.data);
+
+        dishes.value = dishes.value.filter(dish => dish.dishId !== id);
+        filteredDishes.value = dishes.value;
+
+        console.log('本地菜品数据更新完成。当前菜品列表:', dishes.value);
+
+        goToPage(currentPage.value);
+      } catch (error) {
+        console.error('删除菜品失败:', error);
+
+        if (error.response) {
+          console.error('响应状态:', error.response.status);
+          console.error('响应数据:', error.response.data);
+          console.error('响应头部:', error.response.headers);
+        } else if (error.request) {
+          console.error('请求未收到响应:', error.request);
+        } else {
+          console.error('请求配置时发生错误:', error.message);
+        }
       }
-    });
-    
-    // 在收到响应后，打印服务器返回的响应数据
-    console.log('删除请求成功，服务器响应:', response.data);
-
-    // 更新本地数据
-    dishes.value = dishes.value.filter(dish => dish.dishId !== id);
-    filteredDishes.value = dishes.value;
-    
-    console.log('本地菜品数据更新完成。当前菜品列表:', dishes.value);
-    
-    goToPage(currentPage.value);
-  } catch (error) {
-    console.error('删除菜品失败:', error);
-
-    // 打印详细的错误信息
-    if (error.response) {
-      console.error('响应状态:', error.response.status);
-      console.error('响应数据:', error.response.data);
-      console.error('响应头部:', error.response.headers);
-    } else if (error.request) {
-      console.error('请求未收到响应:', error.request);
-    } else {
-      console.error('请求配置时发生错误:', error.message);
-    }
-  }
-};
-
+    };
 
     const handleFileChange = (event) => {
       const file = event.target.files[0];
@@ -494,7 +483,7 @@ const updateIngredientName = (index) => {
 
     onMounted(() => {
       fetchDishes();
-      fetchCategories(); // 在组件加载时获取类别数据
+      fetchCategories();
     });
 
     return {
@@ -530,13 +519,15 @@ const updateIngredientName = (index) => {
       fileInput,
       paginatedDishes,
       totalPages,
-      pageInput
+      pageInput,
+      notification
     };
   }
 };
 </script>
 
 <style>
+/* 保持所有样式不变 */
 .dish-list {
   padding: 20px;
 }
@@ -661,7 +652,7 @@ const updateIngredientName = (index) => {
   border-color: #007bff;
   background-color: #fff;
 }
-/* 配方标签和按钮容器 */
+
 .recipe-header {
   display: flex;
   justify-content: space-between;
@@ -669,7 +660,6 @@ const updateIngredientName = (index) => {
   margin-bottom: 10px;
 }
 
-/* 配方标签样式 */
 .recipe-label {
   font-size: 18px;
   font-weight: bold;
@@ -678,7 +668,6 @@ const updateIngredientName = (index) => {
   vertical-align: middle;
 }
 
-/* 添加原料按钮样式 */
 .add-ingredient-button {
   padding: 5px 10px;
   background-color: #28a745;
@@ -692,17 +681,15 @@ const updateIngredientName = (index) => {
   vertical-align: middle;
 }
 
-/* 配方表格容器 */
 .recipe-table-container {
-  max-height: 200px; /* 固定表格的高度 */
-  overflow-y: auto; /* 启用垂直滚动 */
+  max-height: 200px;
+  overflow-y: auto;
   margin-bottom: 15px;
   border: 1px solid #ddd;
   border-radius: 5px;
-  position: relative; /* 让容器成为按钮的相对定位参考 */
+  position: relative;
 }
 
-/* 表头粘性效果 */
 .recipe-table thead th {
   position: sticky;
   top: 0;
@@ -710,50 +697,47 @@ const updateIngredientName = (index) => {
   z-index: 1;
   padding: 8px;
   border-bottom: 2px solid #ddd;
-  text-align: center; /* 居中对齐表头 */
+  text-align: center;
 }
 
-/* 配方表格样式 */
 .recipe-table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.recipe-table th, .recipe-table td {
+.recipe-table th,
+.recipe-table td {
   border: 1px solid #ddd;
   padding: 8px;
-  text-align: center; /* 数据居中 */
-  vertical-align: middle; /* 垂直居中 */
+  text-align: center;
+  vertical-align: middle;
 }
 
-/* 固定列宽 */
 .recipe-table th:nth-child(1),
 .recipe-table td:nth-child(1) {
-  width: 50%; /* 食材列宽度 */
+  width: 50%;
 }
 
 .recipe-table th:nth-child(2),
 .recipe-table td:nth-child(2) {
-  width: 35%; /* 份量列宽度 */
+  width: 35%;
 }
 
 .recipe-table th:nth-child(3),
 .recipe-table td:nth-child(3) {
-  width: 15%; /* 操作列宽度 */
+  width: 15%;
 }
 
-/* 确保 select 和 input 内容居中 */
 .recipe-table select,
 .recipe-table input {
   width: 100%;
-  text-align: center; /* 水平居中 */
+  text-align: center;
   padding: 5px;
-  box-sizing: border-box; /* 确保 padding 不会影响宽度 */
+  box-sizing: border-box;
   display: block;
-  margin: 0 auto; /* 保证元素居中 */
+  margin: 0 auto;
 }
 
-/* 删除按钮样式 */
 .delete-button {
   background-color: #dc3545;
   color: white;
@@ -768,16 +752,16 @@ const updateIngredientName = (index) => {
   background-color: #c82333;
 }
 
-
 .button-group {
   display: flex;
-  justify-content: space-between; /* 将按钮分布在容器的两端 */
+  justify-content: space-between;
   margin-top: 20px;
-  width: 100%; /* 确保按钮组占据父容器的全部宽度 */
+  width: 100%;
 }
 
-.confirm-button, .cancel-button {
-  width: 30%; /* 每个按钮的宽度减少以留出中间的空隙 */
+.confirm-button,
+.cancel-button {
+  width: 30%;
   padding: 12px;
   border: none;
   border-radius: 5px;
@@ -785,8 +769,6 @@ const updateIngredientName = (index) => {
   font-size: 16px;
   transition: background-color 0.3s ease, transform 0.3s ease;
 }
-
-
 
 .confirm-button {
   background-color: #28a745;
@@ -882,17 +864,16 @@ const updateIngredientName = (index) => {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  margin-right: 10px; /* 添加右侧间距，使两个按钮之间有间距 */
+  margin-right: 10px;
 }
 
 .Action-buttons button:last-child {
-  margin-right: 0; /* 确保最后一个按钮没有额外的右侧间距 */
+  margin-right: 0;
 }
 
 .Action-buttons button:hover {
   background-color: #0056b3;
 }
-
 
 .pagination {
   margin-top: 20px;
@@ -926,7 +907,29 @@ const updateIngredientName = (index) => {
   border: 1px solid #007bff;
   border-radius: 5px;
 }
-/* 添加背景容器样式 */
 
+.notification {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 20px;
+  border-radius: 5px;
+  background-color: #333;
+  color: #fff;
+  opacity: 0.9;
+  z-index: 1001;
+}
 
+.notification.info {
+  background-color: #007bff;
+}
+
+.notification.success {
+  background-color: #28a745;
+}
+
+.notification.error {
+  background-color: #dc3545;
+}
 </style>
