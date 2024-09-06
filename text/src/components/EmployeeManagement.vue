@@ -14,18 +14,33 @@
       </div>
       <table class="table">
         <thead>
-          <tr>
-            <th>ID</th>
-            <th>姓名</th>
-            <th>身份证号</th>
-            <th>电话</th>
-            <th>地址</th>
-            <th>职位</th>
-            <th>工资</th>
-            <th>操作</th>
-          </tr>
+        <tr>
+          <th>ID</th>
+          <th>姓名</th>
+          <th>身份证号</th>
+          <th>电话</th>
+          <th>地址</th>
+          <th>职位</th>
+          <th>工资</th>
+          <th>操作</th>
+        </tr>
         </thead>
         <tbody>
+<<<<<<< HEAD
+        <tr v-for="employee in paginatedEmployees" :key="employee.employeeId">
+          <td>{{ employee.employeeId }}</td>
+          <td>{{ employee.employeeName }}</td>
+          <td>{{ employee.idCard }}</td>
+          <td>{{ employee.phoneNum }}</td>
+          <td>{{ employee.address }}</td>
+          <td>{{ employee.employeePosition }}</td>
+          <td>{{ employee.salary }}</td>
+          <td>
+            <button @click="showEditModal(employee)" class="button warning">修改</button>
+            <button @click="deleteEmployee(employee.employeeId)" class="button danger">删除</button>
+          </td>
+        </tr>
+=======
           <tr v-for="employee in paginatedEmployees" :key="employee.employeeId">
             <td>{{ employee.employeeId }}</td>
             <td>{{ employee.employeeName }}</td>
@@ -39,6 +54,7 @@
               <button @click="deleteEmployee(employee.employeeId)" class="btn red">删除</button>
             </td>
           </tr>
+>>>>>>> 65b118c00167701923b391d54e8458e9e103e78e
         </tbody>
       </table>
       <div class="pagination">
@@ -98,25 +114,25 @@
           <form @submit.prevent="batchPaySalary">
             <table class="table">
               <thead>
-                <tr>
-                  <th></th>
-                  <th>ID</th>
-                  <th>姓名</th>
-                  <th>工资</th>
-                  <th>本月是否已发工资</th>
-                </tr>
+              <tr>
+                <th></th>
+                <th>ID</th>
+                <th>姓名</th>
+                <th>工资</th>
+                <th>本月是否已发工资</th>
+              </tr>
               </thead>
               <tbody>
-                <tr v-for="employee in employees" :key="employee.employeeId">
-                  <td><input v-if="!employee.isPaidThisMonth" type="checkbox" v-model="selectedEmployees" :value="employee.employeeId" /></td>
-                  <td>{{ employee.employeeId }}</td>
-                  <td>{{ employee.employeeName }}</td>
-                  <td>{{ employee.salary }}</td>
-                  <td>
-                     <span v-if="employee.isPaidThisMonth">已发放</span>
-                     <span v-else>未发放</span>
-                  </td>
-                </tr>
+              <tr v-for="employee in employees" :key="employee.employeeId">
+                <td><input v-if="!employee.isPaidThisMonth" type="checkbox" v-model="selectedEmployees" :value="employee.employeeId" /></td>
+                <td>{{ employee.employeeId }}</td>
+                <td>{{ employee.employeeName }}</td>
+                <td>{{ employee.salary }}</td>
+                <td>
+                  <span v-if="employee.isPaidThisMonth">已发放</span>
+                  <span v-else>未发放</span>
+                </td>
+              </tr>
               </tbody>
             </table>
             <div class="form-group">
@@ -134,7 +150,7 @@
 import axios from 'axios';
 import { ref, reactive, computed } from 'vue';
 
-axios.defaults.baseURL = 'http://8.136.125.61'; // 
+axios.defaults.baseURL = 'http://8.136.125.61'; //
 
 export default {
   setup() {
@@ -145,7 +161,7 @@ export default {
     const isEditing = ref(false);
     const employeeForm = reactive({
       employeeName: '',
-      idCard: '', 
+      idCard: '',
       phoneNum: '',
       address: '',
       employeePosition: '',
@@ -156,34 +172,31 @@ export default {
     const searchPosition = ref('');
     const currentPage = ref(1);
     const totalPages = ref(1);
-    const itemsPerPage = 10; 
+    const itemsPerPage = 10;
     const selectedEmployees = ref([]);
     const selectAll = ref(false);
     const pageInput = ref('');
 
     const fetchEmployees = async () => {
-  try {
-    const response = await axios.get('/api/employee/getInfo');
-    // 检查返回数据是数组并且数组的第一项是对象
-    if (Array.isArray(response.data) && response.data.length > 0 && response.data[0].response && Array.isArray(response.data[0].response)) {
-      employees.value = response.data[0].response.map(emp => ({
-        ...emp,
-        paid: emp.paid || 0
-      }));
-      filteredEmployees.value = employees.value;
-      totalPages.value = Math.ceil(filteredEmployees.value.length / itemsPerPage);
-    } else {
-      console.error('API 返回的数据结构不符合预期:', response.data);
-      employees.value = [];
-      filteredEmployees.value = [];
-      totalPages.value = 0;
-    }
-  } catch (error) {
-    console.error('Error fetching employees:', error);
-  }
-};
-
-
+      try {
+        const response = await axios.get('/api/employee/getInfo');
+        if (Array.isArray(response.data) && response.data.length > 0 && response.data[0].response && Array.isArray(response.data[0].response)) {
+          employees.value = response.data[0].response.map(emp => ({
+            ...emp,
+            paid: emp.paid || 0
+          }));
+          filteredEmployees.value = employees.value;
+          totalPages.value = Math.ceil(filteredEmployees.value.length / itemsPerPage);
+        } else {
+          console.error('API 返回的数据结构不符合预期:', response.data);
+          employees.value = [];
+          filteredEmployees.value = [];
+          totalPages.value = 0;
+        }
+      } catch (error) {
+        console.error('Error fetching employees:', error);
+      }
+    };
 
     const search = async () => {
       try {
@@ -243,7 +256,7 @@ export default {
       }
       try {
         const response = await axios.post('/api/employee/add', { ...employeeForm, paid: 0 });
-        
+
         if (response.status === 200) {
           employees.value.push(response.data);
           closeModal();
@@ -261,6 +274,16 @@ export default {
     };
 
     const updateEmployee = async () => {
+      if (employeeForm.phoneNum.length !== 11) {
+        alert('电话号码必须为11位,请重新输入。');
+        return;
+      }
+
+      if (employeeForm.idCard.length !== 18) {
+        alert('身份证号必须为18位,请重新输入。');
+        return;
+      }
+
       try {
         await axios.put(`/api/employee/${employeeForm.employeeId}`, { ...employeeForm });
         const index = employees.value.findIndex(employee => employee.employeeId === employeeForm.employeeId);
@@ -275,12 +298,11 @@ export default {
       try {
         const response= await axios.delete(`/api/employee/${id}`,{
           headers: {
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw' // 添加Authorization头部
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
           }
         });
-        // 在收到响应后，打印服务器返回的响应数据
         console.log('删除请求成功，服务器响应:', response.data);
-        
+
         employees.value = employees.value.filter(employee => employee.employeeId !== id);
         totalPages.value = Math.ceil(employees.value.length / itemsPerPage);
         fetchEmployees();
@@ -293,39 +315,37 @@ export default {
     };
 
     const batchPaySalary = async () => {
-  try {
-    const employeeIds = selectedEmployees.value; // 获取员工ID列表，确保它是一个字符串数组
-    console.log('所有员工的isPaidThisMonth属性:');
-    employees.value.forEach(employee => {
-      console.log(`员工ID: ${employee.employeeId}, isPaidThisMonth: ${employee.isPaidThisMonth}`);
-    });
-    const response = await axios.post('/api/employee/payWage', employeeIds, {
-      headers: {
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
+      try {
+        const employeeIds = selectedEmployees.value;
+        console.log('所有员工的isPaidThisMonth属性:');
+        employees.value.forEach(employee => {
+          console.log(`员工ID: ${employee.employeeId}, isPaidThisMonth: ${employee.isPaidThisMonth}`);
+        });
+        const response = await axios.post('/api/employee/payWage', employeeIds, {
+          headers: {
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTI0NzU1NCwiZXhwIjoxNzMzODg3NTU0LCJpYXQiOjE3MjUyNDc1NTQsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.WfcCVsnq1zi3jjXv27zKjYue6GgYV8ZCOreIXm_vwKw'
+          }
+        });
+
+        if (response.status === 200) {
+          alert('工资发放成功');
+          fetchEmployees();
+          closeBatchModal();
+        } else {
+          console.error('工资发放失败:', response.data.message);
+        }
+        fetchEmployees();
+      } catch (error) {
+        console.error('批量发工资失败:', error.message);
+        if (error.response) {
+          console.error('响应数据:', error.response.data);
+        }
       }
-    });
-
-    if (response.status === 200) {
-      alert('工资发放成功');
-      fetchEmployees(); // 更新职工信息或界面
-      closeBatchModal();
-    } else {
-      console.error('工资发放失败:', response.data.message);
-    }
-    fetchEmployees();
-  } catch (error) {
-    console.error('批量发工资失败:', error.message);
-    if (error.response) {
-      console.error('响应数据:', error.response.data);
-    }
-  }
-};
-
-
+    };
 
     const resetForm = () => {
       employeeForm.employeeName = '';
-      employeeForm.idCard = ''; 
+      employeeForm.idCard = '';
       employeeForm.phoneNum = '';
       employeeForm.address = '';
       employeeForm.employeePosition = '';
@@ -686,4 +706,28 @@ export default {
   margin: 0 5px;
 }
 
+.message-popup {
+  position: absolute;
+  top: -40px; /* 相对于模态框标题的上方 */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: rgb(255, 255, 255);
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 999;
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+  font-size: 12px;
+}
+
+/* 新增过渡效果 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>
