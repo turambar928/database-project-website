@@ -3,21 +3,16 @@
     <h2>仓库管理</h2>
     <div class="search-bar">
       <input type="text" placeholder="食材名" v-model="searchName" />
-      <select v-model="searchID">
-        <option value="">ID</option>
-        <option value="1">1</option>
-        <option value="2">2</option>
-      </select>
+
       <select v-model="searchGrade">
         <option value="">高耗品等级</option>
         <option value="1">1</option>
         <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
       </select>
-      <select v-model="searchExpiry">
-        <option value="">保质期</option>
-        <option value="2024-09-11">2024-09-11</option>
-        <option value="2024-08-30">2024-08-30</option>
-      </select>
+
       <!-- 搜索按钮 -->
       <button @click="searchWarehouse" class="btn blue">搜索</button>
       <button @click="openRestockItem" class="btn green">进货</button>
@@ -31,7 +26,6 @@
         <th>数量</th>
         <th>高耗品等级</th>
         <th>保质期</th>
-
       </tr>
       </thead>
       <tbody>
@@ -41,7 +35,6 @@
         <td>{{ item.amount }}</td>
         <td>{{ item.grade }}</td>
         <td>{{ item.expiry }}</td>
-
       </tr>
       </tbody>
     </table>
@@ -166,6 +159,15 @@ export default {
     this.fetchAvailableIngredients(); // 获取可选的食材
   },
   methods: {
+
+    filterItems() {
+      this.filteredItems = this.items.filter(item => {
+        const matchesName = !this.searchName || item.ingredientName.includes(this.searchName);
+        const matchesGrade = !this.searchGrade || item.grade === this.searchGrade;
+        return matchesName && matchesGrade;
+      });
+      this.currentPage = 1; // 重置到第一页
+    },
 
     async fetchWarehouseData() {
       try {
