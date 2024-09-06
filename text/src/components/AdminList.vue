@@ -14,6 +14,7 @@
       <button @click="search">搜索</button>
       <button @click="openAddAdmin" class="add_Admin">添加管理员</button>
     </div>
+
     <table class="table">
       <thead>
       <tr>
@@ -54,11 +55,17 @@
       </tr>
       </tbody>
     </table>
+
     <div class="pagination">
       <button @click="prevPage" :disabled="currentPage === 1">«</button>
       <span v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="{'active': currentPage === page}">{{ page }}</span>
       <button @click="nextPage" :disabled="currentPage === totalPages">»</button>
     </div>
+
+    <!-- 提示信息弹出框 -->
+    <transition name="fade">
+      <div v-if="showMessage" class="message-popup">{{ showMessage }}</div>
+    </transition>
 
     <!-- 详细信息弹出框 -->
     <div v-if="showDetail" class="modal">
@@ -78,6 +85,9 @@
       <div class="modal-content form-container">
         <span class="close" @click="closeAddAdmin">&times;</span>
         <h3>添加管理员</h3>
+        <transition name="fade">
+          <div v-if="showMessage" class="message-popup">{{ showMessage }}</div>
+        </transition>
         <form @submit.prevent="confirmAddAdmin">
           <div class="form-group">
             <label for="newName">姓名</label>
@@ -127,15 +137,15 @@
       </div>
     </div>
 
-
-
     <!-- 修改管理员信息弹出框 -->
     <div v-if="showEditAdmin" class="modal">
       <div class="modal-content form-container">
         <span class="close" @click="closeEditAdmin">&times;</span>
         <h3>修改管理员信息</h3>
+        <transition name="fade">
+          <div v-if="showMessage" class="message-popup">{{ showMessage }}</div>
+        </transition>
         <form @submit.prevent="confirmEditAdmin">
-          <!-- 仅保留手机号、职位和性别 -->
           <div class="form-group">
             <label for="editPhone">手机号</label>
             <input type="text" id="editPhone" v-model="selectedAdmin.phoneNum" class="input-field" />
@@ -175,7 +185,6 @@
       </div>
     </div>
 
-
     <!-- 重置密码显示弹出框 -->
     <div v-if="showResetPassword" class="modal">
       <div class="modal-content">
@@ -210,7 +219,7 @@ export default {
       showAddAdmin: false,
       showEditAdmin: false,
       showResetPassword: false,
-      showResetPasswordConfirm: false,  // 添加这个属性
+      showResetPasswordConfirm: false,
       selectedAdmin: {},
       newAdmin: {
         name: '',
@@ -222,7 +231,8 @@ export default {
         address: '',
         email: ''
       },
-      newPassword: ''
+      newPassword: '',
+      showMessage: "", // 控制提示信息弹窗
     };
   },
   computed: {
@@ -259,11 +269,11 @@ export default {
               this.filteredAdmins = this.admins;
               this.currentPage = 1; // 重置到第一页
             } else {
-              console.error('API返回错误:', response.data.msg);
+              this.showError('API返回错误: ' + response.data.msg);
             }
           })
-          .catch(error => {
-            console.error('获取管理员列表时出错:', error);
+          .catch(() => { // 去掉未使用的 error 参数
+            this.showError('获取管理员列表时出错');
           });
     },
     search() {
@@ -290,13 +300,11 @@ export default {
               this.selectedAdmin = response.data.response[0];
               this.showDetail = true;
             } else {
-              console.error('获取管理员详细信息失败:', response.data.msg);
-              alert('获取管理员详细信息失败: ' + response.data.msg);
+              this.showError('获取管理员详细信息失败: ' + response.data.msg);
             }
           })
-          .catch(error => {
-            console.error('获取管理员详细信息时出错:', error);
-            alert('获取管理员详细信息时出错，请稍后重试');
+          .catch(() => { // 去掉未使用的 error 参数
+            this.showError('获取管理员详细信息时出错，请稍后重试');
           });
     },
     closeDetail() {
@@ -311,34 +319,27 @@ export default {
     confirmAddAdmin() {
       // 验证手机号和身份证号
       if (this.newAdmin.phoneNum.length !== 11) {
-        alert('手机号必须为11位，请重新输入');
+        this.showError('手机号必须为11位，请重新输入');
         return;
       }
       if (this.newAdmin.idCard.length !== 18) {
-        alert('身份证号必须为18位，请重新输入');
+        this.showError('身份证号必须为18位，请重新输入');
         return;
       }
 
       axios.post('http://8.136.125.61/api/admin/add', this.newAdmin)
           .then(response => {
             if (response.data && response.data.success) {
-              alert('管理员添加成功');
+              this.showSuccess('管理员添加成功');
               this.fetchAdmins();
               this.closeAddAdmin();
               this.resetNewAdmin();
             } else {
-              console.error('添加管理员失败:', response.data.msg);
-              alert('添加管理员失败: ' + response.data.msg);
+              this.showError('添加管理员失败: ' + response.data.msg);
             }
           })
-          .catch(error => {
-            if (error.response && error.response.data && error.response.data.msg) {
-              console.error('添加管理员时出错:', error.response.data.msg);
-              alert('添加管理员时出错: ' + error.response.data.msg);
-            } else {
-              console.error('添加管理员时出错:', error.message);
-              alert('添加管理员时出错，请稍后重试');
-            }
+          .catch(() => { // 去掉未使用的 error 参数
+            this.showError('添加管理员时出错，请稍后重试');
           });
     },
 
@@ -369,11 +370,11 @@ export default {
               this.showResetPasswordConfirm = false;
               this.showResetPassword = true; // 显示重置密码结果弹出框
             } else {
-              console.error('重置密码失败:', response.data.msg);
+              this.showError('重置密码失败: ' + response.data.msg);
             }
           })
-          .catch(error => {
-            console.error('重置密码失败', error);
+          .catch(() => { // 去掉未使用的 error 参数
+            this.showError('重置密码失败，请稍后重试');
           });
     },
     // 关闭确认重置密码弹出框
@@ -388,7 +389,7 @@ export default {
     copyPassword() {
       const copyText = this.newPassword;
       navigator.clipboard.writeText(copyText).then(() => {
-        alert('密码已复制到剪贴板');
+        this.showSuccess('密码已复制到剪贴板');
       });
     },
     editAdmin(admin) {
@@ -401,7 +402,7 @@ export default {
     confirmEditAdmin() {
       // 验证手机号
       if (this.selectedAdmin.phoneNum.length !== 11) {
-        alert('手机号必须为11位，请重新输入');
+        this.showError('手机号必须为11位，请重新输入');
         return;
       }
 
@@ -416,34 +417,42 @@ export default {
       axios.put(`http://8.136.125.61/api/admin/${adminId}`, updateData)
           .then(response => {
             if (response.data && response.data.success) {
-              alert('管理员信息更新成功');
+              this.showSuccess('管理员信息更新成功');
               this.fetchAdmins();
               this.closeEditAdmin();
             } else {
-              console.error('更新管理员信息失败:', response.data.msg);
-              alert('更新管理员信息失败: ' + response.data.msg);
+              this.showError('更新管理员信息失败: ' + response.data.msg);
             }
           })
-          .catch(error => {
-            console.error('更新管理员信息时出错:', error);
-            alert('更新管理员信息时出错，请稍后重试');
+          .catch(() => { // 去掉未使用的 error 参数
+            this.showError('更新管理员信息时出错，请稍后重试');
           });
     },
     deleteAdmin(adminId) {
       axios.delete(`http://8.136.125.61/api/admin/${adminId}`)
           .then(response => {
             if (response.data && response.data.success) {
-              alert(response.data.msg || '删除成功');
+              this.showSuccess(response.data.msg || '删除成功');
               this.fetchAdmins(); // 刷新管理员列表
             } else {
-              console.error('删除管理员失败:', response.data.msg);
-              alert('删除管理员失败: ' + response.data.msg);
+              this.showError('删除管理员失败: ' + response.data.msg);
             }
           })
-          .catch(error => {
-            console.error('删除管理员时出错:', error);
-            alert('删除管理员时出错，请稍后重试');
+          .catch(() => { // 去掉未使用的 error 参数
+            this.showError('删除管理员时出错，请稍后重试');
           });
+    },
+    showError(message) {
+      this.showMessage = message;
+      setTimeout(() => {
+        this.showMessage = "";
+      }, 3000); // 错误信息3秒后消失
+    },
+    showSuccess(message) {
+      this.showMessage = message;
+      setTimeout(() => {
+        this.showMessage = "";
+      }, 2000); // 成功信息2秒后消失
     }
   }
 };
@@ -620,4 +629,30 @@ export default {
   flex: 1;
   margin-right: 10px;
 }
+
+.message-popup {
+  position: absolute;
+  top: -40px; /* 相对于模态框标题的上方 */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: rgb(255, 255, 255);
+  padding: 10px 20px;
+  border-radius: 5px;
+  z-index: 999;
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+  font-size: 12px;
+}
+
+
+/* 新增过渡效果 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
 </style>
