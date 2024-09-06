@@ -21,7 +21,7 @@
       <!-- 搜索按钮 -->
       <button @click="searchWarehouse" class="btn blue">搜索</button>
       <button @click="openRestockItem" class="btn green">进货</button>
-      <button class="btn add" @click="addItem">添加</button>
+      <button class="btn yellow" @click="addItem">添加</button>
     </div>
     <table class="table">
       <thead>
@@ -469,14 +469,14 @@ export default {
 .table th,
 .table td {
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid rgba(225, 217, 208, 0.5);
   text-align: left;
   font-size: 14px;
 }
 
 .table th {
-  background-color: #007bff;
-  color: white;
+  background-color: rgba(225, 217, 208, 0.5);
+  color: rgb(0, 0, 0);
   text-transform: uppercase;
   font-weight: bold;
 }
@@ -504,37 +504,52 @@ export default {
   color: white;
 }
 
-.btn.add {
-  background-color: #f0ad4e;
-  color: white;
-  padding: 10px 20px;
-  margin: 2px;
+.btn.blue {
+  padding: 10px 15px;
+  margin: 5px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  width: 100px;
-  text-align: center;
-  font-size:14px;
-}
-
-.btn.restock {
-  background-color: #0275d8;
-  color: white;
-}
-
-.btn.red {
-  background-color: #dc3545;
-  color: white;
+  font-size: 14px;
+  background-color: #97cfff;
+  color: #0275d8;
+  font-weight: bold;
 }
 
 .btn.yellow {
-  background-color: #ffc107;
-  color: white;
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #ffca7f;
+  color: #cf8d31;
+  font-weight: bold;
+}
+
+.btn.red {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #f98691;
+  color: rgb(247, 10, 10);
+  font-weight: bold;
 }
 
 .btn.green {
-  background-color: #28a745;
-  color: white;
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #81fa9d;
+  color: #006b29;
+  font-weight: bold;
 }
 
 .pagination {

@@ -11,8 +11,8 @@
         <option value="HR">HR</option>
         <option value="财务">财务</option>
       </select>
-      <button @click="search">搜索</button>
-      <button @click="openAddAdmin" class="add_Admin">添加管理员</button>
+      <button @click="search" class="btn blue">搜索</button>
+      <button @click="openAddAdmin" class="btn green">添加管理员</button>
     </div>
 
     <table class="table">
@@ -464,24 +464,16 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f5f7fa; /* 添加背景色 */
+  background-color: #ffffff; /* 添加背景色 */
   border-radius: 8px; /* 圆角 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
 
-.add_Admin{
-  padding: 10px 15px;
-  margin: 5px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-}
+
 .table {
   width: 100%;
   border-collapse: collapse;
   background-color: #fff; /* 白色背景 */
-  border-radius: 8px; /* 圆角 */
   overflow: hidden; /* 隐藏溢出 */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
@@ -489,14 +481,14 @@ export default {
 .table th,
 .table td {
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid rgba(225, 217, 208, 0.5);
   text-align: left;
   font-size: 14px;
 }
 
 .table th {
-  background-color: #007bff;
-  color: white;
+  background-color: rgba(225, 217, 208, 0.5);
+  color: rgb(0, 0, 0);
   text-transform: uppercase;
   font-weight: bold;
 }
@@ -510,33 +502,60 @@ export default {
 }
 
 .btn {
-  margin: 2px;
-  border: 1px solid #ddd;
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
   border-radius: 4px;
   cursor: pointer;
-  background-color: #f8f9fa;
-  color: black;
-  padding: 5px 10px;
+  font-size: 14px;
 }
 
 .btn.blue {
-  background-color: #007bff;
-  color: white;
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #97cfff;
+  color: #0275d8;
+  font-weight: bold;
 }
 
 .btn.yellow {
-  background-color: #ffc107;
-  color: white;
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #ffca7f;
+  color: #cf8d31;
+  font-weight: bold;
 }
 
 .btn.red {
-  background-color: #dc3545;
-  color: white;
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #f98691;
+  color: rgb(247, 10, 10);
+  font-weight: bold;
 }
 
 .btn.green {
-  background-color: #28a745;
-  color: white;
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #81fa9d;
+  color: #006b29;
+  font-weight: bold;
 }
 
 .center-button {

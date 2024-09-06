@@ -16,7 +16,7 @@
         <option value="0">支出</option>
       </select>
       <input type="date" v-model="searchDate" />
-      <button class="btn search" @click="search">搜索</button>
+      <button class="btn blue" @click="search">搜索</button>
     </div>
     <div class="summary">
       <div class="summary-item">
@@ -148,7 +148,7 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f5f7fa; /* 添加背景色 */
+  background-color: #ffffff; /* 添加背景色 */
   border-radius: 8px; /* 圆角 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
@@ -182,7 +182,6 @@ export default {
   width: 100%;
   border-collapse: collapse;
   background-color: #fff; /* 白色背景 */
-  border-radius: 8px; /* 圆角 */
   overflow: hidden; /* 隐藏溢出 */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
@@ -190,14 +189,14 @@ export default {
 .table th,
 .table td {
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid rgba(225, 217, 208, 0.5);
   text-align: left;
   font-size: 14px;
 }
 
 .table th {
-  background-color: #007bff;
-  color: white;
+  background-color: rgba(225, 217, 208, 0.5);
+  color: rgb(0, 0, 0);
   text-transform: uppercase;
   font-weight: bold;
 }
@@ -209,19 +208,7 @@ export default {
 .table tbody tr:hover {
   background-color: #f1f1f1; /* 鼠标悬停时的背景颜色 */
 }
-
-
 .btn {
-  padding: 5px 10px;
-  margin: 2px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn.search {
-  background-color: #0275d8; /* 蓝色 */
-  color: white;
   padding: 10px 20px;
   margin: 2px;
   border: none;
@@ -229,9 +216,18 @@ export default {
   cursor: pointer;
   width: 100px;
   text-align: center;
-  font-size:14px;
 }
-
+.btn.blue {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #97cfff;
+  color: #0275d8;
+  font-weight: bold;
+}
 .pagination {
   display: flex;
   justify-content: center;

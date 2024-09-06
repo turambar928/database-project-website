@@ -207,7 +207,7 @@ export default {
 .weekly-promotion {
   font-family: Arial, sans-serif;
   padding: 20px;
-  background: #f9f9f9;
+  background: #ffffff;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -243,20 +243,19 @@ export default {
   width: 100%;
   border-collapse: collapse;
   background-color: #fff; /* 白色背景 */
-  border-radius: 8px; /* 圆角 */
   overflow: hidden; /* 隐藏溢出 */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
 .promotion-table th,
 .promotion-table td {
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid rgba(225, 217, 208, 0.5);
   text-align: left;
   font-size: 14px;
 }
 .promotion-table th {
-  background-color: #007bff;
-  color: white;
+  background-color: rgba(225, 217, 208, 0.5);
+  color: rgb(0, 0, 0);
   text-transform: uppercase;
   font-weight: bold;
 }
@@ -268,18 +267,19 @@ export default {
   background-color: #f1f1f1; /* 鼠标悬停时的背景颜色 */
 }
 .promotion-table td button {
-  background-color: #007bff;
-  color: white;
+  background-color: #97cfff;
+  color: #0275d8;
   border: none;
   padding: 6px 12px;
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: bold;
   transition: background-color 0.3s;
+  display:block;
+  margin:0 auto
 }
-.promotion-table td button:hover {
-  background-color: #0056b3;
-}
+
 .promotion-table td input.edit-input {
   width: 80px;
   padding: 4px;
@@ -300,15 +300,11 @@ export default {
 .confirm-button {
   background-color: #28a745;
 }
-.confirm-button:hover {
-  background-color: #218838;
-}
+
 .cancel-button {
   background-color: #dc3545;
 }
-.cancel-button:hover {
-  background-color: #c82333;
-}
+
 .edit-buttons {
   display: block;
   justify-content: center;

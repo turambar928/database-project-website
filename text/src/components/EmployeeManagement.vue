@@ -8,9 +8,9 @@
           <option value="">职位</option>
           <option v-for="position in positions" :key="position" :value="position">{{ position }}</option>
         </select>
-        <button @click="search" class="button primary">搜索</button>
-        <button @click="showAddModal" class="button success">添加职工</button>
-        <button @click="showBatchModal" class="button primary">发工资</button>
+        <button @click="search" class="btn blue">搜索</button>
+        <button @click="showAddModal" class="btn green">添加职工</button>
+        <button @click="showBatchModal" class="btn yellow">发工资</button>
       </div>
       <table class="table">
         <thead>
@@ -26,6 +26,7 @@
         </tr>
         </thead>
         <tbody>
+<<<<<<< HEAD
         <tr v-for="employee in paginatedEmployees" :key="employee.employeeId">
           <td>{{ employee.employeeId }}</td>
           <td>{{ employee.employeeName }}</td>
@@ -39,6 +40,21 @@
             <button @click="deleteEmployee(employee.employeeId)" class="button danger">删除</button>
           </td>
         </tr>
+=======
+          <tr v-for="employee in paginatedEmployees" :key="employee.employeeId">
+            <td>{{ employee.employeeId }}</td>
+            <td>{{ employee.employeeName }}</td>
+            <td>{{ employee.idCard }}</td>
+            <td>{{ employee.phoneNum }}</td>
+            <td>{{ employee.address }}</td>
+            <td>{{ employee.employeePosition }}</td>
+            <td>{{ employee.salary }}</td>
+            <td>
+              <button @click="showEditModal(employee)" class="btn blue">修改</button>
+              <button @click="deleteEmployee(employee.employeeId)" class="btn red">删除</button>
+            </td>
+          </tr>
+>>>>>>> 65b118c00167701923b391d54e8458e9e103e78e
         </tbody>
       </table>
       <div class="pagination">
@@ -395,7 +411,7 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f5f7fa; /* 添加背景色 */
+  background-color: #ffffff; /* 添加背景色 */
   border-radius: 8px; /* 圆角 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
@@ -424,34 +440,54 @@ export default {
   outline: none;
 }
 
-.button {
-  padding: 6px 12px; /* 缩小按钮尺寸 */
+.btn.blue {
+  padding: 10px 15px;
+  margin: 5px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   font-size: 14px;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  background-color: #97cfff;
+  color: #0275d8;
+  font-weight: bold;
 }
 
-.button.primary {
-  background-color: #007bff;
-  color: white;
+.btn.yellow {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #ffca7f;
+  color: #cf8d31;
+  font-weight: bold;
 }
 
-.button.primary:hover {
-  background-color: #0056b3;
-  transform: translateY(-1px); /* 缩小悬停时的上移效果 */
+.btn.red {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #f98691;
+  color: rgb(247, 10, 10);
+  font-weight: bold;
 }
 
-.button.success {
-  background-color: #28a745;
-  color: white;
+.btn.green {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  background-color: #81fa9d;
+  color: #006b29;
+  font-weight: bold;
 }
 
-.button.success:hover {
-  background-color: #218838;
-  transform: translateY(-1px);
-}
 
 .search-add-container button:last-child {
   margin-left: 10px; /* 让发工资按钮稍微远离其他按钮 */
@@ -459,61 +495,8 @@ export default {
 
 
 /* Button Styles */
-.button {
-  padding: 10px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
 
-.button.primary {
-  background-color: #007bff;
-  color: white;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
 
-.button.primary:hover {
-  background-color: #0056b3;
-  transform: translateY(-1px);
-}
-
-.button.success {
-  background-color: #28a745;
-  color: white;
-}
-
-.button.success:hover {
-  background-color: #218838;
-  transform: translateY(-2px);
-}
-
-.button.warning {
-  background-color: #ffc107;
-  color: white;
-  margin-right: 20px; /* 设置按钮之间的间距 */
-}
-
-.button.warning:hover {
-  background-color: #e0a800;
-  transform: translateY(-2px);
-}
-
-.button.danger {
-  background-color: #dc3545;
-  color: white;
-}
-
-.button.danger:hover {
-  background-color: #c82333;
-  transform: translateY(-2px);
-}
 .close-button {
   position: absolute;
   top: 15px;
@@ -542,7 +525,6 @@ export default {
   width: 100%;
   border-collapse: collapse;
   background-color: #fff; /* 白色背景 */
-  border-radius: 8px; /* 圆角 */
   overflow: hidden; /* 隐藏溢出 */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
 }
@@ -550,14 +532,14 @@ export default {
 .table th,
 .table td {
   padding: 15px;
-  border: 1px solid #ddd;
+  border: 1px solid rgba(225, 217, 208, 0.5);
   text-align: left;
   font-size: 14px;
 }
 
 .table th {
-  background-color: #007bff;
-  color: white;
+  background-color: rgba(225, 217, 208, 0.5);
+  color: rgb(0, 0, 0);
   text-transform: uppercase;
   font-weight: bold;
 }
@@ -569,7 +551,6 @@ export default {
 .table tbody tr:hover {
   background-color: #f1f1f1; /* 鼠标悬停时的背景颜色 */
 }
-
 /* Modal Overlay */
 .modal-overlay {
   position: fixed;
