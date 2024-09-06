@@ -34,7 +34,7 @@ export default {
       fetch('http://8.136.125.61/api/Admin/getAdminInfo', {
         method: 'GET',
         headers: {
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTQ1NDYxMSwiZXhwIjoxNzI1NTQxMDExLCJpYXQiOjE3MjU0NTQ2MTEsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.r9SFdp9ChD9jVDX4qmp97pyWr7uF81ct6yXgORksdbw',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTU5NDg5NSwiZXhwIjoxNzM0MjM0ODk1LCJpYXQiOjE3MjU1OTQ4OTUsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.OkgMONlYa5cx6Cm91j_Vts-DYzbUgfRrqSl5f3bWxBE',
           'Content-Type': 'application/json',
         },
       })

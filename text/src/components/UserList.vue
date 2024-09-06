@@ -14,41 +14,61 @@
     <div class="table-container">
       <table class="table">
         <thead>
-          <tr>
-            <th>ID</th>
-            <th>昵称</th>
-            <th>手机号</th>
-            <th>身份</th>
-            <th>性别</th>
-            <th>详细信息</th>
-            <th>操作</th>
-          </tr>
+        <tr>
+          <th>ID</th>
+          <th>昵称</th>
+          <th>手机号</th>
+          <th>身份</th>
+          <th>性别</th>
+          <th>详细信息</th>
+          <th>操作</th>
+        </tr>
         </thead>
         <tbody>
-          <tr v-if="filteredUsers.length === 0">
-            <td colspan="7" class="no-data">没有找到匹配的用户</td>
-          </tr>
-          <tr v-for="(user, index) in translatedUsers" :key="index" class="table-row">
-            <td>{{ user.accountId }}</td>
-            <td>{{ user.accountName }}</td>
-            <td>{{ user.phoneNum }}</td>
-            <td>{{ user.identityDisplay }}</td>
-            <td>{{ user.genderDisplay }}</td>
-            <td>
-              <button class="btn small blue" @click="viewDetail(user)">查看</button>
-            </td>
-            <td class="action-buttons">
-              <button class="btn small yellow" @click="confirmResetPassword(user)">重置密码</button>
-              <button class="btn small blue" @click="editUser(user)">修改</button>
-              <button class="btn small red" @click="deleteUser(user.accountId)">删除</button>
-            </td>
-          </tr>
+        <tr v-if="filteredUsers.length === 0">
+          <td colspan="7" class="no-data">没有找到匹配的用户</td>
+        </tr>
+        <tr
+            v-for="(user, index) in translatedUsers"
+            :key="index"
+            class="table-row"
+        >
+          <td>{{ user.accountId }}</td>
+          <td>{{ user.accountName }}</td>
+          <td>{{ user.phoneNum }}</td>
+          <td>{{ user.identityDisplay }}</td>
+          <td>{{ user.genderDisplay }}</td>
+          <td>
+            <button class="btn small blue" @click="viewDetail(user)">查看</button>
+          </td>
+          <td class="action-buttons">
+            <button
+                class="btn small yellow"
+                @click="confirmResetPassword(user)"
+            >
+              重置密码
+            </button>
+            <button class="btn small blue" @click="editUser(user)">修改</button>
+            <button
+                class="btn small red"
+                @click="deleteUser(user.accountId)"
+            >
+              删除
+            </button>
+          </td>
+        </tr>
         </tbody>
       </table>
     </div>
     <div class="pagination">
       <button @click="prevPage" :disabled="currentPage === 1">«</button>
-      <span v-for="page in totalPages" :key="page" @click="goToPage(page)" :class="{'active': currentPage === page}">{{ page }}</span>
+      <span
+          v-for="page in totalPages"
+          :key="page"
+          @click="goToPage(page)"
+          :class="{ active: currentPage === page }"
+      >{{ page }}</span
+      >
       <button @click="nextPage" :disabled="currentPage === totalPages">»</button>
     </div>
 
@@ -57,10 +77,10 @@
       <div class="modal-content">
         <span class="close" @click="closeDetail">&times;</span>
         <h3>用户信息</h3>
-        <p><strong>姓名：</strong> {{ selectedUser.name || '空' }}</p>
-        <p><strong>身份证号：</strong> {{ selectedUser.idNumber || '空' }}</p>
-        <p><strong>生日：</strong> {{ selectedUser.birthday || '空' }}</p>
-        <p><strong>地址：</strong> {{ selectedUser.address || '空' }}</p>
+        <p><strong>姓名：</strong> {{ selectedUser.name || "空" }}</p>
+        <p><strong>身份证号：</strong> {{ selectedUser.idNumber || "空" }}</p>
+        <p><strong>生日：</strong> {{ selectedUser.birthday || "空" }}</p>
+        <p><strong>地址：</strong> {{ selectedUser.address || "空" }}</p>
       </div>
     </div>
 
@@ -92,6 +112,11 @@
     <!-- 修改用户信息弹出框 -->
     <div v-if="showEditUser" class="modal">
       <div class="modal-content">
+        <!-- 将提示信息放在这里 -->
+        <transition name="fade">
+          <div v-if="showMessage" class="message-popup">{{ showMessage }}</div>
+        </transition>
+
         <span class="close" @click="closeEditUser">&times;</span>
         <h3>修改用户信息</h3>
         <form @submit.prevent="confirmEditUser">
@@ -143,7 +168,8 @@ export default {
       showResetPassword: false,
       showEditUser: false,
       selectedUser: {},
-      newPassword: ''
+      newPassword: '',
+      showMessage: "", // 控制提示信息弹窗
     };
   },
   computed: {
@@ -174,8 +200,8 @@ export default {
             this.users = response.data.response || [];
             this.filteredUsers = this.users;
           })
-          .catch((error) => {
-            console.error('获取用户列表失败', error);
+          .catch(() => {
+            this.showError('获取用户列表失败，无法获取用户数据，请稍后再试');
           });
     },
     search() {
@@ -194,12 +220,12 @@ export default {
               }));
               this.currentPage = 1;
             } else {
-              console.error('搜索用户失败：', response.data.msg);
+              this.showError('搜索用户失败：' + response.data.msg);
               this.filteredUsers = [];
             }
           })
-          .catch((error) => {
-            console.error('搜索用户失败', error);
+          .catch(() => {
+            this.showError('搜索用户失败，请求服务器出错');
           });
     },
     viewDetail(user) {
@@ -216,11 +242,11 @@ export default {
               };
               this.showDetail = true;
             } else {
-              console.error('获取用户详细信息失败', response.data.msg);
+              this.showError('获取用户详细信息失败：' + response.data.msg);
             }
           })
-          .catch(error => {
-            console.error('获取用户详细信息失败', error);
+          .catch(() => {
+            this.showError('获取用户详细信息失败，请求服务器出错');
           });
     },
     closeDetail() {
@@ -238,8 +264,8 @@ export default {
             this.showResetPasswordConfirm = false;
             this.showResetPassword = true;
           })
-          .catch(error => {
-            console.error('重置密码失败', error);
+          .catch(() => {
+            this.showError('重置密码失败，无法重置密码，请稍后再试');
           });
     },
     closeResetPasswordConfirm() {
@@ -251,7 +277,7 @@ export default {
     copyPassword() {
       const copyText = this.newPassword;
       navigator.clipboard.writeText(copyText).then(() => {
-        alert('密码已复制到剪贴板');
+        this.showSuccess('密码已复制，密码已成功复制到剪贴板');
       });
     },
     editUser(user) {
@@ -264,7 +290,7 @@ export default {
     confirmEditUser() {
       // 验证手机号长度
       if (this.selectedUser.phoneNum.length !== 11) {
-        alert('手机号必须为11位，请重新输入');
+        this.showError('手机号验证失败，手机号必须为11位，请重新输入');
         return;
       }
 
@@ -283,8 +309,8 @@ export default {
             }
             this.showEditUser = false;
           })
-          .catch(error => {
-            console.error('修改用户信息失败', error);
+          .catch(() => {
+            this.showError('修改用户信息失败，无法修改用户信息，请稍后再试');
           });
     },
     deleteUser(userId) {
@@ -293,8 +319,8 @@ export default {
             this.users = this.users.filter(u => u.accountId !== userId);
             this.filteredUsers = this.users;
           })
-          .catch(error => {
-            console.error('删除用户失败', error);
+          .catch(() => {
+            this.showError('删除用户失败，无法删除用户，请稍后再试');
           });
     },
     prevPage() {
@@ -309,11 +335,22 @@ export default {
     },
     goToPage(page) {
       this.currentPage = page;
-    }
+    },
+    showError(message) {
+      this.showMessage = message;
+      setTimeout(() => {
+        this.showMessage = "";
+      }, 3000); // 错误信息3秒后消失
+    },
+    showSuccess(message) {
+      this.showMessage = message;
+      setTimeout(() => {
+        this.showMessage = "";
+      }, 2000); // 成功信息2秒后消失
+    },
   }
 };
 </script>
-
 
 <style scoped>
 .user-list {
@@ -507,5 +544,29 @@ export default {
 
 .full-width {
   width: 100%;
+}
+/* 新增提示信息弹窗样式 */
+.message-popup {
+  position: absolute; /* 改为相对于父容器 */
+  top: -30px; /* 调整位置到标题上方 */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  z-index: 10;
+  opacity: 1;
+  transition: opacity 0.5s ease-in-out;
+  font-size: 12px;
+}
+
+/* 新增过渡效果 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
 }
 </style>

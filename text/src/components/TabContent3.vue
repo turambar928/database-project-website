@@ -72,7 +72,7 @@ export default {
         { label: '头像', name: 'portrait', type: 'text', value: '' }
       ],
       editableFields: ['accountName', 'phoneNum', 'gender', 'birthDate', 'email', 'address'], // 可编辑字段
-      token: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTQ1NDYxMSwiZXhwIjoxNzI1NTQxMDExLCJpYXQiOjE3MjU0NTQ2MTEsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.r9SFdp9ChD9jVDX4qmp97pyWr7uF81ct6yXgORksdbw'
+      token: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAxNiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTU5NDg5NSwiZXhwIjoxNzM0MjM0ODk1LCJpYXQiOjE3MjU1OTQ4OTUsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.OkgMONlYa5cx6Cm91j_Vts-DYzbUgfRrqSl5f3bWxBE'
     };
   },
   methods: {
