@@ -138,6 +138,7 @@ export default {
       },
       availableIngredients: [],
       items: [],
+      pageInput: '', // 页码输入
       filteredItems: [],
       currentPage: 1,
       itemsPerPage: 8,
@@ -276,6 +277,17 @@ export default {
       }
     },
 
+    // 页码跳转逻辑
+    changePage(page) {
+      const pageNum = Number(page); // 将输入的页码转换为数字
+      if (pageNum >= 1 && pageNum <= this.totalPages) {
+        this.currentPage = pageNum; // 设置当前页码
+        this.pageInput = ''; // 清空输入框
+      } else {
+        alert('请输入有效的页码'); // 添加简单的页码验证
+      }
+    },
+
     async confirmAddItem() {
       // 将前端输入的数据映射到API请求体所需的字段名
       const requestPayload = {
@@ -392,21 +404,7 @@ export default {
 
 
 
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
-    },
 
-    nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
-    },
-
-    goToPage(page) {
-      this.currentPage = page;
-    },
 
     addItem() {
       this.showAddItem = true;

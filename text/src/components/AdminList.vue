@@ -235,6 +235,8 @@ export default {
       },
       newPassword: '',
       showMessage: "", // 控制提示信息弹窗
+      pageInput: '', // 页码输入
+
     };
   },
   computed: {
@@ -259,6 +261,16 @@ export default {
     this.fetchAdmins(); // 组件挂载时获取管理员列表
   },
   methods: {
+    // 页码跳转逻辑
+    changePage(page) {
+      const pageNum = Number(page); // 将输入的页码转换为数字
+      if (pageNum >= 1 && pageNum <= this.totalPages) {
+        this.currentPage = pageNum; // 设置当前页码
+        this.pageInput = ''; // 清空输入框
+      } else {
+        alert('请输入有效的页码'); // 添加简单的页码验证
+      }
+    },
     fetchAdmins() {
       const params = {};
       if (this.searchName) params.name = this.searchName;

@@ -885,12 +885,7 @@ export default {
   margin-right: 0;
 }
 
-<<<<<<< HEAD
-.Action-buttons button:hover {
-  background-color: #0056b3;
-}
-=======
->>>>>>> 65b118c00167701923b391d54e8458e9e103e78e
+
 
 .pagination {
   margin-top: 20px;

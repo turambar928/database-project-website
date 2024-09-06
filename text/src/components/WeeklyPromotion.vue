@@ -87,9 +87,21 @@ export default {
       showBatchManageDialog: false,
       selectedDishes: [],
       discount: null,
+      pageInput: '', // 页码输入
+
     };
   },
   methods: {
+    // 页码跳转逻辑
+    changePage(page) {
+      const pageNum = Number(page); // 将输入的页码转换为数字
+      if (pageNum >= 1 && pageNum <= this.totalPages) {
+        this.currentPage = pageNum; // 设置当前页码
+        this.pageInput = ''; // 清空输入框
+      } else {
+        alert('请输入有效的页码'); // 添加简单的页码验证
+      }
+    },
     getCurrentDate() {
       const today = new Date();
       const year = today.getFullYear();

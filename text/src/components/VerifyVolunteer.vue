@@ -63,6 +63,8 @@ export default {
       selectedApplication: null,
       showApproveDialog: false,
       approvalReason: '',
+      pageInput: '', // 页码输入
+
     };
   },
   created() {
@@ -71,6 +73,16 @@ export default {
     console.log('当前申请数据:', this.applications);
   },
   methods: {
+    // 页码跳转逻辑
+    changePage(page) {
+      const pageNum = Number(page); // 将输入的页码转换为数字
+      if (pageNum >= 1 && pageNum <= this.totalPages) {
+        this.currentPage = pageNum; // 设置当前页码
+        this.pageInput = ''; // 清空输入框
+      } else {
+        alert('请输入有效的页码'); // 添加简单的页码验证
+      }
+    },
     async fetchApplications() {
       try {
         console.log('正在从API获取所有申请数据...');

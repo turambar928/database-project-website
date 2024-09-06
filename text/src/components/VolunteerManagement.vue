@@ -60,11 +60,22 @@ export default {
         idCard: '',
         phoneNum: '',
         deliverCount: 0,
+        pageInput: '', // 页码输入
         score: 0
       }
     };
   },
   methods: {
+    // 页码跳转逻辑
+    changePage(page) {
+      const pageNum = Number(page); // 将输入的页码转换为数字
+      if (pageNum >= 1 && pageNum <= this.totalPages) {
+        this.currentPage = pageNum; // 设置当前页码
+        this.pageInput = ''; // 清空输入框
+      } else {
+        alert('请输入有效的页码'); // 添加简单的页码验证
+      }
+    },
     async fetchVolunteers() {
       try {
         console.log('正在获取所有志愿者信息...');
