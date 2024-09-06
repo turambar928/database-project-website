@@ -185,21 +185,26 @@ export default {
         "星期日": 0 // 在JavaScript中，0表示星期日
       };
 
-      const base = new Date(baseDate);
-      const baseDay = base.getDay(); // 获取用户输入日期的星期几（0 表示星期日，1 表示星期一，等等）
+      const base = new Date(baseDate); // 使用选定的基准日期
+      const baseDay = base.getDay(); // 获取基准日期的星期几（0表示星期日，1表示星期一，等等）
 
       const targetDayIndex = dayMap[targetDay]; // 用户点击的星期几的数字表示
 
-      // 计算出用户点击的那一天的具体日期
+
       let diff = targetDayIndex - baseDay;
-      if (diff < 0) {
-        diff += 7; // 处理跨越周的情况，例如从星期日到星期一
-      }
+
+
       const targetDate = new Date(base);
       targetDate.setDate(base.getDate() + diff);
 
-      return targetDate.toISOString().split('T')[0]; // 返回 yyyy-mm-dd 格式的日期字符串
+      // 如果是星期日，日期加7天
+      if (targetDay === "星期日") {
+        targetDate.setDate(targetDate.getDate() + 7);
+      }
+
+      return targetDate.toISOString().split('T')[0];
     },
+
 
 
 
