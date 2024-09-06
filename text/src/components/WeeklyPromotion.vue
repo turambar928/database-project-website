@@ -11,8 +11,6 @@
       <button class="status" @click="openBatchManage">批量管理</button>
     </div>
 
-
-
     <!-- 批量管理对话框 -->
     <div v-if="showBatchManageDialog" class="batch-manage-dialog">
       <div class="dialog-content">
@@ -29,7 +27,6 @@
         <div class="discount-section">
           <label for="discount">折扣率: </label>
           <input type="number" v-model="discount" min="0" max="100" step="1" />
-          <span>%</span>
         </div>
         <button class="confirm-button" @click="applyDiscount">确认</button>
       </div>
@@ -50,13 +47,15 @@
       <tr v-for="(dish, index) in dishes" :key="dish.id">
         <td>{{ dish.name }}</td>
         <td>{{ dish.category }}</td>
-        <td>{{ dish.originalPrice !== undefined ? dish.originalPrice.toFixed(2) : 'N/A' }} 元</td>
+        <td>
+          {{ dish.originalPrice !== undefined ? dish.originalPrice.toFixed(2) : 'N/A' }} 元
+        </td>
         <td>
           {{ dish.currentPrice !== undefined ? dish.currentPrice.toFixed(2) : 'N/A' }} 元
         </td>
         <td>
           <div v-if="editingIndex === index">
-            <input type="number" v-model="dish.discountRate" min="0" max="100" class="edit-input" />
+            <input type="number" v-model="dish.discountRate" min="0" max="100" step="1" class="edit-input" @input="calculateCurrentPrice(index)" />
             <div class="edit-buttons">
               <button @click="confirmEdit(dish.id)" class="confirm-button small">确认</button>
               <button @click="cancelEdit" class="cancel-button small">取消</button>
@@ -75,6 +74,8 @@
   </div>
 </template>
 
+
+
 <script>
 import axios from 'axios';
 
@@ -87,21 +88,11 @@ export default {
       showBatchManageDialog: false,
       selectedDishes: [],
       discount: null,
-      pageInput: '', // 页码输入
-
+      pageInput: '',
+      menuDate: new Date().toISOString().split('T')[0],
     };
   },
   methods: {
-    // 页码跳转逻辑
-    changePage(page) {
-      const pageNum = Number(page); // 将输入的页码转换为数字
-      if (pageNum >= 1 && pageNum <= this.totalPages) {
-        this.currentPage = pageNum; // 设置当前页码
-        this.pageInput = ''; // 清空输入框
-      } else {
-        alert('请输入有效的页码'); // 添加简单的页码验证
-      }
-    },
     getCurrentDate() {
       const today = new Date();
       const year = today.getFullYear();
@@ -109,70 +100,108 @@ export default {
       const day = String(today.getDate()).padStart(2, '0');
       return `${year}-${month}-${day}`;
     },
+
     fetchDishes() {
-      const url = `http://8.136.125.61/api/menu/getDiscount?week=${this.promotionDate}`;
+      const selectedDate = new Date(this.promotionDate); // 使用用户选择的日期
+      const dayOfWeek = selectedDate.getDay(); // 获取选择日期对应的星期几
+      const dayMap = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']; // 对应的API字段名
+
+      const url = `http://8.136.125.61/api/menu?date=${selectedDate.toISOString().split('T')[0]}`; // 使用新 API 请求的 URL
 
       axios.get(url, {
         headers: {
           'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxNjgwMDAwMiIsInJvbGUiOiJhZG1pbiIsIm5iZiI6MTcyNTEyMjMxNywiZXhwIjoyMDg1MTIyMzE3LCJpYXQiOjE3MjUxMjIzMTcsImlzcyI6InlvdXJfaXNzdWVyIiwiYXVkIjoieW91cl9hdWRpZW5jZSJ9.iuxCr68lU34uW5KsZj2c15bwTFsdiguorpWyo_6quP0'
         }
-      }).then(response => {
-        console.log('API response:', response.data);
-        this.dishes = response.data.dishes.map(dish => ({
-          ...dish,
-          discountRate: dish.currentPrice/dish.originalPrice,
-          currentPrice: dish.currentPrice // 初始现价等于原价
-        }));
-      }).catch(error => {
-        console.error('Error fetching dishes:', error);
-      });
+      })
+          .then(response => {
+            if (response.data) {
+              const menuData = response.data;
+              const dishesOfTheDay = menuData[dayMap[dayOfWeek]] || []; // 获取当天的菜品
+
+              // 使用 Map 进行去重，Map 对象的 key 是菜品的 id
+              const uniqueDishesMap = new Map();
+              dishesOfTheDay.forEach(dish => {
+                if (!uniqueDishesMap.has(dish.id)) {
+                  uniqueDishesMap.set(dish.id, {
+                    ...dish,
+                    discountRate: ((dish.originalPrice - dish.discountPrice) / dish.originalPrice) * 100, // 计算折扣率
+                    currentPrice: dish.discountPrice // 现价直接使用后端返回的 discountPrice
+                  });
+                }
+              });
+
+              // 转换 Map 为数组
+              this.dishes = Array.from(uniqueDishesMap.values());
+            } else {
+              console.error('获取菜单失败: 数据为空或格式不正确');
+              this.clearWeeklyMenu();
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching dishes:', error);
+            this.clearWeeklyMenu();
+          });
     },
+
+
+
+    calculateCurrentPrice(index) {
+      const dish = this.dishes[index];
+      const discount = dish.discountRate / 100; // 确保折扣率为百分比形式
+      dish.currentPrice = dish.originalPrice * (1 - discount); // 根据折扣率和原价计算现价
+    },
+
     editPrice(index) {
       this.editingIndex = index;
     },
+
     confirmEdit(dishId) {
       const dish = this.dishes[this.editingIndex];
-      const discount = dish.discountRate / 100;
+      const discount = dish.discountRate / 100; // 将折扣率转换为小数形式
 
-      const discountedPrice = dish.originalPrice * (1 - discount);
-      dish.currentPrice = discountedPrice;
-
+      // 发起 API 请求，将折扣率发送给后端
       axios.put('http://8.136.125.61/api/menu/uploadDiscount', {
         date: this.promotionDate,
         dishId: dishId,
-        discount: dish.discountRate
+        discount: discount // 发送折扣率为小数形式
       })
           .then(response => {
-            const updatedDish = response.data;
-            const updatedPrice = updatedDish.updatedPrice;
+            if (response.data) {
+              const updatedDish = response.data; // 假设 API 返回更新后的菜品数据
 
-            this.dishes = this.dishes.map(d =>
-                d.id === dishId
-                    ? { ...d, currentPrice: updatedPrice, discountRate: dish.discountRate }
-                    : d
-            );
-            this.editingIndex = null;
-            console.log('折扣率:', dish.discountRate, '现价:', updatedPrice);
+              // 根据返回的数据更新前端状态
+              this.dishes = this.dishes.map(d =>
+                  d.id === dishId
+                      ? { ...d, currentPrice: updatedDish.updatedPrice, discountRate: dish.discountRate }
+                      : d
+              );
+
+              this.editingIndex = null; // 退出编辑模式
+              console.log('折扣率:', dish.discountRate, '现价:', updatedDish.updatedPrice);
+            } else {
+              console.error('更新失败：返回数据为空或格式不正确');
+            }
           })
           .catch(error => {
             console.error('Error updating price:', error);
           });
     },
+
+
+
     cancelEdit() {
       this.editingIndex = null;
       this.fetchDishes();
     },
+
     openBatchManage() {
       this.showBatchManageDialog = true;
       this.fetchDishes();
     },
+
     closeBatchManageDialog() {
       this.showBatchManageDialog = false;
     },
-
-
-
-
 
     applyDiscount() {
       if (this.selectedDishes.length === 0 || this.discount <= 0 || this.discount > 100) {
@@ -180,18 +209,21 @@ export default {
         return;
       }
 
-      // 逐个调用API设置折扣率
+      // 将折扣率转换为小数形式
+      const discountDecimal = this.discount / 100;
+
       const promises = this.selectedDishes.map(dishId => {
         const dish = this.dishes.find(d => d.id === dishId);
         if (dish) {
+          // 更新每个菜品的折扣率和现价
           dish.discountRate = this.discount;
-          dish.currentPrice = dish.originalPrice * (1 - this.discount / 100);
+          dish.currentPrice = dish.originalPrice * (1 - discountDecimal);
 
-          // 调用API
+          // 发起 API 请求，逐一发送更新请求
           return axios.put('http://8.136.125.61/api/menu/uploadDiscount', {
             date: this.promotionDate,
             dishId: dishId,
-            discount: this.discount
+            discount: discountDecimal // 发送折扣率为小数形式
           });
         }
         return Promise.resolve();
@@ -207,13 +239,20 @@ export default {
           .catch(error => {
             console.error('Error applying discount:', error);
           });
-    },
+    }
+
+
+
+
+
   },
   mounted() {
     this.fetchDishes();
   }
 }
 </script>
+
+
 
 <style scoped>
 .weekly-promotion {
@@ -290,8 +329,8 @@ export default {
   font-size: 14px;
   font-weight: bold;
   transition: background-color 0.3s;
-  display:block;
-  margin:0 auto
+  display: block;
+  margin: 0 auto;
 }
 
 .promotion-table td input.edit-input {
@@ -323,6 +362,8 @@ export default {
   display: block;
   justify-content: center;
 }
+
+/* 批量管理对话框样式 */
 .batch-manage-dialog {
   position: fixed;
   top: 50%;
@@ -330,14 +371,22 @@ export default {
   transform: translate(-50%, -50%);
   background: white;
   border: 1px solid #ccc;
-  padding: 20px;
+  padding: 30px; /* 增加内边距 */
   z-index: 1000;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  border-radius: 10px; /* 增加边框圆角 */
+  width: 500px; /* 调整对话框宽度 */
+  max-width: 90%; /* 设置最大宽度 */
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* 居中对齐内容 */
 }
+
 .dialog-content {
   position: relative;
+  width: 100%; /* 让内容宽度与父容器对齐 */
 }
+
 .close-button {
   background-color: transparent;
   border: none;
@@ -350,14 +399,17 @@ export default {
   align-items: center;
   justify-content: center;
 }
+
 .close-button .icon {
-  width: 20px;
-  height: 20px;
+  width: 24px; /* 调整关闭图标大小 */
+  height: 24px;
   transition: transform 0.3s ease;
 }
+
 .close-button:hover .icon {
   transform: scale(1.2);
 }
+
 .dish-selection {
   display: flex;
   flex-direction: column;
@@ -366,26 +418,56 @@ export default {
   background-color: #f9f9f9;
   border-radius: 8px;
   border: 1px solid #d3d3d3;
+  width: 100%; /* 让选择框填满对话框 */
+  max-height: 200px; /* 限制最大高度，避免超出屏幕 */
+  overflow-y: auto; /* 添加滚动条 */
 }
+
 .dish-item {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
 }
+
 .dish-item label {
   margin-left: 10px;
+  font-size: 16px; /* 更大的字体 */
 }
+
 .discount-section {
   margin-top: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .discount-section label {
   margin-right: 10px;
+  font-size: 16px; /* 更大的字体 */
 }
+
+.discount-section input {
+  width: 60px;
+  padding: 5px;
+  font-size: 16px; /* 更大的字体 */
+  margin-left: 10px;
+}
+
 .confirm-button {
   margin-top: 20px;
   width: 100%;
+  padding: 10px;
+  background-color: #28a745;
+  color: white;
+  font-size: 18px; /* 更大的字体 */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.confirm-button:hover {
+  background-color: #218838;
 }
 </style>
+
