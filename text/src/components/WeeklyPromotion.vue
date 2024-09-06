@@ -55,16 +55,17 @@
         </td>
         <td>
           <div v-if="editingIndex === index">
-            <input type="number" v-model="dish.discountRate" min="0" max="100" step="1" class="edit-input" @input="calculateCurrentPrice(index)" />
+            <input type="number" v-model="dish.discountRate" min="0" max="100" step="1" class="edit-input" />
             <div class="edit-buttons">
               <button @click="confirmEdit(dish.id)" class="confirm-button small">确认</button>
               <button @click="cancelEdit" class="cancel-button small">取消</button>
             </div>
           </div>
           <div v-else>
-            {{ dish.discountRate ? dish.discountRate + '%' : 'N/A' }}
+            {{ dish.discountRate ? 100 - dish.discountRate + '%' : 'N/A' }}
           </div>
         </td>
+
         <td>
           <button v-if="editingIndex !== index" @click="editPrice(index)" class="edit-button">修改</button>
         </td>
@@ -148,7 +149,7 @@ export default {
     calculateCurrentPrice(index) {
       const dish = this.dishes[index];
       const discount = dish.discountRate / 100; // 确保折扣率为百分比形式
-      dish.currentPrice = dish.originalPrice * (1 - discount); // 根据折扣率和原价计算现价
+      dish.currentPrice = dish.originalPrice * (discount); // 根据折扣率和原价计算现价
     },
 
     editPrice(index) {
@@ -172,12 +173,12 @@ export default {
               // 根据返回的数据更新前端状态
               this.dishes = this.dishes.map(d =>
                   d.id === dishId
-                      ? { ...d, currentPrice: updatedDish.updatedPrice, discountRate: dish.discountRate }
+                      ? { ...d, currentPrice: updatedDish.updatedPrice.toFixed(2), discountRate: dish.discountRate.toFixed(2) }
                       : d
               );
 
               this.editingIndex = null; // 退出编辑模式
-              console.log('折扣率:', dish.discountRate, '现价:', updatedDish.updatedPrice);
+              console.log('折扣率:', dish.discountRate.toFixed(2), '现价:', updatedDish.updatedPrice.toFixed(2));
             } else {
               console.error('更新失败：返回数据为空或格式不正确');
             }
