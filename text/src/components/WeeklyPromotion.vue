@@ -62,7 +62,7 @@
             </div>
           </div>
           <div v-else>
-            {{ dish.discountRate ? 100 - dish.discountRate + '%' : 'N/A' }}
+            {{ dish.discountRate ? dish.discountRate + '%' : 'N/A' }}
           </div>
         </td>
 
@@ -125,7 +125,7 @@ export default {
                 if (!uniqueDishesMap.has(dish.id)) {
                   uniqueDishesMap.set(dish.id, {
                     ...dish,
-                    discountRate: ((dish.originalPrice - dish.discountPrice) / dish.originalPrice) * 100, // 计算折扣率
+                    discountRate: ((dish.discountPrice) / dish.originalPrice) * 100, // 计算折扣率
                     currentPrice: dish.discountPrice // 现价直接使用后端返回的 discountPrice
                   });
                 }
@@ -173,12 +173,12 @@ export default {
               // 根据返回的数据更新前端状态
               this.dishes = this.dishes.map(d =>
                   d.id === dishId
-                      ? { ...d, currentPrice: updatedDish.updatedPrice.toFixed(2), discountRate: dish.discountRate.toFixed(2) }
+                      ? { ...d, currentPrice: updatedDish.updatedPrice, discountRate: dish.discountRate }
                       : d
               );
 
               this.editingIndex = null; // 退出编辑模式
-              console.log('折扣率:', dish.discountRate.toFixed(2), '现价:', updatedDish.updatedPrice.toFixed(2));
+              console.log('折扣率:', dish.discountRate, '现价:', updatedDish.updatedPrice);
             } else {
               console.error('更新失败：返回数据为空或格式不正确');
             }
