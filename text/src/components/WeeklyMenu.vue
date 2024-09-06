@@ -15,12 +15,12 @@
 
     <div class="menu-grid">
       <div class="day" v-for="day in days" :key="day">
-        <h2>{{ day }}</h2>
+        <div class="weekmenu-title">{{ day }}</div>
         <div class="dish-list">
           <div class="dish-item" v-for="dish in weeklyMenu[day]" :key="dish.id">
             <span>{{ dish.name }}</span>
             <button v-if="status === '可编辑'" class="remove-button" @click="removeDish(day, dish.id)">
-              <img src="close.png" alt="Remove" class="icon" />
+              <img src="trash.png" alt="Remove" class="icon" />
             </button>
           </div>
           <button v-if="status === '可编辑'" class="add-button" @click="openAddDishDialog(day)">+</button>
@@ -34,7 +34,6 @@
         <button class="close-button" @click="closeAddDishDialog">
           <img src="close.png" alt="Close" class="icon" />
         </button>
-        <label for="dish-select">选择菜品</label>
         <select v-model="selectedDishId" id="dish-select">
           <option value="">请选择菜品</option>
           <!-- 动态生成的菜品选项 -->
@@ -331,7 +330,7 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #f5f7fa; /* 添加背景色 */
+  background-color: #ffffff; /* 添加背景色 */
   border-radius: 8px; /* 圆角 */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* 轻微阴影 */
   font-family: Arial, Helvetica, sans-serif;
@@ -357,13 +356,32 @@ export default {
   justify-content: space-between;
   margin-top: 20px;
 }
+.weekmenu-title {
+  background-color: rgb(255, 229, 193);
+  font-size: 20px;
+  padding: 10px;
+  border-radius: 6px;
+  border: 2px solid #f5a249;
+  color: #f5a249;
+}
 .day {
   width: 13%;
-  border: 1px solid #413d3d;
+  background-color: rgb(248, 246, 245);
+  border-left: 2px dashed #ded5ce;
   padding: 10px;
   text-align: center;
   position: relative;
 }
+.day:first-child{
+  border-left: none;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+.day:last-child{
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
 .dish-list {
   margin-top: 10px;
 }
@@ -372,10 +390,12 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
-  background: #f9f9f9;
-  border-radius: 5px;
+  background: rgba(225, 217, 208, 0.5);
+  border: none;
+  border-radius: 3px;
   padding: 10px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 90px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1);
   position: relative;
 }
 .remove-button {
@@ -384,7 +404,7 @@ export default {
   cursor: pointer;
   padding: 0;
   position: absolute;
-  right: -30px;
+  right: -20px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
@@ -401,14 +421,14 @@ export default {
 }
 
 .add-button {
-  background-color: green;
-  color: white;
+  background-color: rgb(131, 177, 131);
+  color: rgb(27, 125, 22);
   border: none;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   font-size: 20px;
-  line-height: 30px;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -418,7 +438,6 @@ export default {
   transition: background-color 0.3s ease, transform 0.2s ease;
 }
 .add-button:hover {
-  background-color: #27ae60;
   transform: scale(1.1);
 }
 
@@ -431,10 +450,14 @@ export default {
   border: 1px solid #ccc;
   padding: 20px;
   z-index: 1000;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  width: 200px;
+  height: 120px;
 }
 .dialog-content {
   position: relative;
+  display: flex;
+  flex-direction: column; 
+  justify-content: space-between; 
 }
 .close-button {
   background-color: transparent;

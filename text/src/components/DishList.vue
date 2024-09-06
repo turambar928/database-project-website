@@ -1,6 +1,7 @@
 <template>
   <div class="dish-list">
     <h2>菜品管理</h2>
+    
     <div class="search-bar">
       <label for="dish-name">名称 </label>
       <input v-model="searchName" id="dish-name" placeholder="输入菜品名称" />
@@ -17,7 +18,8 @@
       <button @click="searchDishes">搜索</button>
       <button @click="openAddDishForm">+</button>
     </div>
-
+    <!-- 缓冲条 -->
+    <div v-if="isLoading" class="loading-indicator">加载中...</div>
     <div v-if="showForm" class="dish-form-overlay">
       <div class="dish-form-container">
         <div class="dish-form">
@@ -114,10 +116,12 @@
     </div>
 
     <div class="pagination">
-      <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1">上一页</button>
-      <input v-model="pageInput" type="number" min="1" :max="totalPages" />
-      <button @click="goToPage(pageInput)" :disabled="!pageInput || pageInput < 1 || pageInput > totalPages">跳转</button>
-      <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages">下一页</button>
+      <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="button orange">上一页</button>
+      <span>{{ currentPage }} / {{ totalPages }}</span>
+      <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="button orange">下一页</button>
+      <input v-model="pageInput" type="number" min="1" :max="totalPages" placeholder="跳转" class="input-field" />
+      <button @click="goToPage(pageInput)" :disabled="!pageInput || pageInput < 1 || pageInput > totalPages" class="button orange">跳转</button>
+
     </div>
   </div>
 </template>
@@ -133,6 +137,8 @@ axios.defaults.headers.common['Authorization'] = 'Bearer eyJhbGciOiJIUzI1NiIsInR
 
 export default {
   setup() {
+    const isLoading = ref(false);  // 追踪是否正在加载数据
+
     const searchName = ref('');
     const searchCategory = ref('');
     const dishes = ref([]);
@@ -171,6 +177,7 @@ export default {
     };
 
     const fetchDishes = async () => {
+      isLoading.value = true;  // 开始加载
   try {
     const response = await axios.get('/api/dish/search');
     if (response.data.success) {
@@ -189,6 +196,8 @@ export default {
     } else {
       console.error('请求失败:', error.message);
     }
+  }finally {
+    isLoading.value = false;  // 结束加载
   }
 };
 
@@ -530,7 +539,8 @@ const updateIngredientName = (index) => {
       fileInput,
       paginatedDishes,
       totalPages,
-      pageInput
+      pageInput,
+      isLoading  // 确保 isLoading 被返回
     };
   }
 };
@@ -540,6 +550,12 @@ const updateIngredientName = (index) => {
 .dish-list {
   padding: 20px;
 }
+.loading-indicator {
+  text-align: center;
+  font-size: 16px;
+  color: #333;
+  padding: 10px;
+}
 
 .search-bar {
   display: flex;
@@ -547,7 +563,7 @@ const updateIngredientName = (index) => {
   justify-content: flex-start;
   font-family: 'Arial', sans-serif;
   padding: 10px 20px;
-  background-color: #f5f5f5;
+  background-color: rgba(225, 217, 208, 0.5);
   border-radius: 10px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
@@ -574,28 +590,25 @@ const updateIngredientName = (index) => {
 .search-bar button {
   padding: 10px 15px;
   border: none;
-  background-color: #007bff;
-  color: white;
+  background-color: #7dbcff;
+  color: #007bff;
   border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
+  font-weight: 600;
   transition: background-color 0.3s ease, transform 0.3s ease;
   margin-left: 10px;
 }
 
 .search-bar button:hover {
-  background-color: #0056b3;
   transform: translateY(-2px);
 }
 
 .search-bar button:last-child {
-  background-color: #28a745;
+  background-color: #6bc17f;
+  color: #1d8635;
   font-size: 20px;
   padding: 5px 10px;
-}
-
-.search-bar button:last-child:hover {
-  background-color: #218838;
 }
 
 .dish-form-overlay {
@@ -789,8 +802,8 @@ const updateIngredientName = (index) => {
 
 
 .confirm-button {
-  background-color: #28a745;
-  color: white;
+  background-color: #2aa244;
+  color: rgb(255, 255, 255);
 }
 
 .confirm-button:hover {
@@ -875,10 +888,10 @@ const updateIngredientName = (index) => {
 
 .Action-buttons button {
   margin-top: 5px;
-  padding: 5px 10px;
-  border: none;
-  background-color: #007bff;
-  color: white;
+  padding: 4px 8px;
+  border: 2px solid #007bff;
+  background-color: #ffffff;
+  color: #007bff;
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -893,40 +906,40 @@ const updateIngredientName = (index) => {
   background-color: #0056b3;
 }
 
-
 .pagination {
-  margin-top: 20px;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
 .pagination button {
-  margin-right: 5px;
-  padding: 5px 10px;
-  border: 1px solid #007bff;
-  background-color: #007bff;
-  color: white;
-  border-radius: 5px;
+  margin: 0 5px;
+  padding: 3px;
+  border: none;
+  border-radius: 2px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  border: 2px solid rgb(103, 136, 246);
+  background-color: white;
+  color: rgb(103, 136, 246);
+  font-size: 10px;
+  font-weight: 400;
 }
 
 .pagination button:disabled {
-  background-color: #ddd;
-  border-color: #ddd;
-  cursor: not-allowed;
+  border: 2px solid rgb(223, 223, 223);
+  background-color: white;
+  color: rgb(223, 223, 223);
 }
-
-.pagination input {
+.pagination span {
+  color: rgb(223, 223, 223);
+}
+.input-field {
   width: 50px;
-  text-align: center;
-  margin-right: 5px;
   padding: 5px;
-  border: 1px solid #007bff;
-  border-radius: 5px;
+  font-size: 10px;
+  border: 1px solid rgb(103, 136, 246);
+  border-radius: 3px;
 }
-/* 添加背景容器样式 */
 
 
 </style>
