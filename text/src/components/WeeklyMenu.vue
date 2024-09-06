@@ -191,7 +191,10 @@ export default {
       const targetDayIndex = dayMap[targetDay]; // 用户点击的星期几的数字表示
 
       // 计算出用户点击的那一天的具体日期
-      const diff = targetDayIndex - baseDay;
+      let diff = targetDayIndex - baseDay;
+      if (diff < 0) {
+        diff += 7; // 处理跨越周的情况，例如从星期日到星期一
+      }
       const targetDate = new Date(base);
       targetDate.setDate(base.getDate() + diff);
 
