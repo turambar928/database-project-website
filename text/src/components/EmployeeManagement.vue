@@ -27,20 +27,6 @@
         </thead>
         <tbody>
 
-        <tr v-for="employee in paginatedEmployees" :key="employee.employeeId">
-          <td>{{ employee.employeeId }}</td>
-          <td>{{ employee.employeeName }}</td>
-          <td>{{ employee.idCard }}</td>
-          <td>{{ employee.phoneNum }}</td>
-          <td>{{ employee.address }}</td>
-          <td>{{ employee.employeePosition }}</td>
-          <td>{{ employee.salary }}</td>
-          <td>
-            <button @click="showEditModal(employee)" class="button warning">修改</button>
-            <button @click="deleteEmployee(employee.employeeId)" class="button danger">删除</button>
-          </td>
-        </tr>
-
           <tr v-for="employee in paginatedEmployees" :key="employee.employeeId">
             <td>{{ employee.employeeId }}</td>
             <td>{{ employee.employeeName }}</td>
